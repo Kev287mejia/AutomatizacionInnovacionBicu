@@ -113,7 +113,7 @@ def ejecutar_modo_analyze() -> None:
     print("  Parsers activos: Word (.docx), Asistencia física/escaneada, Excel (.xlsx).")
     print()
     input_dir = BASE_DIR / "input"
-    archivos_input = list(input_dir.glob("*.*")) if input_dir.exists() else []
+    archivos_input = [f for f in input_dir.glob("*.*") if f.is_file() and not f.name.startswith(".")] if input_dir.exists() else []
     print(f"  Archivos encontrados en input/: {len(archivos_input)}")
     for arc in archivos_input:
         print(f"    - {arc.name} ({arc.stat().st_size} bytes)")
@@ -148,7 +148,7 @@ def ejecutar_modo_validate() -> int:
     print()
 
     input_dir = BASE_DIR / "input"
-    archivos_input = list(input_dir.glob("*.*")) if input_dir.exists() else []
+    archivos_input = [f for f in input_dir.glob("*.*") if f.is_file() and not f.name.startswith(".")] if input_dir.exists() else []
 
     if not archivos_input:
         print("  (Carpeta input/ vacía. Ejecutando validación sobre el conjunto de referencia institucional: Caso Real Septiembre 2026)...")
