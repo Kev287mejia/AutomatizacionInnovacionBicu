@@ -1,0 +1,29 @@
+{
+  "_comentario": "Mapeos de sexo específicos por fuente de origen según Regla C-08 y caso confirmado de septiembre 2026.",
+  "_estado": "CONFIRMADO (Fase 3)",
+  "_regla": "NUNCA interpretar un código de sexo globalmente. El significado depende de la fuente. Si el código no tiene mapeo definido para esa fuente, el resultado es null + WARNING + REVISIÓN.",
+  "_valores_internos_validos": ["FEMENINO", "MASCULINO"],
+  "mapeos": {
+    "informe_word": {
+      "M": "FEMENINO",
+      "MUJER": "FEMENINO",
+      "V": "MASCULINO",
+      "VARON": "MASCULINO",
+      "VARÓN": "MASCULINO"
+    },
+    "asistencia_fisica": {
+      "M": "MASCULINO",
+      "MASCULINO": "MASCULINO",
+      "F": "FEMENINO",
+      "FEMENINO": "FEMENINO"
+    },
+    "excel_oficial": {
+      "1": "FEMENINO",
+      "1. FEMENINO": "FEMENINO",
+      "FEMENINO": "FEMENINO",
+      "2": "MASCULINO",
+      "2. MASCULINO": "MASCULINO",
+      "MASCULINO": "MASCULINO"
+    }
+  }
+}

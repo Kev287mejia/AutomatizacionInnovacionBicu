@@ -1,0 +1,88 @@
+# ==============================================================================
+# .gitignore - Repositorio Institucional BICU
+# ==============================================================================
+
+# Entornos virtuales y dependencias
+.venv/
+venv/
+env/
+
+# Caché y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Artefactos de compilación, empaquetado y distribución
+build/
+dist/
+dist_*/
+release/
+release*/
+staging/
+entrega/
+*.spec.bak
+
+# Logs y reportes de depuración
+logs/
+*.log
+
+# Espacios de trabajo temporales, dumps y scratch
+temp_*/
+scratch/
+archive.txt
+scratch_report.md
+
+# Protección de datos de entrada y salida
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de bloqueo temporal de Microsoft Office
+~$*.xlsx
+~$*.docx
+
+# Documentos institucionales, hojas de cálculo y reportes (protección total)
+*.docx
+*.xlsx
+*.xlsm
+*.xls
+*.pdf
+templates/*.xlsx
+templates/*.xlsm
+templates/*.xls
+
+# Documentación interna de desarrollo, auditorías de corrida y UAT
+docs/
+
+# Reportes internos generados en raíz
+reporte_*.json
+reporte_*.md
+
+# Documentación interna de fases de desarrollo e informes de release
+# (Se excluyen para resguardo de la arquitectura interna de la institución)
+FASE_*.md
+!FASE_REPOSITORIO_GITHUB_CONFIGURACION.md
+INFORME_*.md
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Instaladores sueltos y scripts temporales
+get-pip.py
+
+# Variables de entorno y credenciales
+.env
+.env.*
+*.pem
+*.key

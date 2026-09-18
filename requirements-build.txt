@@ -1,0 +1,13 @@
+﻿# =============================================================================
+# requirements-build.txt
+# Dependencias EXCLUSIVAS de build/empaquetado -- NO son runtime del .exe
+# =============================================================================
+# Instalar con:
+#   pip install -r requirements-build.txt
+#
+# Estas dependencias NO se incluyen dentro del ejecutable final.
+# El ejecutable contiene sus propias dependencias de runtime (openpyxl, etc.)
+# =============================================================================
+
+# --- Empaquetado Windows ---
+pyinstaller>=6.10,<7.0

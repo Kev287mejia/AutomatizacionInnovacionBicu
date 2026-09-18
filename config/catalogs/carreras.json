@@ -1,0 +1,11 @@
+{
+  "_comentario": "Catálogo oficial de carreras.",
+  "_estado": "PENDIENTE DE CONFIRMACIÓN (P-06)",
+  "_instruccion": "No agregar entradas sin confirmación institucional. Una carrera no reconocida genera WARNING + REVISIÓN.",
+  "_estructura": {
+    "codigo": "Código interno del sistema",
+    "nombre_oficial": "Nombre oficial según catálogo institucional",
+    "aliases": ["Lista de variantes o abreviaciones conocidas"]
+  },
+  "carreras": []
+}

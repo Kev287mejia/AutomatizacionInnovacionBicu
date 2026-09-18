@@ -1,0 +1,6 @@
+{
+  "_comentario": "Catálogo de etnias reconocidas.",
+  "_estado": "PENDIENTE DE CONFIRMACIÓN (P-16)",
+  "_instruccion": "No agregar valores sin confirmar el catálogo oficial. Una etnia no reconocida genera WARNING.",
+  "etnias": []
+}

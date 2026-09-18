@@ -1,0 +1,94 @@
+# =============================================================================
+# config/settings.yaml
+# Configuración general del sistema
+# =============================================================================
+#
+# IMPORTANTE: Este archivo controla el comportamiento del sistema.
+# Modificar con cuidado. Los cambios afectan todo el procesamiento.
+#
+# Etiquetas usadas en este proyecto:
+#   [CONFIRMADO]              - Dato confirmado por la institución
+#   [PENDIENTE DE CONFIRMACIÓN] - Requiere validación institucional
+#   [DECISIÓN TÉCNICA]        - Decisión de implementación interna
+# =============================================================================
+
+sistema:
+  nombre: "Sistema de Automatización Estadístico de Asistencias"
+  version: "0.1.0"
+  fase_actual: 9
+  modo_default: "analyze"   # [DECISIÓN TÉCNICA] MVP inicia solo con analyze
+
+rutas:
+  input: "input"
+  output: "output"
+  logs: "logs"
+  config: "config"
+  catalogs: "config/catalogs"
+  sources: "config/sources"
+  templates: "templates"
+
+logging:
+  nivel: "DEBUG"            # DEBUG / INFO / WARNING / ERROR
+  archivo: "logs/sistema.log"
+  formato: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  fecha_formato: "%Y-%m-%d %H:%M:%S"
+  max_bytes: 5242880        # 5 MB por archivo de log
+  backup_count: 3           # Mantener hasta 3 archivos de log históricos
+
+procesamiento:
+  # [PENDIENTE DE CONFIRMACIÓN P-07]
+  # Reglas de deduplicación por período aún no confirmadas institucionalmente.
+  # El sistema conserva TODAS las participaciones hasta que se confirmen las reglas.
+  deduplicacion_activa: false
+
+  # [DECISIÓN TÉCNICA] MVP usa memoria; SQLite se puede activar en el futuro
+  persistencia: "memoria"
+
+  # [DECISIÓN TÉCNICA] El sistema nunca modifica archivos de la carpeta input
+  input_solo_lectura: true
+
+validacion:
+  # Niveles disponibles: ERROR, WARNING, INFO, REVISION
+  detener_en_error: true    # Si hay ERRORs críticos, no continuar al siguiente paso
+  generar_reporte: true
+
+catalogs:
+  # [PENDIENTE DE CONFIRMACIÓN P-06]
+  # El catálogo de carreras estará vacío hasta confirmar el catálogo oficial.
+  # Una carrera no reconocida genera WARNING + REVISIÓN, nunca un valor inventado.
+  carreras: "config/catalogs/carreras.json"
+  etnias: "config/catalogs/etnias.json"
+  municipios: "config/catalogs/municipios.json"
+  ambitos: "config/catalogs/ambitos.json"
+
+sources:
+  # [PENDIENTE DE CONFIRMACIÓN P-05]
+  # Los mapeos de sexo deben confirmarse por fuente antes de activarse.
+  # Un código sin mapeo definido genera WARNING + REVISIÓN, nunca un valor asumido.
+  sex_mappings: "config/sources/sex_mappings.json"
+
+catalogos_politicas:
+  # Política institucional declarativa para catálogos pendientes o ausentes
+  carrera:
+    estado: "CATALOGO_PENDIENTE"
+    requerido: false
+    modo_exportacion: "TEXTO_LITERAL_NO_HOMOLOGADO"
+  municipio:
+    estado: "CATALOGO_PENDIENTE"
+    requerido: false
+    modo_exportacion: "TEXTO_LITERAL_NO_HOMOLOGADO"
+  etnia:
+    estado: "CATALOGO_PENDIENTE"
+    requerido: false
+    modo_exportacion: "TEXTO_LITERAL_NO_HOMOLOGADO"
+
+exportacion:
+  carpeta_salida: "output"
+  archivos_oficiales:
+    matriz_1: "Matriz_1_Consolidado_Actividades.xlsx"
+    matriz_2: "Matriz_2_Estudiantes.xlsx"
+    matriz_3: "Matriz_3_Academicos_Administrativos.xlsx"
+    matriz_4: "Matriz_4_Colaboradores.xlsx"
+    matriz_5: "Matriz_5_Protagonistas_Beneficiados.xlsx"
+  manifiesto: "manifiesto_exportacion.json"
+

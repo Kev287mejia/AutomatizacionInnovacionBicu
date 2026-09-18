@@ -1,0 +1,33 @@
+# =============================================================================
+# Sistema de Automatización Estadístico de Asistencias
+# requirements.txt
+# =============================================================================
+# Instalar con: pip install -r requirements.txt
+# Recomendado: usar un entorno virtual (python -m venv venv)
+
+# --- Modelos de datos y validación ---
+pydantic>=2.0,<3.0
+
+# --- Procesamiento de Excel ---
+openpyxl>=3.1,<4.0
+
+# --- Procesamiento de Word ---
+python-docx>=1.1,<2.0
+
+# --- Análisis de datos ---
+# [DECISIÓN TÉCNICA] Acepta pandas 2.x y 3.x — ya hay pandas 3.0.3 instalado en el sistema
+pandas>=2.0
+
+# --- Configuración YAML ---
+pyyaml>=6.0,<7.0
+
+# --- Testing ---
+pytest>=7.4
+pytest-cov>=4.0
+
+# --- Utilidades ---
+python-dateutil>=2.8,<3.0
+
+# --- Interfaz Gráfica (Fase 14.9) ---
+customtkinter>=5.2
+

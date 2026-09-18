@@ -1,0 +1,13 @@
+# Carpeta Oficial de Plantillas Institucionales (Fase 8)
+# =======================================================
+#
+# Coloque en esta carpeta los 5 archivos Excel oficiales en blanco suministrados por la institución:
+#
+# 1. Matriz_1_Consolidado_Actividades.xlsx
+# 2. Matriz_2_Estudiantes.xlsx
+# 3. Matriz_3_Academicos_Administrativos.xlsx
+# 4. Matriz_4_Colaboradores.xlsx
+# 5. Matriz_5_Protagonistas_Beneficiados.xlsx
+#
+# El inspector físico de la Fase 8 identificará automáticamente estos archivos reales
+# con prioridad absoluta sobre cualquier fixture de prueba.

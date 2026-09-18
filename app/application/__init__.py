@@ -1,0 +1,130 @@
+"""Capa Application - Sistema Institucional de Gestión de Actividades, Participantes, Evidencias y Reportes (BICU).
+
+Contiene contratos, modelos de intención (Commands), consultas de lectura (Queries),
+DTOs de transporte y fakes en memoria para pruebas desacopladas de persistencia.
+"""
+
+from app.application.commands import (
+    RegistrarActividadCommand,
+    AsignarPlanificacionCommand,
+    AsignarDisenoMetodologicoCommand,
+    RegistrarInformeActividadCommand,
+    RegistrarPersonaCommand,
+    RegistrarParticipacionIndividualCommand,
+    IngestarListaAsistenciaCommand,
+    RegistrarEvidenciaDigitalCommand,
+    VincularEvidenciaActividadCommand,
+    DesvincularEvidenciaActividadCommand,
+    CrearInformeSemanalCommand,
+    AsociarActividadesInformeSemanalCommand,
+    RegistrarDiscrepanciaCommand,
+    ResolverRevisionDiscrepanciaCommand,
+)
+from app.application.queries import (
+    ConsultarActividadesPorPeriodoQuery,
+    ObtenerDetalleActividadQuery,
+    BuscarPersonasPorNombreQuery,
+    ObtenerPersonaPorIdQuery,
+    ConsultarParticipantesPorActividadQuery,
+    ConsultarParticipantesEnRevisionQuery,
+    ConsultarEvidenciasActividadQuery,
+    ConsultarInformeSemanalPorPeriodoQuery,
+    ConsultarDiscrepanciasPendientesQuery,
+)
+from app.application.dto import (
+    FilaParticipanteIngestaDTO,
+    PartidaPresupuestariaDTO,
+    DetalleActividadInformeDTO,
+    IngestaListaAsistenciaResultDTO,
+    ActividadResumenDTO,
+    ActividadDetalleDTO,
+    PersonaResumenDTO,
+    PersonaDetalleDTO,
+    ParticipacionDetalleDTO,
+    EvidenciaVinculadaDTO,
+    DiscrepanciaDetalleDTO,
+    InformeSemanalCompletoDTO,
+    PlanificacionAsignadaDTO,
+    DisenoMetodologicoAsignadoDTO,
+    InformeActividadRegistradoDTO,
+)
+from app.application.fakes import (
+    InMemoryActividadRepository,
+    InMemoryPersonaRepository,
+    InMemoryParticipacionRepository,
+    InMemoryEvidenciaRepository,
+    InMemoryInformeSemanalRepository,
+    InMemoryDiscrepanciaRepository,
+    InMemoryUnitOfWork,
+)
+from app.application.use_cases import (
+    RegistrarActividadUseCase,
+    AsignarPlanificacionUseCase,
+    AsignarDisenoMetodologicoUseCase,
+    RegistrarInformeActividadUseCase,
+    RegistrarPersonaUseCase,
+    RegistrarParticipacionIndividualUseCase,
+    IngestarListaAsistenciaUseCase,
+)
+
+__all__ = [
+    # Commands
+    "RegistrarActividadCommand",
+    "AsignarPlanificacionCommand",
+    "AsignarDisenoMetodologicoCommand",
+    "RegistrarInformeActividadCommand",
+    "RegistrarPersonaCommand",
+    "RegistrarParticipacionIndividualCommand",
+    "IngestarListaAsistenciaCommand",
+    "RegistrarEvidenciaDigitalCommand",
+    "VincularEvidenciaActividadCommand",
+    "DesvincularEvidenciaActividadCommand",
+    "CrearInformeSemanalCommand",
+    "AsociarActividadesInformeSemanalCommand",
+    "RegistrarDiscrepanciaCommand",
+    "ResolverRevisionDiscrepanciaCommand",
+    # Queries
+    "ConsultarActividadesPorPeriodoQuery",
+    "ObtenerDetalleActividadQuery",
+    "BuscarPersonasPorNombreQuery",
+    "ObtenerPersonaPorIdQuery",
+    "ConsultarParticipantesPorActividadQuery",
+    "ConsultarParticipantesEnRevisionQuery",
+    "ConsultarEvidenciasActividadQuery",
+    "ConsultarInformeSemanalPorPeriodoQuery",
+    "ConsultarDiscrepanciasPendientesQuery",
+    # DTOs
+    "FilaParticipanteIngestaDTO",
+    "PartidaPresupuestariaDTO",
+    "DetalleActividadInformeDTO",
+    "IngestaListaAsistenciaResultDTO",
+    "ActividadResumenDTO",
+    "ActividadDetalleDTO",
+    "PersonaResumenDTO",
+    "PersonaDetalleDTO",
+    "ParticipacionDetalleDTO",
+    "EvidenciaVinculadaDTO",
+    "DiscrepanciaDetalleDTO",
+    "InformeSemanalCompletoDTO",
+    "PlanificacionAsignadaDTO",
+    "DisenoMetodologicoAsignadoDTO",
+    "InformeActividadRegistradoDTO",
+    # Fakes
+    "InMemoryActividadRepository",
+    "InMemoryPersonaRepository",
+    "InMemoryParticipacionRepository",
+    "InMemoryEvidenciaRepository",
+    "InMemoryInformeSemanalRepository",
+    "InMemoryDiscrepanciaRepository",
+    "InMemoryUnitOfWork",
+    # Use Cases
+    "RegistrarActividadUseCase",
+    "AsignarPlanificacionUseCase",
+    "AsignarDisenoMetodologicoUseCase",
+    "RegistrarInformeActividadUseCase",
+    "RegistrarPersonaUseCase",
+    "RegistrarParticipacionIndividualUseCase",
+    "IngestarListaAsistenciaUseCase",
+]
+
+
