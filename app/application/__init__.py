@@ -20,6 +20,9 @@ from app.application.commands import (
     RegistrarDiscrepanciaCommand,
     ResolverRevisionDiscrepanciaCommand,
 )
+from app.application.commands.calidad_commands import (
+    EvaluarCalidadActividadCommand,
+)
 from app.application.queries import (
     ConsultarActividadesPorPeriodoQuery,
     ObtenerDetalleActividadQuery,
@@ -48,6 +51,40 @@ from app.application.dto import (
     DisenoMetodologicoAsignadoDTO,
     InformeActividadRegistradoDTO,
 )
+from app.application.dto.quality_dtos import (
+    ValidationFindingDTO,
+    QualityAssessmentDTO,
+)
+from app.application.commands.pipeline_commands import (
+    EjecutarPipelineActividadCommand,
+    ExportarMatricesActividadCommand,
+    ExportarMatricesPeriodoCommand,
+)
+from app.application.dto.export_dtos import (
+    PoliticaExportacionRevision,
+    ExportacionPreparadaDTO,
+    PipelineActividadResultDTO,
+    ExportarMatricesResultDTO,
+)
+from app.application.export_acl import (
+    ExportACL,
+    ExportDataset,
+)
+from app.application.word_acl import (
+    WordACL,
+    WordActividadDTO,
+    WordEstamentoItemDTO,
+    WordEvidenciaItemDTO,
+    WordWeeklyReportDataset,
+    FuenteCifras,
+    FuenteResultados,
+    PoliticaPresentacionRevisionWord,
+)
+from app.application.ports import (
+    IWordActividadRenderer,
+    IWordInformeSemanalRenderer,
+    IWordDossierRenderer,
+)
 from app.application.fakes import (
     InMemoryActividadRepository,
     InMemoryPersonaRepository,
@@ -65,6 +102,17 @@ from app.application.use_cases import (
     RegistrarPersonaUseCase,
     RegistrarParticipacionIndividualUseCase,
     IngestarListaAsistenciaUseCase,
+    EnrutarParticipacionesActividadUseCase,
+    EvaluarCalidadActividadUseCase,
+    ConsultarDiscrepanciasPendientesUseCase,
+    ResolverRevisionDiscrepanciaUseCase,
+    ProcesarPipelineActividadUseCase,
+    ExportarMatricesActividadUseCase,
+    ExportarMatricesPeriodoUseCase,
+    ActividadNoEncontradaError,
+    GenerarInformeActividadWordUseCase,
+    GenerarInformeSemanalWordUseCase,
+    GenerarDossierConsolidadoWordUseCase,
 )
 
 __all__ = [
@@ -83,6 +131,10 @@ __all__ = [
     "AsociarActividadesInformeSemanalCommand",
     "RegistrarDiscrepanciaCommand",
     "ResolverRevisionDiscrepanciaCommand",
+    "EvaluarCalidadActividadCommand",
+    "EjecutarPipelineActividadCommand",
+    "ExportarMatricesActividadCommand",
+    "ExportarMatricesPeriodoCommand",
     # Queries
     "ConsultarActividadesPorPeriodoQuery",
     "ObtenerDetalleActividadQuery",
@@ -109,6 +161,28 @@ __all__ = [
     "PlanificacionAsignadaDTO",
     "DisenoMetodologicoAsignadoDTO",
     "InformeActividadRegistradoDTO",
+    "ValidationFindingDTO",
+    "QualityAssessmentDTO",
+    "PoliticaExportacionRevision",
+    "ExportacionPreparadaDTO",
+    "PipelineActividadResultDTO",
+    "ExportarMatricesResultDTO",
+    # Export ACL
+    "ExportACL",
+    "ExportDataset",
+    # Word ACL
+    "WordACL",
+    "WordActividadDTO",
+    "WordEstamentoItemDTO",
+    "WordEvidenciaItemDTO",
+    "WordWeeklyReportDataset",
+    "FuenteCifras",
+    "FuenteResultados",
+    "PoliticaPresentacionRevisionWord",
+    # Ports
+    "IWordActividadRenderer",
+    "IWordInformeSemanalRenderer",
+    "IWordDossierRenderer",
     # Fakes
     "InMemoryActividadRepository",
     "InMemoryPersonaRepository",
@@ -125,6 +199,15 @@ __all__ = [
     "RegistrarPersonaUseCase",
     "RegistrarParticipacionIndividualUseCase",
     "IngestarListaAsistenciaUseCase",
+    "EnrutarParticipacionesActividadUseCase",
+    "EvaluarCalidadActividadUseCase",
+    "ConsultarDiscrepanciasPendientesUseCase",
+    "ResolverRevisionDiscrepanciaUseCase",
+    "ProcesarPipelineActividadUseCase",
+    "ExportarMatricesActividadUseCase",
+    "ExportarMatricesPeriodoUseCase",
+    "ActividadNoEncontradaError",
+    "GenerarInformeActividadWordUseCase",
+    "GenerarInformeSemanalWordUseCase",
+    "GenerarDossierConsolidadoWordUseCase",
 ]
-
-
