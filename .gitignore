@@ -40,6 +40,8 @@ input/*
 !input/.gitkeep
 output/*
 !output/.gitkeep
+validation/
+evidence/
 
 # Bases de datos locales
 *.db

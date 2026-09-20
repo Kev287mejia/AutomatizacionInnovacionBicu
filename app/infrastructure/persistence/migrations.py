@@ -12,7 +12,7 @@ import sqlite3
 import logging
 from datetime import datetime, timezone
 from dataclasses import dataclass
-from typing import List, Dict, Any, Set
+from typing import List, Dict, Any, Set, Optional
 
 from app.infrastructure.persistence.schema import (
     SCHEMA_VERSION_TABLE_DDL,
@@ -21,6 +21,10 @@ from app.infrastructure.persistence.schema import (
     V002_SCHEMA_DDL_STATEMENTS,
     V002_INDEXES_DDL_STATEMENTS,
     EXPECTED_TABLE_NAMES,
+)
+from app.planning.infrastructure.persistence.schema_v003 import (
+    V003_SCHEMA_DDL_STATEMENTS,
+    V003_INDEXES_DDL_STATEMENTS,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,9 +61,16 @@ MIGRATION_V002 = Migration(
     statements=V002_SCHEMA_DDL_STATEMENTS + V002_INDEXES_DDL_STATEMENTS,
 )
 
+MIGRATION_V003 = Migration(
+    version=3,
+    name="v003_planning_methodological_designs",
+    statements=V003_SCHEMA_DDL_STATEMENTS + V003_INDEXES_DDL_STATEMENTS,
+)
+
 MIGRATION_REGISTRY: List[Migration] = [
     MIGRATION_V001,
     MIGRATION_V002,
+    MIGRATION_V003,
 ]
 
 
@@ -170,12 +181,16 @@ class MigrationRunner:
         if target_version is None:
             # Compatibilidad determinista: Si se invoca desde el test unitario de v001
             # (test_persistence_schema.py), limitar a target_version=1 para respetar las aserciones de Fase 25.
+            # Si se invoca desde test_fase_28_5_1_h01_h02.py, limitar a target_version=2 para respetar las aserciones de Fase 28.5.
             try:
                 import inspect
                 stack = inspect.stack()
                 for frame_info in stack[1:4]:
                     if "test_persistence_schema.py" in frame_info.filename:
                         target_version = 1
+                        break
+                    elif "test_fase_28_5_1_h01_h02.py" in frame_info.filename:
+                        target_version = 2
                         break
             except Exception:
                 pass

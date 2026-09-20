@@ -39,7 +39,7 @@ class WordBatchEventType(str, Enum):
 
 ETAPAS_WORD_BATCH: List[Dict[str, Any]] = [
     {"index": 1, "id": "descubrimiento", "name": "Descubrimiento de documentos Word (.docx)"},
-    {"index": 2, "id": "ingesta", "name": "Ingesta atómica hacia SQLite SSOT"},
+    {"index": 2, "id": "ingesta", "name": "Registro de actividades en base de datos"},
     {"index": 3, "id": "calidad", "name": "Validación de reglas de calidad Q-01..Q-20"},
     {"index": 4, "id": "enrutamiento", "name": "Enrutamiento institucional de participaciones"},
     {"index": 5, "id": "exportacion", "name": "Exportación consolidada de matrices M1–M5"},

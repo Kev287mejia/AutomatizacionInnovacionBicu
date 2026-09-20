@@ -297,7 +297,7 @@ class WordBatchProcessingView(ctk.CTkFrame):
         # Control de Simulación (Dry-Run)
         self.chk_dry_run = ctk.CTkCheckBox(
             scroll_exec,
-            text="Modo Simulación (Dry-Run: valida y calcula sin escribir en SQLite ni exportar archivos)",
+            text="Modo Simulación (sin guardar cambios: valida y calcula sin escribir en la base de datos ni exportar archivos)",
             font=ctk.CTkFont(family="Segoe UI", size=12),
         )
         self.chk_dry_run.grid(row=1, column=0, sticky="w", padx=14, pady=(0, 10))
@@ -367,10 +367,10 @@ class WordBatchProcessingView(ctk.CTkFrame):
         # Card 2: Actividades Creadas
         c_act = ctk.CTkFrame(metrics_frame, fg_color=("gray92", "gray17"), corner_radius=6)
         c_act.grid(row=0, column=1, padx=4, pady=4, sticky="ew")
-        ctk.CTkLabel(c_act, text="Actividades en SQLite", font=ctk.CTkFont(family="Segoe UI", size=11), text_color="gray").pack(pady=(8, 0))
+        ctk.CTkLabel(c_act, text="Actividades registradas", font=ctk.CTkFont(family="Segoe UI", size=11), text_color="gray").pack(pady=(8, 0))
         self.val_actividades = ctk.CTkLabel(c_act, text="0", font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"))
         self.val_actividades.pack(pady=(0, 2))
-        self.lbl_act_sub = ctk.CTkLabel(c_act, text="Persistidas como SSOT", font=ctk.CTkFont(family="Segoe UI", size=10), text_color="gray")
+        self.lbl_act_sub = ctk.CTkLabel(c_act, text="Registradas oficialmente", font=ctk.CTkFont(family="Segoe UI", size=10), text_color="gray")
         self.lbl_act_sub.pack(pady=(0, 8))
 
         # Card 3: Evidencias Registradas
@@ -707,7 +707,7 @@ class WordBatchProcessingView(ctk.CTkFrame):
             self.lbl_mat_sub.configure(text="M1 generada con éxito")
         else:
             self.val_matrices.configure(text="0 de 5", text_color="gray")
-            self.lbl_mat_sub.configure(text="Sin exportar (Dry-Run)")
+            self.lbl_mat_sub.configure(text="Sin exportar (Modo Simulación)")
 
         # Cargar tabla de archivos procesados
         for w in self.table_scroll.winfo_children():
@@ -750,7 +750,7 @@ class WordBatchProcessingView(ctk.CTkFrame):
             if f_dto.motivo_rechazo:
                 det = f"Rechazado: {f_dto.motivo_rechazo}"
             elif f_dto.posible_duplicado_advertido:
-                det = "Documento ya registrado previamente en la base de datos (GAP-3)."
+                det = "Documento ya registrado previamente en la base de datos (Registro duplicado detectado)."
             elif f_dto.advertencias:
                 det = f_dto.advertencias[0]
             elif f_dto.id_actividad:

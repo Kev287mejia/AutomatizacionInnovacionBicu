@@ -120,8 +120,8 @@ class ModuleSelectionView(ctk.CTkFrame):
             card_w2m,
             text=(
                 "Extrae actividades institucionales desde documentos Word (.docx), "
-                "valida reglas de calidad Q-01 a Q-20, registra los datos en el repositorio "
-                "SQLite y genera las matrices consolidadas oficiales M1 a M5."
+                "valida reglas de calidad Q-01 a Q-20, registra los datos en la base de datos "
+                "institucional y genera las matrices consolidadas oficiales M1 a M5."
             ),
             font=ctk.CTkFont(family="Segoe UI", size=12),
             text_color=("gray40", "gray70"),

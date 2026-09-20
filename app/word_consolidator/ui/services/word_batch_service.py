@@ -27,6 +27,7 @@ from app.application.use_cases.pipeline.procesar_pipeline_actividad import (
 from app.core.ports.unit_of_work import IUnitOfWork
 from app.infrastructure.persistence.config import DatabaseConfig
 from app.infrastructure.persistence.connection import SQLiteConnectionManager
+from app.infrastructure.persistence.migrations import MigrationRunner
 from app.infrastructure.persistence.repositories.unit_of_work import (
     SQLiteUnitOfWork,
 )
@@ -154,10 +155,17 @@ class WordBatchAppService:
         """Fábrica institucional para construir el orquestador IngestarCarpetaWordUseCase.
 
         Conecta los casos de uso atómicos respetando la arquitectura de capas.
+        Garantiza que la base de datos contenga el esquema activo V002 antes de instanciar el UoW.
         """
         if uow is None:
             config = DatabaseConfig()
             manager = SQLiteConnectionManager(config)
+            conn = manager.get_connection()
+            try:
+                runner = MigrationRunner(conn)
+                runner.apply_all_pending()
+            finally:
+                conn.close()
             uow = SQLiteUnitOfWork(connection_manager=manager, db_path=config.db_path)
 
         extractor = WordActivityExtractor()

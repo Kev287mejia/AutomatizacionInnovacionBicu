@@ -77,6 +77,23 @@ class ConsolidatorApp(ctk.CTk):
         ctk.set_appearance_mode("System")  # Adaptable a Light/Dark de Windows
         ctk.set_default_color_theme("blue")  # Paleta azul institucional
 
+        # Asegurar esquema SQLite institucional en el arranque de la GUI
+        try:
+            from app.infrastructure.persistence.config import DatabaseConfig
+            from app.infrastructure.persistence.connection import SQLiteConnectionManager
+            from app.infrastructure.persistence.migrations import MigrationRunner
+
+            _cfg = DatabaseConfig()
+            _mgr = SQLiteConnectionManager(_cfg)
+            _conn = _mgr.get_connection()
+            try:
+                _runner = MigrationRunner(_conn)
+                _runner.apply_all_pending()
+            finally:
+                _conn.close()
+        except Exception:
+            pass
+
         super().__init__(**kwargs)
 
         self.title("BICU — Sistema de Gestión Institucional de Asistencias y Actividades")
