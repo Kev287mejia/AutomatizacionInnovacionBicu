@@ -366,7 +366,7 @@ INITIAL_INDEXES_DDL_STATEMENTS = [
     "CREATE INDEX IF NOT EXISTS idx_salida_matriz ON salida_institucional(codigo_matriz, fecha_emision);",
 ]
 
-# Catálogo oficial de las 18 tablas funcionales + 1 técnica
+# Catálogo oficial de las 18 tablas funcionales + 1 técnica (v001)
 EXPECTED_TABLE_NAMES = {
     "schema_version",
     "actividad",
@@ -388,3 +388,50 @@ EXPECTED_TABLE_NAMES = {
     "salida_institucional",
     "auditoria_evento",
 }
+
+# ---------------------------------------------------------------------------
+# ESQUEMA V002: HASH SHA-256 E IDEMPOTENCIA, MÉTRICAS AGREGADAS (GAP-1, GAP-2, GAP-3)
+# ---------------------------------------------------------------------------
+V002_SCHEMA_DDL_STATEMENTS = [
+    # 1. Agregar columna hash_sha256 a la tabla actividad (GAP-3)
+    "ALTER TABLE actividad ADD COLUMN hash_sha256 TEXT;",
+
+    # 2. Crear tabla actividad_metrica_agregada para las 15 métricas de Tabla 2 (GAP-1)
+    """
+    CREATE TABLE IF NOT EXISTS actividad_metrica_agregada (
+        id_actividad TEXT PRIMARY KEY,
+        total_participantes INTEGER,
+        total_femenino INTEGER,
+        total_masculino INTEGER,
+        total_estudiantes INTEGER,
+        total_docentes INTEGER,
+        total_administrativos INTEGER,
+        total_otros INTEGER,
+        total_mestizo INTEGER,
+        total_creole INTEGER,
+        total_miskitu INTEGER,
+        total_mayangna INTEGER,
+        total_ulwa INTEGER,
+        total_rama INTEGER,
+        total_garifuna INTEGER,
+        total_otra_etnia INTEGER,
+        fuente_seccion TEXT NOT NULL,
+        presenta_discrepancia_interna INTEGER NOT NULL DEFAULT 0 CHECK (presenta_discrepancia_interna IN (0, 1)),
+        created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+        FOREIGN KEY (id_actividad) REFERENCES actividad(id_actividad) ON DELETE CASCADE
+    );
+    """,
+]
+
+V002_INDEXES_DDL_STATEMENTS = [
+    # Índice único parcial para hash_sha256: garantiza unicidad cuando el hash existe,
+    # permitiendo múltiples filas NULL sin colisión (idempotencia y concurrencia).
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_actividad_hash_sha256 ON actividad(hash_sha256) WHERE hash_sha256 IS NOT NULL;",
+
+    # Índice para búsquedas por código de indicador institucional (GAP-2).
+    "CREATE INDEX IF NOT EXISTS idx_actividad_indicador ON actividad(codigo_indicador);",
+]
+
+# Catálogo ampliado de tablas en v002 (19 funcionales + 1 técnica)
+EXPECTED_TABLE_NAMES_V002 = EXPECTED_TABLE_NAMES | {"actividad_metrica_agregada"}
+

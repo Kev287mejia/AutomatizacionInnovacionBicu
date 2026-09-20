@@ -17,15 +17,19 @@ from app.infrastructure.persistence.connection import (
 )
 from app.infrastructure.persistence.schema import (
     EXPECTED_TABLE_NAMES,
+    EXPECTED_TABLE_NAMES_V002,
     SCHEMA_VERSION_TABLE_DDL,
     INITIAL_SCHEMA_DDL_STATEMENTS,
     INITIAL_INDEXES_DDL_STATEMENTS,
+    V002_SCHEMA_DDL_STATEMENTS,
+    V002_INDEXES_DDL_STATEMENTS,
 )
 from app.infrastructure.persistence.migrations import (
     Migration,
     MigrationRunner,
     MIGRATION_REGISTRY,
     MIGRATION_V001,
+    MIGRATION_V002,
 )
 from app.infrastructure.persistence.repositories import (
     SQLiteActividadRepository,
@@ -46,13 +50,17 @@ __all__ = [
     "SQLiteConnectionManager",
     "transaction",
     "EXPECTED_TABLE_NAMES",
+    "EXPECTED_TABLE_NAMES_V002",
     "SCHEMA_VERSION_TABLE_DDL",
     "INITIAL_SCHEMA_DDL_STATEMENTS",
     "INITIAL_INDEXES_DDL_STATEMENTS",
+    "V002_SCHEMA_DDL_STATEMENTS",
+    "V002_INDEXES_DDL_STATEMENTS",
     "Migration",
     "MigrationRunner",
     "MIGRATION_REGISTRY",
     "MIGRATION_V001",
+    "MIGRATION_V002",
     "SQLiteActividadRepository",
     "SQLitePersonaRepository",
     "SQLiteParticipacionRepository",
@@ -61,3 +69,4 @@ __all__ = [
     "SQLiteDiscrepanciaRepository",
     "SQLiteUnitOfWork",
 ]
+

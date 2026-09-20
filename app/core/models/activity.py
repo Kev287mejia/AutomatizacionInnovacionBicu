@@ -17,6 +17,53 @@ import uuid
 from pydantic import BaseModel, Field, field_validator
 
 
+class ActividadMetricaAgregada(BaseModel):
+    """Métricas cuantitativas agregadas provenientes de la Tabla 2 del informe Word.
+
+    REGLA FUNDAMENTAL DE DATOS AGREGADOS:
+    La información agregada de Tabla 2:
+    - NO CREA PERSONA
+    - NO CREA PARTICIPATION
+    - NO CREA CÉDULA
+    - NO CREA ESTUDIANTE
+    - NO CREA DOCENTE
+    - NO CREA ADMINISTRATIVO
+    - NO CREA PROTAGONISTA
+    Únicamente debe almacenarse como actividad_metrica_agregada.
+    """
+    id_actividad: str = Field(
+        ...,
+        description="UUID de la actividad institucional vinculada (relación 1:1)."
+    )
+    total_participantes: Optional[int] = Field(default=None, description="Total global de participantes.")
+    total_femenino: Optional[int] = Field(default=None, description="Total participantes sexo femenino.")
+    total_masculino: Optional[int] = Field(default=None, description="Total participantes sexo masculino.")
+    total_estudiantes: Optional[int] = Field(default=None, description="Total estamento estudiantes.")
+    total_docentes: Optional[int] = Field(default=None, description="Total estamento docentes.")
+    total_administrativos: Optional[int] = Field(default=None, description="Total estamento personal administrativo.")
+    total_otros: Optional[int] = Field(default=None, description="Total estamento otros.")
+    total_mestizo: Optional[int] = Field(default=None, description="Total etnia Mestizo.")
+    total_creole: Optional[int] = Field(default=None, description="Total etnia Creole.")
+    total_miskitu: Optional[int] = Field(default=None, description="Total etnia Miskitu.")
+    total_mayangna: Optional[int] = Field(default=None, description="Total etnia Mayangna.")
+    total_ulwa: Optional[int] = Field(default=None, description="Total etnia Ulwa.")
+    total_rama: Optional[int] = Field(default=None, description="Total etnia Rama.")
+    total_garifuna: Optional[int] = Field(default=None, description="Total etnia Garífuna.")
+    total_otra_etnia: Optional[int] = Field(default=None, description="Total otras etnias.")
+    fuente_seccion: str = Field(
+        default="TABLA_2_MATRIZ_CUANTITATIVA",
+        description="Sección del documento origen de donde proceden las métricas."
+    )
+    presenta_discrepancia_interna: bool = Field(
+        default=False,
+        description="Refleja si el propio documento presenta inconsistencia interna entre sus cifras agregadas."
+    )
+
+    model_config = {
+        "validate_assignment": True,
+    }
+
+
 class Activity(BaseModel):
     """
     Modelo representativo de una Actividad o Evento.
@@ -33,6 +80,14 @@ class Activity(BaseModel):
     nombre_actividad_oficial: Optional[str] = Field(
         default=None,
         description="Nombre estandarizado u oficial tras normalización o confirmación del usuario."
+    )
+    codigo_indicador: Optional[str] = Field(
+        default=None,
+        description="Código de indicador institucional extraído de la ficha técnica (GAP-2). No es tipo_evento."
+    )
+    hash_sha256: Optional[str] = Field(
+        default=None,
+        description="Hash criptográfico SHA-256 del archivo DOCX de origen para idempotencia (GAP-3)."
     )
     fecha_evento: Optional[Union[date, str]] = Field(
         default=None,
@@ -74,6 +129,10 @@ class Activity(BaseModel):
         default=None,
         description="Nombre o ruta del archivo de donde fue extraída la información de la actividad."
     )
+    metrica_agregada: Optional[ActividadMetricaAgregada] = Field(
+        default=None,
+        description="Métricas cuantitativas agregadas provenientes de Tabla 2 (GAP-1)."
+    )
 
     @field_validator("nombre_actividad_original")
     @classmethod
@@ -87,3 +146,4 @@ class Activity(BaseModel):
         "validate_assignment": True,
         "str_strip_whitespace": True,
     }
+

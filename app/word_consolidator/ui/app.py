@@ -14,6 +14,8 @@ from typing import Optional
 import customtkinter as ctk
 
 from app.word_consolidator.ui.views.main_window import MainWindow
+from app.word_consolidator.ui.views.module_selection_view import ModuleSelectionView
+from app.word_consolidator.ui.views.word_batch_view import WordBatchProcessingView
 
 
 def configurar_dpi_awareness() -> None:
@@ -77,9 +79,9 @@ class ConsolidatorApp(ctk.CTk):
 
         super().__init__(**kwargs)
 
-        self.title("BICU — Consolidador Institucional de Asistencias (Excel → Word)")
-        self.geometry("980x700")
-        self.minsize(800, 520)
+        self.title("BICU — Sistema de Gestión Institucional de Asistencias y Actividades")
+        self.geometry("1020x720")
+        self.minsize(850, 560)
 
         # Configurar icono oficial institucional de BICU
         icono = obtener_ruta_icono()
@@ -95,9 +97,29 @@ class ConsolidatorApp(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Instanciar vista principal
-        self.main_window = MainWindow(self)
-        self.main_window.grid(row=0, column=0, sticky="nsew")
+        # Contenedor de vistas intercambiables
+        self.container = ctk.CTkFrame(self, fg_color="transparent")
+        self.container.grid(row=0, column=0, sticky="nsew")
+        self.container.grid_columnconfigure(0, weight=1)
+        self.container.grid_rowconfigure(0, weight=1)
+
+        # Instanciar vistas
+        self.module_selection_view = ModuleSelectionView(
+            self.container,
+            on_select_word_batch=self.mostrar_word_batch,
+            on_select_matrices_word=self.mostrar_matrices_word,
+        )
+        self.word_batch_view = WordBatchProcessingView(
+            self.container,
+            on_volver_menu=self.mostrar_menu_principal,
+        )
+        self.main_window = MainWindow(
+            self.container,
+            on_volver_menu=self.mostrar_menu_principal,
+        )
+
+        # Iniciar en el selector de módulos
+        self.mostrar_menu_principal()
 
     def _aplicar_icono_seguro(self, icono: str) -> None:
         """Aplica el icono verificando que la ventana siga viva."""
@@ -106,6 +128,26 @@ class ConsolidatorApp(ctk.CTk):
                 self.iconbitmap(icono)
         except Exception:
             pass
+
+    def _ocultar_todas_las_vistas(self) -> None:
+        """Oculta todas las vistas del contenedor."""
+        for v in (self.module_selection_view, self.word_batch_view, self.main_window):
+            v.grid_forget()
+
+    def mostrar_menu_principal(self) -> None:
+        """Muestra la vista de selección inicial de módulos."""
+        self._ocultar_todas_las_vistas()
+        self.module_selection_view.grid(row=0, column=0, sticky="nsew")
+
+    def mostrar_word_batch(self) -> None:
+        """Muestra la vista del Módulo 1: Word → Matrices M1–M5."""
+        self._ocultar_todas_las_vistas()
+        self.word_batch_view.grid(row=0, column=0, sticky="nsew")
+
+    def mostrar_matrices_word(self) -> None:
+        """Muestra la vista del Módulo 2: Matrices → Informes Word (patrimonial)."""
+        self._ocultar_todas_las_vistas()
+        self.main_window.grid(row=0, column=0, sticky="nsew")
 
 
 def main() -> None:
@@ -116,3 +158,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

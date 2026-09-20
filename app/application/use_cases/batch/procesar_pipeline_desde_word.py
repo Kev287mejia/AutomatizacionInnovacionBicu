@@ -142,6 +142,28 @@ class ProcesarPipelineDesdeWordUseCase:
                 else str(ingesta_res.tipo_documento)
             )
 
+        # Si fue omitido por duplicado (GAP-3)
+        if getattr(ingesta_res, "posible_duplicado", False):
+            logger.info(
+                f"Documento '{nombre_archivo}' omitido por duplicado (GAP-3). El lote continúa."
+            )
+            return PipelineDesdeWordResultDTO(
+                nombre_archivo=nombre_archivo,
+                exitoso=True,
+                id_actividad=None,
+                tipo_documento=tipo_doc_str,
+                ingesta_exitosa=True,
+                evidencias_registradas=0,
+                motivo_rechazo=None,
+                pipeline_ejecutado=False,
+                calidad_estado=None,
+                total_hallazgos=0,
+                total_participaciones=0,
+                advertencias=advertencias_acumuladas,
+                errores=errores_acumulados,
+                posible_duplicado_advertido=True,
+            )
+
         # Si la ingesta no fue exitosa (documento rechazado o incompatible)
         if not ingesta_res.exitoso or not ingesta_res.id_actividad:
             logger.info(

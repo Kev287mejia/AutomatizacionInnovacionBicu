@@ -27,6 +27,7 @@ from app.application.dto.word_extraction_dtos import (
 from app.application.mappers.word_activity_mapper import WordActivityDTOMapper
 from app.application.ports.word_activity_extractor import IWordActivityExtractor
 from app.audit.audit_logger import get_logger
+from app.core.exceptions.persistence_exceptions import EntityAlreadyExistsError
 from app.core.ports.unit_of_work import IUnitOfWork
 
 logger = get_logger(__name__)
@@ -168,7 +169,34 @@ class IngestarActividadDesdeWordUseCase:
         evidencias_guardadas = 0
         try:
             with self._uow:
-                # Guardar la entidad Actividad en SQLite
+                # 4.1. GAP-3: Idempotencia documental mediante SHA-256 (pre-verificación dentro de UoW)
+                if extraction_dto.hash_sha256:
+                    actividad_existente = self._uow.actividades.get_by_hash(extraction_dto.hash_sha256)
+                    if actividad_existente is not None:
+                        logger.warning(
+                            f"Documento duplicado omitido por hash SHA-256 para '{nombre_archivo}'. "
+                            f"Actividad previamente registrada: {actividad_existente.id_actividad}. OMITIDO — DUPLICADO."
+                        )
+                        return IngestaActividadWordResultDTO(
+                            exitoso=True,
+                            id_actividad=None,
+                            nombre_archivo=nombre_archivo,
+                            ruta_archivo=str(path),
+                            tipo_documento=diag.tipo_documento,
+                            compatible_flujo_principal=True,
+                            total_participantes_declarado=None,
+                            evidencias_registradas_count=0,
+                            motivo_rechazo=None,
+                            advertencias=[
+                                f"OMITIDO — DUPLICADO: Documento '{nombre_archivo}' con hash SHA-256 idéntico "
+                                f"a una actividad ya registrada ({actividad_existente.id_actividad})."
+                            ] + diag.advertencias,
+                            errores=[],
+                            extraction_dto=extraction_dto,
+                            posible_duplicado=True,
+                        )
+
+                # Guardar la entidad Actividad en SQLite (incluye métricas agregadas)
                 self._uow.actividades.save(actividad)
 
                 # Registrar y vincular evidencias detectadas compatibles
@@ -185,6 +213,28 @@ class IngestarActividadDesdeWordUseCase:
                 # Confirmar atómicamente la transacción
                 self._uow.commit()
 
+        except EntityAlreadyExistsError as exc:
+            # GAP-3 & Concurrencia (Bloque 8): Manejo controlado de unicidad por hash SHA-256
+            logger.warning(
+                f"Conflicto de integridad por hash duplicado en '{nombre_archivo}': {exc}. OMITIDO — DUPLICADO."
+            )
+            return IngestaActividadWordResultDTO(
+                exitoso=True,
+                id_actividad=None,
+                nombre_archivo=nombre_archivo,
+                ruta_archivo=str(path),
+                tipo_documento=diag.tipo_documento,
+                compatible_flujo_principal=True,
+                total_participantes_declarado=None,
+                evidencias_registradas_count=0,
+                motivo_rechazo=None,
+                advertencias=[
+                    f"OMITIDO — DUPLICADO: Documento '{nombre_archivo}' omitido por restricción UNIQUE de hash SHA-256."
+                ] + diag.advertencias,
+                errores=[],
+                extraction_dto=extraction_dto,
+                posible_duplicado=True,
+            )
         except Exception as exc:
             logger.error(f"Fallo transaccional durante persistencia de '{nombre_archivo}': {exc}")
             # El context manager ejecuta automáticamente rollback()

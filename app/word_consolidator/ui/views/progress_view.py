@@ -17,8 +17,16 @@ class ProgressView(ctk.CTkFrame):
     Componente visual que refleja fielmente las etapas del pipeline en tiempo real.
     """
 
-    def __init__(self, master: Any, **kwargs: Any):
+    def __init__(
+        self,
+        master: Any,
+        etapas: Optional[List[Dict[str, Any]]] = None,
+        titulo: Optional[str] = None,
+        **kwargs: Any,
+    ):
         super().__init__(master, **kwargs)
+        self.etapas: List[Dict[str, Any]] = etapas if etapas is not None else ETAPAS_PIPELINE
+        self.titulo_texto: str = titulo or "PROGRESO DE CONSOLIDACIÓN INSTITUCIONAL"
         self.stage_widgets: Dict[int, Dict[str, Any]] = {}
         self._init_ui()
 
@@ -31,7 +39,7 @@ class ProgressView(ctk.CTkFrame):
 
         self.title_lbl = ctk.CTkLabel(
             header_frame,
-            text="PROGRESO DE CONSOLIDACIÓN INSTITUCIONAL",
+            text=self.titulo_texto,
             font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w",
         )
@@ -51,7 +59,8 @@ class ProgressView(ctk.CTkFrame):
         self.stages_container.grid(row=1, column=0, sticky="ew", padx=15, pady=8)
         self.stages_container.grid_columnconfigure(1, weight=1)
 
-        for item in ETAPAS_PIPELINE:
+        total_etapas = len(self.etapas)
+        for item in self.etapas:
             idx = item["index"]
             name = item["name"]
 
@@ -70,7 +79,7 @@ class ProgressView(ctk.CTkFrame):
 
             name_lbl = ctk.CTkLabel(
                 row_frame,
-                text=f"Etapa {idx}/9: {name}",
+                text=f"Etapa {idx}/{total_etapas}: {name}",
                 font=ctk.CTkFont(size=12),
                 text_color="gray",
                 anchor="w",
@@ -114,11 +123,13 @@ class ProgressView(ctk.CTkFrame):
             text="Iniciando ejecución institucional...",
             text_color=("black", "white"),
         )
-        for idx in range(1, len(ETAPAS_PIPELINE) + 1):
-            w = self.stage_widgets[idx]
-            w["icon"].configure(text="[   ]", text_color="gray")
-            w["name"].configure(text_color="gray")
-            w["status"].configure(text="Pendiente", text_color="gray")
+        for item in self.etapas:
+            idx = item["index"]
+            if idx in self.stage_widgets:
+                w = self.stage_widgets[idx]
+                w["icon"].configure(text="[   ]", text_color="gray")
+                w["name"].configure(text_color="gray")
+                w["status"].configure(text="Pendiente", text_color="gray")
         self.lbl_warning.configure(
             text="Observaciones: Procesando en segundo plano...",
             text_color="gray",
@@ -163,18 +174,20 @@ class ProgressView(ctk.CTkFrame):
     def agregar_advertencia(self, mensaje: str) -> None:
         """Muestra una advertencia institucional no bloqueante."""
         self.lbl_warning.configure(
-            text=f"⚠️ Aviso: {mensaje}",
+            text=f"Aviso: {mensaje}",
             text_color="#FFA726",
         )
 
-    def finalizar_exitoso(self) -> None:
+    def finalizar_exitoso(self, mensaje: Optional[str] = None) -> None:
         """Marca el conjunto de etapas como culminado con éxito."""
         self.subtitle_lbl.configure(
-            text="✓ Consolidación completada exitosamente. Documento Word y auditoría listos.",
+            text=mensaje or "✓ Proceso completado exitosamente.",
             text_color="#4CAF50",
         )
-        for idx in range(1, len(ETAPAS_PIPELINE) + 1):
-            w = self.stage_widgets[idx]
-            w["icon"].configure(text="[ ✓ ]", text_color="#4CAF50")
-            w["name"].configure(text_color=("black", "white"))
-            w["status"].configure(text="Finalizada", text_color="#4CAF50")
+        for item in self.etapas:
+            idx = item["index"]
+            if idx in self.stage_widgets:
+                w = self.stage_widgets[idx]
+                w["icon"].configure(text="[ ✓ ]", text_color="#4CAF50")
+                w["name"].configure(text_color=("black", "white"))
+                w["status"].configure(text="Finalizada", text_color="#4CAF50")

@@ -427,13 +427,14 @@ class TestIngestaActividadDesdeWord:
             assert act.sede == "OTRA"
 
     # -----------------------------------------------------------------------
-    # T-16: Repetición del mismo documento (Idempotencia REAL de v001)
+    # T-16: Repetición del mismo documento (Cierre de GAP-3 en Schema v002)
     # -----------------------------------------------------------------------
-    def test_t16_comportamiento_repeticion_documento_demuestra_gap_idempotencia(self, use_case, sqlite_test_env, tmp_path):
-        """T-16: Demuestra el comportamiento real del modelo: Schema v001 no tiene constraint
+    def test_t16_comportamiento_repeticion_documento_cierra_gap_idempotencia(self, use_case, sqlite_test_env, tmp_path):
+        """T-16: Demuestra el cierre de GAP-3 en Schema v002:
 
-        de hash en 'actividad', por lo que procesar dos veces genera dos registros con UUID distinto.
-        Esto se documenta explícitamente como OPEN ARCHITECTURAL GAP.
+        Al procesar dos veces el mismo documento DOCX (mismo hash SHA-256),
+        la segunda ejecución se omite como OMITIDO — DUPLICADO sin error y sin crear
+        un segundo registro.
         """
         doc_path = _crear_docx_actividad_valido(tmp_path, "t16_idempotencia.docx")
 
@@ -443,12 +444,17 @@ class TestIngestaActividadDesdeWord:
         assert res_1.exitoso is True
         assert res_2.exitoso is True
 
-        # Cada llamada genera un UUID nuevo conforme al diseño actual de Activity
-        assert res_1.id_actividad != res_2.id_actividad
+        # En V002 (GAP-3 cerrado): la primera crea la actividad, la segunda se omite como duplicado
+        assert res_1.id_actividad is not None
+        assert res_2.id_actividad is None
+        assert res_2.posible_duplicado is True
+        assert any("OMITIDO — DUPLICADO" in adv for adv in res_2.advertencias)
 
         with sqlite_test_env:
             assert sqlite_test_env.actividades.exists(res_1.id_actividad)
-            assert sqlite_test_env.actividades.exists(res_2.id_actividad)
+            cursor = sqlite_test_env._conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM actividad")
+            assert cursor.fetchone()[0] == 1
 
     # -----------------------------------------------------------------------
     # T-17: La capa Application no importa docx, sqlite3 ni openpyxl

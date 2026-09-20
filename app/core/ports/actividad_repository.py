@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List, Optional, Union
 
-from app.core.models.activity import Activity
+from app.core.models.activity import ActividadMetricaAgregada, Activity
 
 
 class IActividadRepository(ABC):
@@ -29,6 +29,18 @@ class IActividadRepository(ABC):
 
         Args:
             id_actividad: Identificador único de la actividad.
+
+        Returns:
+            Instancia de Activity si existe, None en caso contrario.
+        """
+        ...
+
+    @abstractmethod
+    def get_by_hash(self, hash_sha256: str) -> Optional[Activity]:
+        """Recupera una actividad por el hash criptográfico SHA-256 de su documento Word fuente (GAP-3).
+
+        Args:
+            hash_sha256: Hash hexadecimal de 64 caracteres.
 
         Returns:
             Instancia de Activity si existe, None en caso contrario.
@@ -74,3 +86,25 @@ class IActividadRepository(ABC):
             Cantidad entera de actividades.
         """
         ...
+
+    @abstractmethod
+    def save_metrica_agregada(self, metrica: ActividadMetricaAgregada) -> None:
+        """Inserta o actualiza las métricas cuantitativas agregadas de Tabla 2 (GAP-1).
+
+        Args:
+            metrica: Entidad ActividadMetricaAgregada vinculada a la actividad.
+        """
+        ...
+
+    @abstractmethod
+    def get_metrica_agregada(self, id_actividad: str) -> Optional[ActividadMetricaAgregada]:
+        """Recupera las métricas cuantitativas agregadas de una actividad.
+
+        Args:
+            id_actividad: UUID de la actividad.
+
+        Returns:
+            ActividadMetricaAgregada si existe, None en caso contrario.
+        """
+        ...
+

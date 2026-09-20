@@ -392,6 +392,10 @@ class IngestaActividadWordResultDTO(BaseModel):
         default=None,
         description="DTO original producido por IWordActivityExtractor."
     )
+    posible_duplicado: bool = Field(
+        default=False,
+        description="True si la actividad fue omitida por duplicado exacto de hash SHA-256 (GAP-3)."
+    )
 
     model_config = {
         "frozen": True,

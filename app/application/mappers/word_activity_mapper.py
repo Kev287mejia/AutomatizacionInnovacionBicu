@@ -23,7 +23,7 @@ from app.application.dto.word_extraction_dtos import (
     TipoEvidenciaWord,
     WordActivityExtractionResultDTO,
 )
-from app.core.models.activity import Activity
+from app.core.models.activity import ActividadMetricaAgregada, Activity
 from app.core.models.evidence import Evidencia, TipoEvidencia
 
 
@@ -65,11 +65,22 @@ class WordActivityDTOMapper:
         # Determinar tipo_evento únicamente si existe evidencia explícita en la denominación de la actividad.
         tipo_evento = cls._detectar_tipo_evento_explicito(nombre_original)
 
+        # GAP-2: Preservar código/indicador institucional proveniente de la Ficha Técnica (Tabla 1)
+        codigo_indicador = ficha.indicador.strip() if ficha.indicador else None
+
+        # GAP-3: Hash SHA-256 de los bytes reales del documento Word
+        hash_sha256 = extraction_dto.hash_sha256
+
         # CORRECCIÓN CRÍTICA 02: Construcción de información adicional de trazabilidad
         informacion_adicional = cls._construir_trazabilidad_adicional(extraction_dto)
 
+        id_actividad = str(uuid.uuid4())
+
+        # GAP-1: Mapeo de métricas cuantitativas agregadas oficiales de Tabla 2
+        metrica_agregada = cls.to_metrica_agregada(extraction_dto, id_actividad)
+
         return Activity(
-            id_actividad=str(uuid.uuid4()),
+            id_actividad=id_actividad,
             nombre_actividad_original=nombre_original,
             nombre_actividad_oficial=None,
             fecha_evento=fecha_evento,
@@ -82,6 +93,80 @@ class WordActivityDTOMapper:
             eje_linea_estrategica=eje_estrategico,
             informacion_adicional=informacion_adicional,
             fuente_origen=extraction_dto.nombre_archivo,
+            codigo_indicador=codigo_indicador,
+            hash_sha256=hash_sha256,
+            metrica_agregada=metrica_agregada,
+        )
+
+    @classmethod
+    def to_metrica_agregada(
+        cls, extraction_dto: WordActivityExtractionResultDTO, id_actividad: str
+    ) -> Optional[ActividadMetricaAgregada]:
+        """Extrae la métrica agregada oficial (15 métricas) desde la Tabla 2 del informe Word.
+
+        Reglas:
+        - GAP-1: Persistencia formal 1:1 en actividad_metrica_agregada.
+        - NO CREA PARTICIPANTES NOMINALES.
+        - DETECTAR != CORREGIR: Preserva discrepancias sin alteración matemática.
+        - Preserva Nones cuando el dato no fue provisto (no inventar ceros).
+        """
+        mc = extraction_dto.matriz_cuantitativa
+        if mc is None:
+            return None
+
+        # Desglose étnico declarado
+        etnias = {k.strip().upper(): v for k, v in mc.distribucion_etnica.items()} if mc.distribucion_etnica else {}
+
+        mestizo = etnias.get("MESTIZO")
+        creole = etnias.get("CREOLE")
+        miskitu = etnias.get("MISKITU") if "MISKITU" in etnias else etnias.get("MISKITO")
+        mayangna = etnias.get("MAYANGNA")
+        ulwa = etnias.get("ULWA")
+        rama = etnias.get("RAMA")
+        garifuna = etnias.get("GARÍFUNA") if "GARÍFUNA" in etnias else etnias.get("GARIFUNA")
+
+        # Otras etnias fuera de las 7 oficiales
+        etnias_oficiales = {"MESTIZO", "CREOLE", "MISKITU", "MISKITO", "MAYANGNA", "ULWA", "RAMA", "GARÍFUNA", "GARIFUNA"}
+        otras_etnias_vals = [v for k, v in etnias.items() if k not in etnias_oficiales]
+        if otras_etnias_vals:
+            total_otra_etnia = sum(otras_etnias_vals)
+        elif "OTRA" in etnias or "OTRO" in etnias or "OTRAS" in etnias:
+            total_otra_etnia = etnias.get("OTRA", etnias.get("OTRO", etnias.get("OTRAS")))
+        else:
+            total_otra_etnia = None
+
+        # Discrepancia interna (aritmética de Tabla 2 o Ficha vs Tabla 2)
+        ficha = extraction_dto.ficha_tecnica
+        discrepancia_ficha_tabla2 = False
+        if ficha and ficha.total_participantes_declarado is not None and mc.total is not None:
+            if ficha.total_participantes_declarado != mc.total:
+                discrepancia_ficha_tabla2 = True
+
+        presenta_discrepancia = (
+            mc.discrepancia_suma_genero
+            or mc.discrepancia_suma_estamento
+            or discrepancia_ficha_tabla2
+        )
+
+        return ActividadMetricaAgregada(
+            id_actividad=id_actividad,
+            total_participantes=mc.total,
+            total_femenino=mc.femenino,
+            total_masculino=mc.masculino,
+            total_estudiantes=mc.estudiantes,
+            total_docentes=mc.docentes,
+            total_administrativos=mc.trabajadores_administrativos,
+            total_otros=mc.otros,
+            total_mestizo=mestizo,
+            total_creole=creole,
+            total_miskitu=miskitu,
+            total_mayangna=mayangna,
+            total_ulwa=ulwa,
+            total_rama=rama,
+            total_garifuna=garifuna,
+            total_otra_etnia=total_otra_etnia,
+            fuente_seccion="TABLA_2_MATRIZ_CUANTITATIVA",
+            presenta_discrepancia_interna=presenta_discrepancia,
         )
 
     @classmethod

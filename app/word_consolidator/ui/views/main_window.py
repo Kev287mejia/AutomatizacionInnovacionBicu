@@ -40,8 +40,14 @@ class MainWindow(ctk.CTkFrame):
     Contenedor principal e integrador de flujo de la interfaz institucional BICU.
     """
 
-    def __init__(self, master: Any, **kwargs: Any):
+    def __init__(
+        self,
+        master: Any,
+        on_volver_menu: Optional[Callable[[], None]] = None,
+        **kwargs: Any,
+    ):
         super().__init__(master, **kwargs)
+        self.on_volver_menu = on_volver_menu
         self.worker: Optional[ConsolidationWorker] = None
         self.event_queue: queue.Queue = queue.Queue()
         self._polling_id: Optional[str] = None
@@ -58,11 +64,12 @@ class MainWindow(ctk.CTkFrame):
         header = ctk.CTkFrame(self, fg_color=("#0B3C5D", "#1A2634"), corner_radius=0)
         header.grid(row=0, column=0, sticky="ew")
         header.grid_columnconfigure(0, weight=1)
+        header.grid_columnconfigure(1, weight=0)
 
         title_lbl = ctk.CTkLabel(
             header,
             text="BLUEFIELDS INDIAN & CARIBBEAN UNIVERSITY — BICU",
-            font=ctk.CTkFont(size=16, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
             text_color="white",
             anchor="w",
         )
@@ -71,11 +78,25 @@ class MainWindow(ctk.CTkFrame):
         sub_lbl = ctk.CTkLabel(
             header,
             text="Sistema Automatizado de Consolidación de Asistencias → Informe Word Institucional",
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(family="Segoe UI", size=12),
             text_color=("#E0E0E0", "#B0BEC5"),
             anchor="w",
         )
         sub_lbl.grid(row=1, column=0, padx=20, pady=(0, 12), sticky="w")
+
+        if self.on_volver_menu:
+            btn_volver = ctk.CTkButton(
+                header,
+                text="← Menú Principal",
+                font=ctk.CTkFont(family="Segoe UI", size=12),
+                fg_color="#1A2634",
+                hover_color="#07263D",
+                width=130,
+                height=32,
+                corner_radius=5,
+                command=self.on_volver_menu,
+            )
+            btn_volver.grid(row=0, column=1, rowspan=2, padx=15, pady=10, sticky="e")
 
         # ---------------------------------------------------------------------
         # PESTAÑAS DE FLUJO OPERATIVO (Tabview)
