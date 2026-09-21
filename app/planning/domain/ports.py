@@ -20,7 +20,7 @@ import abc
 import uuid
 from typing import Any, Optional, Sequence
 
-from app.planning.domain.dtos import MethodologicalDesignDTO
+from app.planning.domain.dtos import MethodologicalDesignDTO, PlanningSourceReadResultDTO
 from app.planning.domain.entities import MethodologicalDesign, PlannedActivity
 from app.planning.domain.value_objects import AIProposal, CatalogReference
 
@@ -155,4 +155,77 @@ class MethodologicalDocumentRendererPort(abc.ABC):
         Returns:
             Ruta del archivo generado.
         """
+        raise NotImplementedError
+
+
+class PlanningSourceReaderPort(abc.ABC):
+    """Puerto abstracto para la lectura de fuentes externas de planificacion (POA).
+
+    Fuente: FASE_29_7 §5.
+    Clasificacion: DECISION ARQUITECTONICA.
+
+    PRINCIPIO: Ceguera a Infraestructura de Persistencia.
+      El reader solo abre, analiza y normaliza tecnicamente el archivo externo (Excel),
+      retornando PlanningSourceReadResultDTO sin acoplamiento a base de datos ni modelos de ejecucion.
+    """
+
+    @abc.abstractmethod
+    def read_planning_source(
+        self,
+        file_path: str,
+        sheet_name: Optional[str] = None,
+    ) -> PlanningSourceReadResultDTO:
+        """Lee un archivo institucional de planificacion y retorna los datos tecnicamente normalizados.
+
+        Args:
+            file_path: Ruta al archivo Excel institucional.
+            sheet_name: Nombre especifico de la hoja a procesar (opcional).
+
+        Returns:
+            PlanningSourceReadResultDTO con actividades procesadas, advertencias y errores estructurales.
+        """
+        raise NotImplementedError
+
+
+class PlanningUnitOfWorkPort(abc.ABC):
+    """Puerto abstracto para la Unidad de Trabajo Satelite de Planificacion.
+
+    Fuente: FASE_29_7 §10, FASE_29_4_2.
+    Clasificacion: DECISION ARQUITECTONICA.
+    """
+
+    @property
+    @abc.abstractmethod
+    def planned_activities(self) -> PlannedActivityRepositoryPort:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def methodological_designs(self) -> MethodologicalDesignRepositoryPort:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def catalogs(self) -> CatalogRepositoryPort:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __enter__(self) -> "PlanningUnitOfWorkPort":
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[Any],
+    ) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def commit(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rollback(self) -> None:
         raise NotImplementedError

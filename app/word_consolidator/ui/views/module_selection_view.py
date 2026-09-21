@@ -18,11 +18,13 @@ class ModuleSelectionView(ctk.CTkFrame):
         master: Any,
         on_select_word_batch: Optional[Callable[[], None]] = None,
         on_select_matrices_word: Optional[Callable[[], None]] = None,
+        on_select_planning: Optional[Callable[[], None]] = None,
         **kwargs: Any,
     ):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.on_select_word_batch = on_select_word_batch
         self.on_select_matrices_word = on_select_matrices_word
+        self.on_select_planning = on_select_planning
 
         self._init_ui()
 
@@ -59,7 +61,7 @@ class ModuleSelectionView(ctk.CTkFrame):
         # 2. CUERPO CENTRAL: SELECCIÓN DE PROCESO
         # ---------------------------------------------------------------------
         center_frame = ctk.CTkFrame(self, fg_color="transparent")
-        center_frame.grid(row=1, column=0, sticky="nsew", padx=30, pady=25)
+        center_frame.grid(row=1, column=0, sticky="nsew", padx=24, pady=20)
         center_frame.grid_columnconfigure(0, weight=1)
 
         prompt_title = ctk.CTkLabel(
@@ -68,7 +70,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
             anchor="center",
         )
-        prompt_title.grid(row=0, column=0, pady=(10, 4))
+        prompt_title.grid(row=0, column=0, pady=(6, 2))
 
         prompt_desc = ctk.CTkLabel(
             center_frame,
@@ -77,12 +79,13 @@ class ModuleSelectionView(ctk.CTkFrame):
             text_color="gray",
             anchor="center",
         )
-        prompt_desc.grid(row=1, column=0, pady=(0, 25))
+        prompt_desc.grid(row=1, column=0, pady=(0, 18))
 
         cards_container = ctk.CTkFrame(center_frame, fg_color="transparent")
         cards_container.grid(row=2, column=0, sticky="ew")
         cards_container.grid_columnconfigure(0, weight=1)
         cards_container.grid_columnconfigure(1, weight=1)
+        cards_container.grid_columnconfigure(2, weight=1)
 
         # ---------------------------------------------------------------------
         # Tarjeta 1: WORD → MATRICES
@@ -94,7 +97,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             border_width=1,
             border_color=("gray80", "gray25"),
         )
-        card_w2m.grid(row=0, column=0, padx=(0, 12), pady=10, sticky="nsew")
+        card_w2m.grid(row=0, column=0, padx=(0, 8), pady=8, sticky="nsew")
         card_w2m.grid_columnconfigure(0, weight=1)
 
         w2m_badge = ctk.CTkLabel(
@@ -104,44 +107,44 @@ class ModuleSelectionView(ctk.CTkFrame):
             text_color=("#0B3C5D", "#4FC3F7"),
             anchor="w",
         )
-        w2m_badge.grid(row=0, column=0, padx=20, pady=(18, 4), sticky="w")
+        w2m_badge.grid(row=0, column=0, padx=16, pady=(16, 4), sticky="w")
 
         w2m_title = ctk.CTkLabel(
             card_w2m,
             text="PROCESAR INFORMES WORD → MATRICES M1–M5",
-            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
-            wraplength=380,
+            wraplength=260,
             justify="left",
         )
-        w2m_title.grid(row=1, column=0, padx=20, pady=(0, 8), sticky="w")
+        w2m_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
 
         w2m_desc = ctk.CTkLabel(
             card_w2m,
             text=(
                 "Extrae actividades institucionales desde documentos Word (.docx), "
                 "valida reglas de calidad Q-01 a Q-20, registra los datos en la base de datos "
-                "institucional y genera las matrices consolidadas oficiales M1 a M5."
+                "institucional y genera las matrices oficiales M1 a M5."
             ),
-            font=ctk.CTkFont(family="Segoe UI", size=12),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
             text_color=("gray40", "gray70"),
             anchor="w",
-            wraplength=380,
+            wraplength=260,
             justify="left",
         )
-        w2m_desc.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="w")
+        w2m_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
 
         btn_w2m = ctk.CTkButton(
             card_w2m,
-            text="Iniciar Procesamiento Word  ➔",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text="Iniciar Procesamiento  ➔",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             fg_color="#0B3C5D",
             hover_color="#07263D",
-            height=36,
-            corner_radius=5,
+            height=34,
+            corner_radius=4,
             command=self._on_click_word_batch,
         )
-        btn_w2m.grid(row=3, column=0, padx=20, pady=(0, 20), sticky="ew")
+        btn_w2m.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
 
         # ---------------------------------------------------------------------
         # Tarjeta 2: MATRICES → INFORMES WORD (PATRIMONIAL)
@@ -153,7 +156,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             border_width=1,
             border_color=("gray80", "gray25"),
         )
-        card_m2w.grid(row=0, column=1, padx=(12, 0), pady=10, sticky="nsew")
+        card_m2w.grid(row=0, column=1, padx=(8, 8), pady=8, sticky="nsew")
         card_m2w.grid_columnconfigure(0, weight=1)
 
         m2w_badge = ctk.CTkLabel(
@@ -163,17 +166,17 @@ class ModuleSelectionView(ctk.CTkFrame):
             text_color=("#0B3C5D", "#4FC3F7"),
             anchor="w",
         )
-        m2w_badge.grid(row=0, column=0, padx=20, pady=(18, 4), sticky="w")
+        m2w_badge.grid(row=0, column=0, padx=16, pady=(16, 4), sticky="w")
 
         m2w_title = ctk.CTkLabel(
             card_m2w,
             text="CONSOLIDAR MATRICES EXCEL → INFORMES WORD",
-            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
-            wraplength=380,
+            wraplength=260,
             justify="left",
         )
-        m2w_title.grid(row=1, column=0, padx=20, pady=(0, 8), sticky="w")
+        m2w_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
 
         m2w_desc = ctk.CTkLabel(
             card_m2w,
@@ -182,25 +185,84 @@ class ModuleSelectionView(ctk.CTkFrame):
                 "y genera el Informe Técnico de Auditoría y el Informe Institucional "
                 "Ejecutivo en formato Word (.docx)."
             ),
-            font=ctk.CTkFont(family="Segoe UI", size=12),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
             text_color=("gray40", "gray70"),
             anchor="w",
-            wraplength=380,
+            wraplength=260,
             justify="left",
         )
-        m2w_desc.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="w")
+        m2w_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
 
         btn_m2w = ctk.CTkButton(
             card_m2w,
-            text="Iniciar Consolidación de Matrices  ➔",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text="Iniciar Consolidación  ➔",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             fg_color="#0B3C5D",
             hover_color="#07263D",
-            height=36,
-            corner_radius=5,
+            height=34,
+            corner_radius=4,
             command=self._on_click_matrices_word,
         )
-        btn_m2w.grid(row=3, column=0, padx=20, pady=(0, 20), sticky="ew")
+        btn_m2w.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
+
+        # ---------------------------------------------------------------------
+        # Tarjeta 3: PLANIFICACIÓN Y DISEÑO METODOLÓGICO (MÓDULO 3)
+        # ---------------------------------------------------------------------
+        card_plan = ctk.CTkFrame(
+            cards_container,
+            fg_color=("gray92", "gray17"),
+            corner_radius=6,
+            border_width=1,
+            border_color=("gray80", "gray25"),
+        )
+        card_plan.grid(row=0, column=2, padx=(8, 0), pady=8, sticky="nsew")
+        card_plan.grid_columnconfigure(0, weight=1)
+
+        plan_badge = ctk.CTkLabel(
+            card_plan,
+            text="MÓDULO 3",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color=("#0B3C5D", "#4FC3F7"),
+            anchor="w",
+        )
+        plan_badge.grid(row=0, column=0, padx=16, pady=(16, 4), sticky="w")
+
+        plan_title = ctk.CTkLabel(
+            card_plan,
+            text="PLANIFICACIÓN Y DISEÑO METODOLÓGICO",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            anchor="w",
+            wraplength=260,
+            justify="left",
+        )
+        plan_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
+
+        plan_desc = ctk.CTkLabel(
+            card_plan,
+            text=(
+                "Gestiona las actividades del Plan Operativo Anual (POA), elabora "
+                "y valida los diseños metodológicos de talleres y eventos, y genera "
+                "los documentos oficiales en formato Word (.docx)."
+            ),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=("gray40", "gray70"),
+            anchor="w",
+            wraplength=260,
+            justify="left",
+        )
+        plan_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
+
+        btn_plan = ctk.CTkButton(
+            card_plan,
+            text="Iniciar Planificación  ➔",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            fg_color="#0B3C5D",
+            hover_color="#07263D",
+            height=34,
+            corner_radius=4,
+            command=self._on_click_planning,
+        )
+        btn_plan.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
 
         # ---------------------------------------------------------------------
         # 3. PIE DE PÁGINA INSTITUCIONAL
@@ -224,3 +286,7 @@ class ModuleSelectionView(ctk.CTkFrame):
     def _on_click_matrices_word(self) -> None:
         if self.on_select_matrices_word:
             self.on_select_matrices_word()
+
+    def _on_click_planning(self) -> None:
+        if self.on_select_planning:
+            self.on_select_planning()

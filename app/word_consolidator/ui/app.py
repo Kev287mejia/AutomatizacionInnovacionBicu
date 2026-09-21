@@ -9,10 +9,9 @@ e inicializa la ventana principal de CustomTkinter.
 import ctypes
 import os
 import sys
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import customtkinter as ctk
-
 from app.word_consolidator.ui.views.main_window import MainWindow
 from app.word_consolidator.ui.views.module_selection_view import ModuleSelectionView
 from app.word_consolidator.ui.views.word_batch_view import WordBatchProcessingView
@@ -69,7 +68,21 @@ class ConsolidatorApp(ctk.CTk):
     Ventana raíz de la aplicación de escritorio CustomTkinter para BICU.
     """
 
-    def __init__(self, **kwargs):
+    _planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
+
+    @classmethod
+    def set_planning_view_factory(
+        cls,
+        factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]],
+    ) -> None:
+        """Registra la fábrica visual para el Módulo 3 (Planificación) sin acoplar paquetes."""
+        cls._planning_view_factory = factory
+
+    def __init__(
+        self,
+        planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
+        **kwargs: Any,
+    ):
         # Configurar DPI antes de inicializar la ventana
         configurar_dpi_awareness()
 
@@ -125,6 +138,7 @@ class ConsolidatorApp(ctk.CTk):
             self.container,
             on_select_word_batch=self.mostrar_word_batch,
             on_select_matrices_word=self.mostrar_matrices_word,
+            on_select_planning=self.mostrar_planning,
         )
         self.word_batch_view = WordBatchProcessingView(
             self.container,
@@ -134,6 +148,15 @@ class ConsolidatorApp(ctk.CTk):
             self.container,
             on_volver_menu=self.mostrar_menu_principal,
         )
+
+        # Fábrica de vista de planificación (inyección de dependencias desacoplada)
+        effective_factory = planning_view_factory or self._planning_view_factory
+        if effective_factory is not None:
+            self.planning_view: Optional[ctk.CTkFrame] = effective_factory(
+                self.container, self.mostrar_menu_principal
+            )
+        else:
+            self.planning_view = None
 
         # Iniciar en el selector de módulos
         self.mostrar_menu_principal()
@@ -148,8 +171,9 @@ class ConsolidatorApp(ctk.CTk):
 
     def _ocultar_todas_las_vistas(self) -> None:
         """Oculta todas las vistas del contenedor."""
-        for v in (self.module_selection_view, self.word_batch_view, self.main_window):
-            v.grid_forget()
+        for v in (self.module_selection_view, self.word_batch_view, self.main_window, self.planning_view):
+            if v is not None:
+                v.grid_forget()
 
     def mostrar_menu_principal(self) -> None:
         """Muestra la vista de selección inicial de módulos."""
@@ -165,6 +189,20 @@ class ConsolidatorApp(ctk.CTk):
         """Muestra la vista del Módulo 2: Matrices → Informes Word (patrimonial)."""
         self._ocultar_todas_las_vistas()
         self.main_window.grid(row=0, column=0, sticky="nsew")
+
+    def mostrar_planning(self) -> None:
+        """Muestra la vista del Módulo 3: Planificación y Diseño Metodológico."""
+        if self.planning_view is not None:
+            self._ocultar_todas_las_vistas()
+            if hasattr(self.planning_view, "mostrar_lista_actividades"):
+                self.planning_view.mostrar_lista_actividades()
+            self.planning_view.grid(row=0, column=0, sticky="nsew")
+        else:
+            from tkinter import messagebox
+            messagebox.showinfo(
+                "Módulo de Planificación",
+                "El Módulo 3 (Planificación y Diseño Metodológico) no está configurado en esta instancia.",
+            )
 
 
 def main() -> None:

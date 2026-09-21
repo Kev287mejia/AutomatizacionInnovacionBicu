@@ -14,6 +14,7 @@ from types import TracebackType
 
 from app.core.exceptions.persistence_exceptions import TransactionError
 from app.infrastructure.persistence.connection import SQLiteConnectionManager
+from app.planning.domain.ports import PlanningUnitOfWorkPort
 from app.planning.infrastructure.persistence.repositories import (
     SQLiteCatalogRepository,
     SQLiteMethodologicalDesignRepository,
@@ -21,7 +22,7 @@ from app.planning.infrastructure.persistence.repositories import (
 )
 
 
-class PlanningUnitOfWork:
+class PlanningUnitOfWork(PlanningUnitOfWorkPort):
     """Unidad de Trabajo satélite para el módulo de Planificación y Diseño Metodológico."""
 
     def __init__(

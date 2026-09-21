@@ -14,7 +14,18 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.word_consolidator.ui.app import main
+from app.planning.ui.views.planning_main_view import PlanningMainView
+from app.word_consolidator.ui.app import ConsolidatorApp
+
+
+def main() -> None:
+    app = ConsolidatorApp(
+        planning_view_factory=lambda container, on_back: PlanningMainView(
+            container, on_volver_menu=on_back
+        )
+    )
+    app.mainloop()
+
 
 if __name__ == "__main__":
     main()
