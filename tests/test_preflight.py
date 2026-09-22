@@ -60,14 +60,15 @@ def _make_valid_db(path: Path, schema_version: int = 4, m5_count: int = 0) -> Pa
                 (v, f"v{v:03d}_test"),
             )
         conn.execute(
-            """CREATE TABLE perfil_beneficiario (
-                id INTEGER PRIMARY KEY,
+            """CREATE TABLE participacion (
+                id_participacion TEXT PRIMARY KEY,
                 es_historico_preexistente INTEGER NOT NULL DEFAULT 0
             );"""
         )
         for i in range(m5_count):
             conn.execute(
-                "INSERT INTO perfil_beneficiario (es_historico_preexistente) VALUES (1);"
+                "INSERT INTO participacion (id_participacion, es_historico_preexistente) VALUES (?, 1);",
+                (f"part-hist-{i}",),
             )
         conn.commit()
     finally:
@@ -241,6 +242,63 @@ class TestPreflightChecksIndividual:
         checker = ReleasePreflightChecker(db_path=db)
         check = checker._check_m5_historical_records()
         assert check.status == PreflightStatus.WARNING
+
+    def test_check_m5_h03_canonical_table_participacion_no_operational_error(
+        self, tmp_path: Path
+    ) -> None:
+        """H-03: Verifica que la consulta use 'participacion' y no 'perfil_beneficiario'.
+
+        En el esquema institucional V004, 'perfil_beneficiario' no posee la columna
+        'es_historico_preexistente', mientras que 'participacion' sí la contiene.
+        Esta prueba simula exactamente dicha estructura para asegurar que no se produzca
+        OperationalError y el estado sea READY con 32 registros protegidos.
+        """
+        db = tmp_path / "canonical_v004.db"
+        conn = sqlite3.connect(str(db))
+        try:
+            conn.execute("PRAGMA journal_mode = WAL;")
+            conn.execute("PRAGMA foreign_keys = ON;")
+            # perfil_beneficiario según esquema real V004 (sin es_historico_preexistente)
+            conn.execute(
+                """CREATE TABLE perfil_beneficiario (
+                    id_perfil_beneficiario TEXT PRIMARY KEY,
+                    id_persona TEXT NOT NULL,
+                    condicion_vulnerabilidad TEXT
+                );"""
+            )
+            # participacion según esquema real V004 (con es_historico_preexistente)
+            conn.execute(
+                """CREATE TABLE participacion (
+                    id_participacion TEXT PRIMARY KEY,
+                    id_actividad TEXT,
+                    id_persona TEXT,
+                    estamento_declarado TEXT,
+                    es_historico_preexistente INTEGER NOT NULL DEFAULT 0
+                );"""
+            )
+            # Insertar los 32 registros históricos patrimoniales de M5
+            for i in range(32):
+                conn.execute(
+                    "INSERT INTO participacion (id_participacion, es_historico_preexistente) VALUES (?, 1);",
+                    (f"part-m5-hist-{i+1}",),
+                )
+            # Insertar participaciones activas del período (es_historico_preexistente = 0)
+            for i in range(10):
+                conn.execute(
+                    "INSERT INTO participacion (id_participacion, es_historico_preexistente) VALUES (?, 0);",
+                    (f"part-activa-{i+1}",),
+                )
+            conn.commit()
+        finally:
+            conn.close()
+
+        checker = ReleasePreflightChecker(db_path=db)
+        check = checker._check_m5_historical_records()
+
+        # Debe ser READY sin OperationalError
+        assert check.status == PreflightStatus.READY
+        assert "32/32 registros históricos de Matriz_5 protegidos." in check.message
+
 
 
 # ---------------------------------------------------------------------------

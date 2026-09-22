@@ -239,20 +239,25 @@ Estructura ejecutiva orientada a la toma de decisiones basada en evidencia:
 
 ## 14. Certificación y Calidad de Software
 
-El sistema cuenta con certificación técnica formal y reproducible. Estado tras Fase 29.24.1:
+El sistema cuenta con certificación técnica formal y reproducible. Estado oficial del Release v1.1.0:
 
 ```text
 Batería de Pruebas:
->= 1,420 APROBADAS (PASS)  [+ nuevos tests de Backup/Restore/Preflight]
+1,485 APROBADAS (PASS)
 1 OMITIDA (SKIP - Configuración de entorno)
 0 FALLOS (FAIL)
 0 ERRORES (ERROR)
 
-Hashes Patrimoniales Custodiados:
-6/6 COINCIDENTES (MATCH)
+Hashes Patrimoniales Custodiados (M1–M5):
+5/5 COINCIDENTES (MATCH)
+
+Ejecutable Oficial v1.1.0:
+SHA-256: 41E80FD377DE31AE5CB9B05F05C607D5D51070910E3A7B16C0C5BEAC7474D4F3
+Tamaño:  16,173,879 bytes
+Estado:  CERTIFICADO Y PUBLICADO (release/BICU_Consolidador.exe)
 
 Registros Históricos M5:
-32/32 INTACTOS
+32/32 INTACTOS (1,696 celdas inmutables)
 
 Invariantes Institucionales (INV-01 a INV-08):
 8/8 APROBADOS (PASS)
@@ -261,10 +266,15 @@ Línea Estructural de Datos:
 V004 ACTIVA E INTACTA
 V005 DESCARTADA E INEXISTENTE
 
-Módulo de Backup/Restore/Preflight:
-BackupService — SQLite Online Backup API — IMPLEMENTADO Y CERTIFICADO
-RestoreService — Restore controlado con safety snapshot — IMPLEMENTADO Y CERTIFICADO
-ReleasePreflightChecker — 5 grupos, 12+ verificaciones — IMPLEMENTADO Y CERTIFICADO
+Módulos y Servicios Integrados:
+Consolidación Word -> Matrices M1-M5 — OPERATIVO Y CERTIFICADO
+Planificación POA y Diseño Metodológico — OPERATIVO Y CERTIFICADO
+Motor de Indicadores y Trazabilidad — OPERATIVO Y CERTIFICADO
+Reporting Oficial (REP-01 a REP-05) y Dashboard — OPERATIVO Y CERTIFICADO
+Cola de Revisión Institucional — OPERATIVO Y CERTIFICADO
+Backup Institucional Seguro (.bicu.bak) — OPERATIVO Y CERTIFICADO
+Restauración Controlada y Safety Backup — OPERATIVO Y CERTIFICADO
+Preflight Operacional Multigrupo — OPERATIVO Y CERTIFICADO
 ```
 
 ---
@@ -279,12 +289,13 @@ ReleasePreflightChecker — 5 grupos, 12+ verificaciones — IMPLEMENTADO Y CERT
 | **Reporting Oficial (REP-01 a REP-05)** | **Certificado y Operativo** | Exportación formal en formatos XLSX, DOCX y CSV. |
 | **Dashboard Institucional (5 Niveles)** | **Certificado y Operativo** | Supervisión ejecutiva jerárquica con filtros de período y sede. |
 | **Cola de Revisión Institucional** | **Certificado y Operativo** | Implementación, auditoría pericial y cierre formal en Fase 29.22. |
-| **Backup Institucional Seguro** | **Implementado y Certificado** | SQLite Online Backup API, formato .bicu.bak, validación multicapa (Fase 29.24.1). |
-| **Restauración Controlada** | **Implementado y Certificado** | Safety snapshot, reemplazo atómico, post-verificación (Fase 29.24.1). |
-| **Preflight Operacional** | **Implementado y Certificado** | 5 grupos de verificación, reporte estructurado READY/WARNING/FATAL (Fase 29.24.1). |
+| **Backup Institucional Seguro** | **Certificado y Operativo** | SQLite Online Backup API, formato .bicu.bak, validación multicapa (Fase 29.24.1). |
+| **Restauración Controlada** | **Certificado y Operativo** | Safety snapshot, reemplazo atómico, post-verificación (Fase 29.24.1). |
+| **Preflight Operacional** | **Certificado y Operativo** | 5 grupos de verificación, reporte estructurado READY/WARNING/FATAL (Fase 29.24.1). |
+| **Distribución Ejecutable v1.1.0** | **Publicado Oficialmente** | Binario promovido bajo custodia SHA-256 en release/BICU_Consolidador.exe. |
 
-**Estado Oficial de la Fase:**
-> **Fase 29.24.1 — Consolidación Operativa, Backup, Restore y Preflight: IMPLEMENTADA, AUDITADA, CERTIFICADA, DOCUMENTADA Y PUBLICADA.**
+**Estado Oficial:**
+> **Release Institucional v1.1.0: CERTIFICADO, PROMOVIDO Y PUBLICADO.**
 
 ---
 

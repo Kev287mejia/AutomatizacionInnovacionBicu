@@ -1,14 +1,13 @@
 ================================================================================
 RELEASE MANIFEST — BICU Sistema Institucional de Gestión y Reporting
-Fase 29.24.1 — Consolidación Operativa, Backup, Restore y Preflight
+Fase 29.24.5 — Publicación Formal del Release Institucional v1.1.0
 ================================================================================
 
-FECHA DE PREPARACIÓN:    2026-09-22
-VERSIÓN DEL SISTEMA:     1.1.0
-COMMIT BASE:             cd56562f4c0993182a4c3e1f7fcea5d547a6662f
-RAMA:                    main
-ESQUEMA SQLITE:          V004 (activo, estable, íntegro)
-ESTADO:                  CANDIDATO A RELEASE (RC1)
+FECHA DE PUBLICACIÓN:   2026-09-22
+VERSIÓN DEL SISTEMA:    1.1.0
+RAMA:                   main
+ESQUEMA SQLITE:         V004 (activo, estable, íntegro)
+ESTADO:                 RELEASE INSTITUCIONAL PUBLICADO (v1.1.0)
 
 ================================================================================
 CAPACIDADES IMPLEMENTADAS EN ESTA FASE
@@ -138,7 +137,7 @@ NO MODIFICADOS (custodia patrimonial garantizada):
   app/infrastructure/persistence/migrations.py         (V005 no existe)
 
 ================================================================================
-CUSTODIA PATRIMONIAL AUDITADA (6/6 MATCH)
+CUSTODIA PATRIMONIAL AUDITADA (Fase 29.24.3)
 ================================================================================
 
   M1:  fdaebcb36cbcfaf7189cd03056e961bda1e1d8d1093c501bd4fa3951618ad2ad [MATCH]
@@ -146,16 +145,19 @@ CUSTODIA PATRIMONIAL AUDITADA (6/6 MATCH)
   M3:  dc1786616cb1a9bc2f82a74cc693ee20ab95b689b658b366164f502201b07c87 [MATCH]
   M4:  fd079c5f2be780e602dc563696a6f157d76c4c20410308037cec52f3d2654578 [MATCH]
   M5:  a3dff20ec209de209f59dd8b1ad1be84aa7aebd1536ced406c59453a08973dc3 [MATCH]
-  EXE: 0a94be44de80079ffceee8abe34025cb6f604bc8a3126e209d221e4828df214b [MATCH]
 
-Resultado de Custodia: 6/6 MATCH (100% íntegro)
+IDENTIFICACIÓN DE EJECUTABLES:
+  EXE Oficial v1.1.0:   41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3 [PUBLICADO - release/BICU_Consolidador.exe - 16,173,879 bytes]
+  EXE Histórico v1.0.3: 0a94be44de80079ffceee8abe34025cb6f604bc8a3126e209d221e4828df214b [LINEAGE HISTÓRICO - 15,214,693 bytes]
+
+Resultado de Custodia: 5/5 Matrices Patrimoniales MATCH + Binario Oficial v1.1.0 Publicado
 
 ================================================================================
-DICTAMEN DE CERTIFICACIÓN DE RELEASE CANDIDATE
+DICTAMEN DE PUBLICACIÓN DE RELEASE INSTITUCIONAL
 ================================================================================
 
-Estado: IMPLEMENTACIÓN APROBADA Y RELEASE CANDIDATE PREPARADO (RC1)
-Certificado por: Software Project Leader / Lead Technical Architect
+Estado: RELEASE INSTITUCIONAL v1.1.0 PUBLICADO (Fase 29.24.5)
+Certificado y Publicado por: Software Project Leader + Senior Python Engineer + Release Engineer + Auditor Técnico Institucional
 Fecha: 2026-09-22
 ================================================================================
 AUTORIZACIÓN

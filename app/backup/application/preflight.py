@@ -444,22 +444,22 @@ class ReleasePreflightChecker:
         try:
             conn = sqlite3.connect(str(self._db_path), timeout=8.0)
             try:
-                # Verificar si la tabla beneficiario existe (Matriz_5 se persiste como beneficiario)
+                # Verificar si la tabla participacion existe (los 32 registros históricos de Matriz_5 residen en participacion)
                 table_row = conn.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table' AND name='perfil_beneficiario';"
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='participacion';"
                 ).fetchone()
                 if not table_row:
                     return PreflightCheck(
                         name=name,
                         status=PreflightStatus.WARNING,
                         message=(
-                            "La tabla perfil_beneficiario no existe aún. "
+                            "La tabla participacion no existe aún. "
                             "Se creará con las migraciones iniciales."
                         ),
                     )
 
                 row = conn.execute(
-                    "SELECT COUNT(*) FROM perfil_beneficiario WHERE es_historico_preexistente = 1;"
+                    "SELECT COUNT(*) FROM participacion WHERE es_historico_preexistente = 1;"
                 ).fetchone()
                 count = int(row[0]) if row else 0
 
