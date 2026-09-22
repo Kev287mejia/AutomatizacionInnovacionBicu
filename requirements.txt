@@ -31,3 +31,9 @@ python-dateutil>=2.8,<3.0
 # --- Interfaz Gráfica (Fase 14.9) ---
 customtkinter>=5.2
 
+# --- HTTP / IA (Fase 29.x — Gemini Adapter) ---
+requests>=2.31,<3.0
+
+# --- Backup y restore (Fase 29.24.1) — stdlib únicamente ---
+# Los módulos sqlite3, zipfile, hashlib, tempfile, shutil, uuid
+# son parte de la biblioteca estándar de Python y no requieren instalación.

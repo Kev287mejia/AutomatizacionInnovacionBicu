@@ -41,8 +41,11 @@ procesamiento:
   # El sistema conserva TODAS las participaciones hasta que se confirmen las reglas.
   deduplicacion_activa: false
 
-  # [DECISIÓN TÉCNICA] MVP usa memoria; SQLite se puede activar en el futuro
-  persistencia: "memoria"
+  # [DECISIÓN TÉCNICA] Persistencia física SQLite con modo WAL y transaccionalidad ACID (Fases 14-29)
+  persistencia: "sqlite"
+  sqlite_journal_mode: "WAL"
+  sqlite_foreign_keys: true
+  sqlite_busy_timeout_ms: 5000
 
   # [DECISIÓN TÉCNICA] El sistema nunca modifica archivos de la carpeta input
   input_solo_lectura: true

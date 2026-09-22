@@ -124,8 +124,29 @@ class ConsolidatorApp(ctk.CTk):
                 _runner.apply_all_pending()
             finally:
                 _conn.close()
-        except Exception:
-            pass
+        except Exception as _startup_exc:
+            import logging
+            import traceback
+            _log = logging.getLogger("bicu.startup")
+            _log.error(
+                "Error durante la inicialización del esquema SQLite al arrancar la GUI: %s\n%s",
+                _startup_exc,
+                traceback.format_exc(),
+            )
+            # Informar al operador de forma no bloqueante:
+            # no se lanza la excepción para permitir que la ventana abra,
+            # pero el error queda registrado en el log institucional.
+            try:
+                from tkinter import messagebox
+                messagebox.showwarning(
+                    "Advertencia de Inicio — BICU",
+                    f"No se pudo inicializar el esquema de la base de datos:\n\n"
+                    f"{_startup_exc}\n\n"
+                    f"Algunas funcionalidades pueden no estar disponibles. "
+                    f"Consulte el log de la aplicación para más detalles.",
+                )
+            except Exception:
+                pass  # Si la ventana aún no existe, el messagebox no puede mostrarse.
 
         super().__init__(**kwargs)
 

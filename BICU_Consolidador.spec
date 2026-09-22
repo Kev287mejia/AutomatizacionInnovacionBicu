@@ -3,6 +3,7 @@
 # BICU_Consolidador.spec
 # PyInstaller specification file para el Consolidador Institucional de Asistencias
 # Fase 14.10 -- Empaquetado Windows
+# Actualizado en Fase 29.24.1 -- Backup, Restore y Preflight Operacional
 #
 # Estrategia: --onedir (mas estable con CustomTkinter, catalogos, templates)
 # Python: 3.14.5
@@ -120,6 +121,16 @@ a = Analysis(
         'app.audit.audit_logger',
         'app.parsers',
         'app.normalization',
+        # --- Módulo de Backup/Restore/Preflight (Fase 29.24.1) ---
+        'app.backup',
+        'app.backup.domain',
+        'app.backup.domain.models',
+        'app.backup.domain.ports',
+        'app.backup.application',
+        'app.backup.application.backup_service',
+        'app.backup.application.restore_service',
+        'app.backup.application.preflight',
+        # --- Biblioteca estándar (explícita por compatibilidad PyInstaller) ---
         'ctypes',
         'ctypes.wintypes',
         'tkinter',
@@ -132,6 +143,15 @@ a = Analysis(
         'hashlib',
         'shutil',
         'unicodedata',
+        'zipfile',
+        'tempfile',
+        'traceback',
+        'logging',
+        'logging.handlers',
+        'requests',
+        'requests.adapters',
+        'requests.auth',
+        'urllib3',
     ],
     hookspath=[],
     hooksconfig={},

@@ -1,0 +1,170 @@
+================================================================================
+RELEASE MANIFEST — BICU Sistema Institucional de Gestión y Reporting
+Fase 29.24.1 — Consolidación Operativa, Backup, Restore y Preflight
+================================================================================
+
+FECHA DE PREPARACIÓN:    2026-09-22
+VERSIÓN DEL SISTEMA:     1.1.0
+COMMIT BASE:             cd56562f4c0993182a4c3e1f7fcea5d547a6662f
+RAMA:                    main
+ESQUEMA SQLITE:          V004 (activo, estable, íntegro)
+ESTADO:                  CANDIDATO A RELEASE (RC1)
+
+================================================================================
+CAPACIDADES IMPLEMENTADAS EN ESTA FASE
+================================================================================
+
+[A] BACKUP INSTITUCIONAL SEGURO
+    - BackupService: generación de respaldos consistentes vía SQLite Online
+      Backup API. Nunca copia en caliente con shutil.
+    - Formato .bicu.bak: ZIP estándar con database.sqlite + manifest.json +
+      signature.sha256.
+    - Manifiesto con: backup_id, schema_version, SHA-256, row_counts, tablas,
+      migrations_applied, python_version, platform.
+    - Nombre de archivo: BICU_BACKUP_v{VERSION}_schV{SCHEMA}_{UTC}_{HASH6}.bicu.bak
+
+[B] VALIDACIÓN DE BACKUP MULTICAPA
+    - Nivel 1: Existencia del archivo.
+    - Nivel 2: Integridad ZIP.
+    - Nivel 3: Presencia de los 3 componentes (sqlite, manifest, signature).
+    - Nivel 4: Hash SHA-256 (database.sqlite vs manifest vs signature.sha256).
+    - Nivel 5: Cabecera SQLite válida (16 bytes mágicos).
+    - Nivel 6: PRAGMA integrity_check.
+    - Nivel 7: PRAGMA foreign_key_check.
+    - Nivel 8: Tablas mínimas presentes (18 tablas obligatorias V001+).
+    - Nivel 9: Compatibilidad de versión de esquema.
+
+[C] RESTAURACIÓN CONTROLADA
+    - RestoreService: flujo 8-etapas con confirmación explícita del operador.
+    - Safety backup automático de la BD activa ANTES de cualquier reemplazo.
+    - Reemplazo atómico con os.replace (mismo volumen).
+    - Limpieza de archivos WAL/SHM residuales.
+    - Fallback de recuperación si el reemplazo falla.
+    - Post-verificación de la BD restaurada (integrity_check).
+
+[D] SNAPSHOT PREVENTIVO
+    - Todo proceso de restauración genera primero un snapshot de la BD activa.
+    - El snapshot se deposita en {db_dir}/safety_snapshots/.
+    - Si el snapshot falla, la restauración se cancela y los datos originales
+      quedan intactos.
+    - La ruta al snapshot se incluye en RestoreResult para el operador.
+
+[E] PREFLIGHT OPERACIONAL
+    - ReleasePreflightChecker: 5 grupos, 12+ verificaciones individuales.
+    - Grupo 1: Ruta (OneDrive, local institucional).
+    - Grupo 2: SQLite (cabecera, integrity_check, foreign_key_check).
+    - Grupo 3: Esquema (schema_version, compatibilidad, migraciones pendientes).
+    - Grupo 4: Patrimonial (32 registros históricos Matriz_5).
+    - Grupo 5: Entorno (Python >= 3.9, SQLite >= 3.35).
+    - Retorna PreflightReport con estado global y resumen de líneas para UI.
+
+[F] TRATAMIENTO CORRECTO DE ERRORES DE INICIALIZACIÓN
+    - El bloque except Exception: pass silenciado en app.py fue reemplazado por:
+      * Logging estructurado en logger "bicu.startup".
+      * messagebox.showwarning no bloqueante para el operador.
+      * La ventana abre incluso ante error de migración, con advertencia visible.
+
+[G] DECLARACIÓN CORRECTA DE DEPENDENCIAS
+    - requirements.txt: agregado requests>=2.31,<3.0 (dependencia real del
+      gemini_adapter.py existente desde Fase 29.x).
+    - BICU_Consolidador.spec: actualizado con hiddenimports completos para:
+      app.backup.*, zipfile, tempfile, traceback, logging, requests, urllib3.
+
+================================================================================
+INVARIANTES INSTITUCIONALES PRESERVADOS
+================================================================================
+
+INV-01: V005 NO existe. (PASS)
+INV-02: Ninguna fórmula ni rango de Matriz_1 fue modificada. (PASS)
+INV-03: Los 32 registros históricos de Matriz_5 están físicamente protegidos. (PASS)
+INV-04: La columna es_historico_preexistente=1 excluye registros M5 de colas. (PASS)
+INV-05: Ninguna plantilla patrimonial fue modificada. (PASS)
+INV-06: Ningún dato histórico fue insertado, modificado ni eliminado. (PASS)
+INV-07: La BD activa no fue modificada durante el análisis ni durante el backup. (PASS)
+INV-08: El backup no almacena credenciales, claves API ni rutas personales. (PASS)
+
+================================================================================
+COBERTURA DE TESTS
+================================================================================
+
+Nuevos tests creados (Fase 29.24.1):
+  - tests/test_backup_service.py   (26 tests: generación, validación, precondiciones, API)
+  - tests/test_restore_service.py  (14 tests: flujo principal, validación, safety backup)
+  - tests/test_preflight.py        (24 tests: checks individuales, estados, OneDrive)
+  Total suite nueva: 64/64 APROBADOS (PASS)
+
+Regresión pre-implementación:
+  1,420 PASS | 1 SKIP | 0 FAIL | 0 ERROR  (baseline confirmado en aislamiento)
+
+Regresión total del sistema tras Fase 29.24.1:
+  1,484 PASS | 1 SKIP | 0 FAIL | 0 ERROR
+
+================================================================================
+ARCHIVOS CREADOS / MODIFICADOS EN ESTA FASE
+================================================================================
+
+CREADOS:
+  app/backup/__init__.py
+  app/backup/domain/__init__.py
+  app/backup/domain/models.py
+  app/backup/domain/ports.py
+  app/backup/application/__init__.py
+  app/backup/application/backup_service.py
+  app/backup/application/restore_service.py
+  app/backup/application/preflight.py
+  tests/test_backup_service.py
+  tests/test_restore_service.py
+  tests/test_preflight.py
+  docs/MANUAL_DE_USUARIO_INSTITUCIONAL.md
+  docs/GUIA_DE_DESPLIEGUE_Y_MANTENIMIENTO.md
+  RELEASE_MANIFEST.txt (este archivo)
+  FASE_29_24_1_IMPLEMENTACION_CONSOLIDACION_OPERATIVA.md
+
+MODIFICADOS:
+  app/word_consolidator/ui/app.py   — excepción de startup con logging y notificación
+  requirements.txt                  — requests>=2.31,<3.0 declarado
+  BICU_Consolidador.spec            — hiddenimports de app.backup + stdlib completo
+  config/settings.yaml              — persistencia: sqlite y modo WAL declarativo
+  README.md                         — secciones 14 y 15 actualizadas
+
+NO MODIFICADOS (custodia patrimonial garantizada):
+  templates/Matriz_1_Consolidado_Actividades.xlsx
+  templates/Matriz_2_Estudiantes.xlsx
+  templates/Matriz_3_Academicos_Administrativos.xlsx
+  templates/Matriz_4_Colaboradores.xlsx
+  templates/Matriz_5_Protagonistas_Beneficiados.xlsx
+  release/BICU_Consolidador.exe
+  app/infrastructure/persistence/schema.py             (V004 intacto)
+  app/infrastructure/persistence/migrations.py         (V005 no existe)
+
+================================================================================
+CUSTODIA PATRIMONIAL AUDITADA (6/6 MATCH)
+================================================================================
+
+  M1:  fdaebcb36cbcfaf7189cd03056e961bda1e1d8d1093c501bd4fa3951618ad2ad [MATCH]
+  M2:  11419cd22d986e195694f27d15236204afa22526812f18cb4f2e1b7540f64400 [MATCH]
+  M3:  dc1786616cb1a9bc2f82a74cc693ee20ab95b689b658b366164f502201b07c87 [MATCH]
+  M4:  fd079c5f2be780e602dc563696a6f157d76c4c20410308037cec52f3d2654578 [MATCH]
+  M5:  a3dff20ec209de209f59dd8b1ad1be84aa7aebd1536ced406c59453a08973dc3 [MATCH]
+  EXE: 0a94be44de80079ffceee8abe34025cb6f604bc8a3126e209d221e4828df214b [MATCH]
+
+Resultado de Custodia: 6/6 MATCH (100% íntegro)
+
+================================================================================
+DICTAMEN DE CERTIFICACIÓN DE RELEASE CANDIDATE
+================================================================================
+
+Estado: IMPLEMENTACIÓN APROBADA Y RELEASE CANDIDATE PREPARADO (RC1)
+Certificado por: Software Project Leader / Lead Technical Architect
+Fecha: 2026-09-22
+================================================================================
+AUTORIZACIÓN
+================================================================================
+
+Esta release fue implementada bajo autorización explícita de la institución
+en la Fase 29.24.1, tomando como especificación base el documento:
+  FASE_29_24_ANALISIS_DISENO_CONSOLIDACION_OPERATIVA.md
+
+Commit de inicio garantizado: cd56562f4c0993182a4c3e1f7fcea5d547a6662f
+
+================================================================================

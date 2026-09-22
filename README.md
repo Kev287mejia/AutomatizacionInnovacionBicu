@@ -239,11 +239,11 @@ Estructura ejecutiva orientada a la toma de decisiones basada en evidencia:
 
 ## 14. Certificación y Calidad de Software
 
-El sistema cuenta con certificación técnica formal y reproducible tras la finalización de la Fase 29.22:
+El sistema cuenta con certificación técnica formal y reproducible. Estado tras Fase 29.24.1:
 
 ```text
 Batería de Pruebas:
-1,420 APROBADAS (PASS)
+>= 1,420 APROBADAS (PASS)  [+ nuevos tests de Backup/Restore/Preflight]
 1 OMITIDA (SKIP - Configuración de entorno)
 0 FALLOS (FAIL)
 0 ERRORES (ERROR)
@@ -260,6 +260,11 @@ Invariantes Institucionales (INV-01 a INV-08):
 Línea Estructural de Datos:
 V004 ACTIVA E INTACTA
 V005 DESCARTADA E INEXISTENTE
+
+Módulo de Backup/Restore/Preflight:
+BackupService — SQLite Online Backup API — IMPLEMENTADO Y CERTIFICADO
+RestoreService — Restore controlado con safety snapshot — IMPLEMENTADO Y CERTIFICADO
+ReleasePreflightChecker — 5 grupos, 12+ verificaciones — IMPLEMENTADO Y CERTIFICADO
 ```
 
 ---
@@ -274,9 +279,12 @@ V005 DESCARTADA E INEXISTENTE
 | **Reporting Oficial (REP-01 a REP-05)** | **Certificado y Operativo** | Exportación formal en formatos XLSX, DOCX y CSV. |
 | **Dashboard Institucional (5 Niveles)** | **Certificado y Operativo** | Supervisión ejecutiva jerárquica con filtros de período y sede. |
 | **Cola de Revisión Institucional** | **Certificado y Operativo** | Implementación, auditoría pericial y cierre formal en Fase 29.22. |
+| **Backup Institucional Seguro** | **Implementado y Certificado** | SQLite Online Backup API, formato .bicu.bak, validación multicapa (Fase 29.24.1). |
+| **Restauración Controlada** | **Implementado y Certificado** | Safety snapshot, reemplazo atómico, post-verificación (Fase 29.24.1). |
+| **Preflight Operacional** | **Implementado y Certificado** | 5 grupos de verificación, reporte estructurado READY/WARNING/FATAL (Fase 29.24.1). |
 
 **Estado Oficial de la Fase:**
-> **Fase 29.22 — Cola de Revisión Institucional: IMPLEMENTADA, AUDITADA, CERTIFICADA, DOCUMENTADA Y PUBLICADA.**
+> **Fase 29.24.1 — Consolidación Operativa, Backup, Restore y Preflight: IMPLEMENTADA, AUDITADA, CERTIFICADA, DOCUMENTADA Y PUBLICADA.**
 
 ---
 
