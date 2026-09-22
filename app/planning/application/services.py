@@ -18,13 +18,18 @@ import re
 from typing import Any, Optional
 import uuid
 
+from app.planning.domain.ai_context_builder import AIContextBuilder
 from app.planning.domain.dtos import (
+    AcceptAIProposalCommand,
+    AIProposalDTO,
     FAQTableDTO,
     MethodologicalDesignDTO,
     OperationalActivityDTO,
     PlannedActivityDetailDTO,
     PlannedActivitySummaryDTO,
     PlanningIngestionReportDTO,
+    RejectAIProposalCommand,
+    RequestAIProposalCommand,
     TimeBlockDTO,
     UpdateMethodologicalDesignCommand,
     ValidationReportDTO,
@@ -32,6 +37,7 @@ from app.planning.domain.dtos import (
 )
 from app.planning.domain.entities import MethodologicalDesign, PlannedActivity
 from app.planning.domain.ports import (
+    AIAssistancePort,
     MethodologicalDesignRepositoryPort,
     MethodologicalDocumentRendererPort,
     PlanningSourceReaderPort,
@@ -39,6 +45,8 @@ from app.planning.domain.ports import (
 )
 from app.planning.domain.validator import MethodologicalDesignValidator
 from app.planning.domain.value_objects import (
+    AI_ALLOWED_TARGET_FIELDS,
+    AIProposal,
     DesignStatus,
     FAQTable,
     OperationalActivity,
@@ -438,10 +446,12 @@ class MethodologicalDesignService:
         self,
         uow: PlanningUnitOfWorkPort,
         validator: Optional[MethodologicalDesignValidator] = None,
+        ai_assistance_port: Optional[AIAssistancePort] = None,
     ) -> None:
-        """Inicializa el servicio inyectando la unidad de trabajo y el validador institucional."""
+        """Inicializa el servicio inyectando la unidad de trabajo, el validador institucional y opcionalmente el puerto de IA."""
         self._uow = uow
         self._validator = validator or MethodologicalDesignValidator()
+        self._ai_port = ai_assistance_port
 
     def list_activities_with_design_status(
         self,
@@ -857,3 +867,258 @@ class MethodologicalDesignService:
             self._uow.commit()
 
             return design.to_dto()
+
+    def request_ai_proposal(
+        self,
+        command: RequestAIProposalCommand,
+        ai_port: Optional[AIAssistancePort] = None,
+    ) -> AIProposalDTO:
+        """Solicita una propuesta de asistencia de IA para un campo permitido.
+
+        Args:
+            command: RequestAIProposalCommand con design_id, target_field y parámetros opcionales.
+            ai_port: Puerto de asistencia de IA opcional (si no se inyectó en el constructor).
+
+        Returns:
+            AIProposalDTO con la propuesta generada en estado pendiente de revisión humana.
+
+        Raises:
+            ValueError: Si el comando es nulo, el diseño o actividad no existen, o target_field es inválido.
+            RuntimeError: Si el diseño está en estado APPROVED (R-08) o no hay puerto de IA configurado.
+        """
+        if command is None:
+            raise ValueError("El comando de solicitud de propuesta no puede ser nulo.")
+
+        port = ai_port or self._ai_port
+        if port is None:
+            raise RuntimeError(
+                "No se ha configurado un puerto de asistencia de IA (AIAssistancePort)."
+            )
+
+        with self._uow:
+            design = self._uow.methodological_designs.get_by_id(command.design_id)
+            if design is None:
+                raise ValueError(f"No existe diseño metodológico con ID '{command.design_id}'.")
+
+            if design.status == DesignStatus.APPROVED:
+                raise RuntimeError(
+                    "No se pueden generar propuestas de IA para un diseño metodológico en estado APPROVED "
+                    "(Regla R-08 de inmutabilidad institucional)."
+                )
+
+            act = self._uow.planned_activities.get_by_planning_id(design.planned_activity_ref)
+            if act is None:
+                raise ValueError(
+                    f"No existe actividad planificada con referencia '{design.planned_activity_ref}'."
+                )
+
+            # Validar y construir contexto con sanitización estricta (whitelisting)
+            context = AIContextBuilder.build_context(
+                activity=act,
+                target_field=command.target_field,
+                step_number=command.step_number,
+                phase_label=command.phase_label,
+            )
+
+            # Generar propuesta a través del puerto
+            proposal = port.generate_narrative_proposal(
+                target_field=command.target_field,
+                source_inputs=context,
+            )
+
+            # Invariante de seguridad: requires_review debe ser True
+            if not proposal.requires_review:
+                raise RuntimeError("Invariante violada: AIProposal.requires_review debe ser True.")
+
+            design.add_ai_proposal(proposal)
+            self._uow.methodological_designs.save(design)
+            self._uow.commit()
+
+            return AIProposalDTO.from_domain(proposal, design.design_id)
+
+    def accept_ai_proposal(
+        self,
+        command: AcceptAIProposalCommand,
+    ) -> MethodologicalDesignDTO:
+        """Acepta formalmente una propuesta de IA y vuelca su contenido al campo correspondiente.
+
+        IMPORTANTE: Aceptar una propuesta NO aprueba el diseño (el diseño permanece en DRAFT).
+
+        Args:
+            command: AcceptAIProposalCommand con design_id, proposal_id y reviewer.
+
+        Returns:
+            MethodologicalDesignDTO actualizado con el texto aplicado y la propuesta auditada.
+
+        Raises:
+            ValueError: Si el comando es nulo, el diseño o propuesta no existen, o ya fue revisada.
+            RuntimeError: Si el diseño está en estado APPROVED (R-08).
+        """
+        if command is None:
+            raise ValueError("El comando de aceptación no puede ser nulo.")
+        if not command.reviewer or not command.reviewer.strip():
+            raise ValueError("El revisor (reviewer) es obligatorio al aceptar una propuesta.")
+
+        with self._uow:
+            design = self._uow.methodological_designs.get_by_id(command.design_id)
+            if design is None:
+                raise ValueError(f"No existe diseño metodológico con ID '{command.design_id}'.")
+
+            if design.status == DesignStatus.APPROVED:
+                raise RuntimeError(
+                    "No se puede modificar un diseño metodológico en estado APPROVED "
+                    "(Regla R-08 de inmutabilidad institucional)."
+                )
+
+            # Localizar propuesta en el agregado
+            target_prop: Optional[AIProposal] = None
+            for p in design.ai_proposals:
+                if p.proposal_id == command.proposal_id:
+                    target_prop = p
+                    break
+
+            if target_prop is None:
+                raise ValueError(
+                    f"No existe propuesta con ID '{command.proposal_id}' en el diseño metodológico."
+                )
+
+            if not target_prop.is_pending_review:
+                raise ValueError(
+                    f"La propuesta '{command.proposal_id}' ya fue revisada previamente "
+                    f"(accepted={target_prop.accepted})."
+                )
+
+            # Registrar aceptación humana
+            target_prop.accept(reviewer=command.reviewer.strip())
+
+            # Volcar contenido al campo correspondiente
+            field_name = target_prop.target_field
+            content = target_prop.proposed_content
+
+            if field_name == "introduction":
+                design.introduction_text = content
+            elif field_name == "methodological_approach":
+                design.methodological_approach = content
+            elif field_name == "objective_1":
+                if not design.objectives:
+                    design.objectives = [content, ""]
+                else:
+                    design.objectives[0] = content
+            elif field_name == "objective_2":
+                if len(design.objectives) < 2:
+                    if len(design.objectives) == 0:
+                        design.objectives = ["", content]
+                    else:
+                        design.objectives.append(content)
+                else:
+                    design.objectives[1] = content
+            elif field_name in ("procedure", "operative_goal"):
+                step_no = target_prop.source_inputs.get("step_number")
+                if step_no is not None:
+                    # Reemplazar la OperationalActivity correspondiente preservando tiempos y orden
+                    new_matrix = []
+                    found = False
+                    for op in design.operational_matrix:
+                        if op.step_number == step_no:
+                            found = True
+                            new_op = OperationalActivity(
+                                step_number=op.step_number,
+                                phase_label=op.phase_label,
+                                operative_goal=content if field_name == "operative_goal" else op.operative_goal,
+                                procedure=content if field_name == "procedure" else op.procedure,
+                                materials=op.materials,
+                                minutes=op.minutes,
+                            )
+                            new_matrix.append(new_op)
+                        else:
+                            new_matrix.append(op)
+                    if found:
+                        design.operational_matrix = new_matrix
+
+            self._uow.methodological_designs.save(design)
+            self._uow.commit()
+
+            return design.to_dto()
+
+    def reject_ai_proposal(
+        self,
+        command: RejectAIProposalCommand,
+    ) -> MethodologicalDesignDTO:
+        """Rechaza formalmente una propuesta de IA registrando el motivo obligatorio.
+
+        El contenido del diseño NO se modifica. La propuesta se conserva como evidencia histórica.
+
+        Args:
+            command: RejectAIProposalCommand con design_id, proposal_id, reviewer y rejection_reason.
+
+        Returns:
+            MethodologicalDesignDTO con la propuesta marcada como rechazada.
+
+        Raises:
+            ValueError: Si el comando es nulo, el diseño o propuesta no existen, o la razón está vacía.
+            RuntimeError: Si el diseño está en estado APPROVED (R-08).
+        """
+        if command is None:
+            raise ValueError("El comando de rechazo no puede ser nulo.")
+        if not command.reviewer or not command.reviewer.strip():
+            raise ValueError("El revisor (reviewer) es obligatorio al rechazar una propuesta.")
+        if not command.rejection_reason or not command.rejection_reason.strip():
+            raise ValueError("El motivo de rechazo (rejection_reason) es obligatorio.")
+
+        with self._uow:
+            design = self._uow.methodological_designs.get_by_id(command.design_id)
+            if design is None:
+                raise ValueError(f"No existe diseño metodológico con ID '{command.design_id}'.")
+
+            if design.status == DesignStatus.APPROVED:
+                raise RuntimeError(
+                    "No se puede modificar un diseño metodológico en estado APPROVED "
+                    "(Regla R-08 de inmutabilidad institucional)."
+                )
+
+            target_prop: Optional[AIProposal] = None
+            for p in design.ai_proposals:
+                if p.proposal_id == command.proposal_id:
+                    target_prop = p
+                    break
+
+            if target_prop is None:
+                raise ValueError(
+                    f"No existe propuesta con ID '{command.proposal_id}' en el diseño metodológico."
+                )
+
+            if not target_prop.is_pending_review:
+                raise ValueError(
+                    f"La propuesta '{command.proposal_id}' ya fue revisada previamente "
+                    f"(accepted={target_prop.accepted})."
+                )
+
+            # Registrar rechazo humano con motivo obligatorio
+            target_prop.reject(
+                reviewer=command.reviewer.strip(),
+                reason=command.rejection_reason.strip(),
+            )
+
+            # NO se modifica ningún campo del diseño
+            self._uow.methodological_designs.save(design)
+            self._uow.commit()
+
+            return design.to_dto()
+
+    def list_ai_proposals(
+        self,
+        design_id: uuid.UUID,
+    ) -> tuple[AIProposalDTO, ...]:
+        """Lista todas las propuestas de IA asociadas a un diseño metodológico."""
+        if design_id is None:
+            raise ValueError("design_id es obligatorio.")
+
+        with self._uow:
+            design = self._uow.methodological_designs.get_by_id(design_id)
+            if design is None:
+                raise ValueError(f"No existe diseño metodológico con ID '{design_id}'.")
+
+            return tuple(
+                AIProposalDTO.from_domain(p, design.design_id)
+                for p in design.ai_proposals
+            )

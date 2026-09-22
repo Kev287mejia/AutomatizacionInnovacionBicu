@@ -19,11 +19,12 @@ from app.planning.domain.catalogs import (
     CATALOG_C5_TIPOS_PROYECTO,
     VALID_CATALOG_IDS,
 )
-from app.planning.domain.entities import MethodologicalDesign, PlannedActivity
+from app.planning.domain.entities import MethodologicalDesign, PlannedActivity, PlanningExecutionLink
 from app.planning.domain.ports import (
     CatalogRepositoryPort,
     MethodologicalDesignRepositoryPort,
     PlannedActivityRepositoryPort,
+    PlanningExecutionLinkRepositoryPort,
 )
 from app.planning.domain.value_objects import CatalogReference, DesignStatus
 from app.planning.infrastructure.persistence.mappers import (
@@ -32,6 +33,7 @@ from app.planning.infrastructure.persistence.mappers import (
     MethodologicalDesignMapper,
     OperationalActivityMapper,
     PlannedActivityMapper,
+    PlanningExecutionLinkMapper,
     TimeBlockMapper,
 )
 
@@ -396,3 +398,125 @@ class SQLiteCatalogRepository(CatalogRepositoryPort):
             return False
         _, mapping = self._CATALOG_MAP[key]
         return code.strip() in mapping
+
+
+class SQLitePlanningExecutionLinkRepository(PlanningExecutionLinkRepositoryPort):
+    """Adaptador concreto SQLite para PlanningExecutionLink.
+
+    Fase 29.18.1 — Trazabilidad Planificación ↔ Ejecución.
+    PRINCIPIO: Solo persiste/consulta el vínculo. Jamas accede a datos de ejecución.
+    """
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+        self._conn.row_factory = sqlite3.Row
+
+    def save(self, link: PlanningExecutionLink) -> None:
+        """Persiste un v\u00ednculo: actualiza si el link_id ya existe, inserta si es nuevo.
+
+        Patr\u00f3n UPDATE-then-INSERT:
+          - Mismo link_id (actualizaci\u00f3n de estado, p.ej. revocaci\u00f3n) \u2192 UPDATE.
+          - Nuevo link_id con par ya vinculado \u2192 INSERT falla con IntegrityError.
+            Esto preserva la invariante UNIQUE(planning_internal_id, id_actividad).
+
+        La IA no puede invocar este m\u00e9todo (R-09 extendido de Fase 29.18.1).
+        """
+        row = PlanningExecutionLinkMapper.to_row(link)
+        cursor = self._conn.cursor()
+        try:
+            # Intenta actualizar un v\u00ednculo existente por link_id
+            cursor.execute(
+                """
+                UPDATE planning_execution_links SET
+                    link_status      = :link_status,
+                    revoked_by       = :revoked_by,
+                    revoked_at       = :revoked_at,
+                    revocation_reason = :revocation_reason
+                WHERE link_id = :link_id;
+                """,
+                row,
+            )
+            if cursor.rowcount == 0:
+                # No exist\u00eda: INSERT nuevo (lanza IntegrityError si el par ya existe)
+                cursor.execute(
+                    """
+                    INSERT INTO planning_execution_links (
+                        link_id, planning_internal_id, id_actividad,
+                        linked_by, linked_at, link_rationale,
+                        numero_sesion, link_status,
+                        revoked_by, revoked_at, revocation_reason
+                    ) VALUES (
+                        :link_id, :planning_internal_id, :id_actividad,
+                        :linked_by, :linked_at, :link_rationale,
+                        :numero_sesion, :link_status,
+                        :revoked_by, :revoked_at, :revocation_reason
+                    );
+                    """,
+                    row,
+                )
+        finally:
+            cursor.close()
+
+    def get_by_id(self, link_id: uuid.UUID) -> Optional[PlanningExecutionLink]:
+        """Obtiene un vínculo por su UUID técnico."""
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM planning_execution_links WHERE link_id = ?;",
+                (str(link_id),),
+            )
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return PlanningExecutionLinkMapper.to_domain(row)
+        finally:
+            cursor.close()
+
+    def get_by_planning_id(
+        self, planning_internal_id: uuid.UUID
+    ) -> Sequence[PlanningExecutionLink]:
+        """Obtiene todos los vínculos de una actividad planificada (cualquier estado)."""
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM planning_execution_links "
+                "WHERE planning_internal_id = ? ORDER BY linked_at DESC;",
+                (str(planning_internal_id),),
+            )
+            rows = cursor.fetchall()
+            return [PlanningExecutionLinkMapper.to_domain(r) for r in rows]
+        finally:
+            cursor.close()
+
+    def get_by_actividad_id(self, id_actividad: str) -> Sequence[PlanningExecutionLink]:
+        """Obtiene todos los vínculos de una actividad ejecutada (cualquier estado)."""
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM planning_execution_links "
+                "WHERE id_actividad = ? ORDER BY linked_at DESC;",
+                (id_actividad,),
+            )
+            rows = cursor.fetchall()
+            return [PlanningExecutionLinkMapper.to_domain(r) for r in rows]
+        finally:
+            cursor.close()
+
+    def get_active_by_planning_id(
+        self, planning_internal_id: uuid.UUID
+    ) -> Optional[PlanningExecutionLink]:
+        """Obtiene el vínculo ACTIVE de una actividad planificada (None si no existe)."""
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM planning_execution_links "
+                "WHERE planning_internal_id = ? AND link_status = 'ACTIVE' "
+                "ORDER BY linked_at DESC LIMIT 1;",
+                (str(planning_internal_id),),
+            )
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return PlanningExecutionLinkMapper.to_domain(row)
+        finally:
+            cursor.close()

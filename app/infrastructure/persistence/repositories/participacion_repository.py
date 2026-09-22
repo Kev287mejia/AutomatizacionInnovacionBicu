@@ -152,14 +152,26 @@ class SQLiteParticipacionRepository(IParticipacionRepository):
             else str(p.categoria_participacion)
         ).strip().upper()
 
-        if cat_str in self.VALID_ESTAMENTOS:
+        if cat_str == "DESCONOCIDO" or (p.matriz_destino and p.matriz_destino.strip().upper() == "COLA_REVISION"):
+            estamento_final = "BENEFICIADO"
+            matriz_dest = "COLA_REVISION"
+            req_rev = 1
+        elif cat_str in self.VALID_ESTAMENTOS:
             estamento_final = cat_str
+            matriz_dest = p.matriz_destino.strip().upper() if p.matriz_destino else None
+            req_rev = 1 if p.requiere_revision else 0
         elif cat_str in ("PROTAGONISTA", "BENEFICIARIO", "COMUNIDAD"):
             estamento_final = "BENEFICIADO"
+            matriz_dest = p.matriz_destino.strip().upper() if p.matriz_destino else None
+            req_rev = 1 if p.requiere_revision else 0
         elif cat_str in ("DOCENTE_HORARIO", "DOCENTE_REGULAR", "PROFESOR"):
             estamento_final = "DOCENTE"
+            matriz_dest = p.matriz_destino.strip().upper() if p.matriz_destino else None
+            req_rev = 1 if p.requiere_revision else 0
         else:
-            estamento_final = "ESTUDIANTE"
+            estamento_final = "BENEFICIADO"
+            matriz_dest = "COLA_REVISION"
+            req_rev = 1
 
         query = """
         INSERT INTO participacion (
@@ -188,29 +200,36 @@ class SQLiteParticipacionRepository(IParticipacionRepository):
             p.id_persona,
             estamento_final,
             1 if p.es_beneficiado_rol else 0,
-            p.matriz_destino.strip().upper() if p.matriz_destino else None,
+            matriz_dest,
             "ASISTENTE",
             "PRESENTE",
             p.observaciones,
             p.fuente_origen,
-            1 if p.requiere_revision else 0,
+            req_rev,
             p.motivo_revision,
-            0,
+            1 if getattr(p, "es_historico_preexistente", 0) else 0,
         )
         return query, params
 
     @staticmethod
     def _row_to_entity(row: sqlite3.Row) -> Participation:
         """Mapea una fila relacional de SQLite al modelo de dominio Participation."""
+        matriz_dest = row["matriz_destino"]
+        if matriz_dest == "COLA_REVISION":
+            cat_part = CategoriaParticipacion.DESCONOCIDO
+        else:
+            cat_part = row["estamento_declarado"]
+
         return Participation(
             id_participacion=row["id_participacion"],
             id_actividad=row["id_actividad"],
             id_persona=row["id_persona"],
-            categoria_participacion=row["estamento_declarado"],
+            categoria_participacion=cat_part,
             es_beneficiado_rol=bool(row["es_beneficiado_rol"]) if "es_beneficiado_rol" in row.keys() else False,
             matriz_destino=row["matriz_destino"],
             fuente_origen=row["archivo_fuente_origen"],
             observaciones=row["carrera_o_cargo_actividad"],
             requiere_revision=bool(row["requiere_revision"]),
             motivo_revision=row["motivo_revision"],
+            es_historico_preexistente=int(row["es_historico_preexistente"]) if "es_historico_preexistente" in row.keys() else 0,
         )

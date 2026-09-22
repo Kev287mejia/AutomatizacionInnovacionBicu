@@ -10,7 +10,7 @@ import json
 from typing import Any, Dict, List, Optional, Sequence
 import uuid
 
-from app.planning.domain.entities import MethodologicalDesign, PlannedActivity
+from app.planning.domain.entities import MethodologicalDesign, PlannedActivity, PlanningExecutionLink
 from app.planning.domain.value_objects import (
     AIProposal,
     DesignStatus,
@@ -332,4 +332,55 @@ class MethodologicalDesignMapper:
             agenda=agenda,
             operational_matrix=matrix,
             ai_proposals=proposals,
+        )
+
+
+class PlanningExecutionLinkMapper:
+    """Mapeador bidireccional para PlanningExecutionLink.
+
+    Fase 29.18.1 — Trazabilidad Planificación ↔ Ejecución.
+    Este mapper no accede a datos del dominio de ejecución más allá de id_actividad.
+    """
+
+    @staticmethod
+    def to_row(link: PlanningExecutionLink) -> Dict[str, Any]:
+        """Convierte un PlanningExecutionLink en un diccionario para INSERT/UPDATE SQLite."""
+        return {
+            "link_id": str(link.link_id),
+            "planning_internal_id": str(link.planning_internal_id),
+            "id_actividad": link.id_actividad,
+            "linked_by": link.linked_by,
+            "linked_at": link.linked_at.isoformat() if link.linked_at else None,
+            "link_rationale": link.link_rationale,
+            "numero_sesion": link.numero_sesion,
+            "link_status": link.link_status,
+            "revoked_by": link.revoked_by,
+            "revoked_at": link.revoked_at.isoformat() if link.revoked_at else None,
+            "revocation_reason": link.revocation_reason,
+        }
+
+    @staticmethod
+    def to_domain(row: Any) -> PlanningExecutionLink:
+        """Convierte una fila SQLite en un PlanningExecutionLink del dominio."""
+        from datetime import timezone
+
+        def _parse_dt(val: Any) -> Optional[datetime]:
+            if val is None:
+                return None
+            if isinstance(val, datetime):
+                return val
+            return datetime.fromisoformat(str(val))
+
+        return PlanningExecutionLink(
+            link_id=uuid.UUID(str(row["link_id"])),
+            planning_internal_id=uuid.UUID(str(row["planning_internal_id"])),
+            id_actividad=str(row["id_actividad"]),
+            linked_by=str(row["linked_by"]),
+            linked_at=_parse_dt(row["linked_at"]) or datetime.now(),
+            link_rationale=str(row["link_rationale"]),
+            numero_sesion=int(row["numero_sesion"]) if row["numero_sesion"] is not None else None,
+            link_status=str(row["link_status"]),
+            revoked_by=row["revoked_by"],
+            revoked_at=_parse_dt(row["revoked_at"]),
+            revocation_reason=row["revocation_reason"],
         )

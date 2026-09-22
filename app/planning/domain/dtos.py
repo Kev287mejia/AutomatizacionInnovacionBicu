@@ -340,3 +340,86 @@ class ValidationReportDTO:
     errors: tuple[ValidationResultDTO, ...] = field(default_factory=tuple)
     warnings: tuple[ValidationResultDTO, ...] = field(default_factory=tuple)
     results: tuple[ValidationResultDTO, ...] = field(default_factory=tuple)
+
+
+# ---------------------------------------------------------------------------
+# DTOs y Comandos para Asistencia de IA (Fase 29.14)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class RequestAIProposalCommand:
+    """Comando inmutable para solicitar una propuesta de asistencia a la IA."""
+    design_id: uuid.UUID
+    target_field: str
+    step_number: Optional[int] = None
+    phase_label: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class AcceptAIProposalCommand:
+    """Comando inmutable para aceptar formalmente una propuesta y volcar su contenido."""
+    design_id: uuid.UUID
+    proposal_id: uuid.UUID
+    reviewer: str
+
+
+@dataclass(frozen=True)
+class RejectAIProposalCommand:
+    """Comando inmutable para rechazar una propuesta con justificación obligatoria."""
+    design_id: uuid.UUID
+    proposal_id: uuid.UUID
+    reviewer: str
+    rejection_reason: str
+
+
+@dataclass(frozen=True)
+class AIProposalDTO:
+    """DTO inmutable para transferir datos de auditoría de propuestas hacia la UI."""
+    proposal_id: uuid.UUID
+    design_id: uuid.UUID
+    target_field: str
+    proposed_content: str
+    confidence: float
+    requires_review: bool
+    accepted: Optional[bool]
+    reviewed_by: Optional[str]
+    review_timestamp: Optional[datetime]
+    rejection_reason: Optional[str]
+    source_inputs: dict
+    step_number: Optional[int] = None
+
+    @property
+    def is_pending(self) -> bool:
+        """True si la propuesta aún no ha sido revisada por un humano."""
+        return self.accepted is None
+
+    @property
+    def is_accepted(self) -> bool:
+        """True si la propuesta fue formalmente aceptada."""
+        return self.accepted is True
+
+    @property
+    def is_rejected(self) -> bool:
+        """True si la propuesta fue rechazada."""
+        return self.accepted is False
+
+    @classmethod
+    def from_domain(cls, proposal: Any, design_id: uuid.UUID) -> "AIProposalDTO":
+        """Factory de conveniencia para construir el DTO a partir de la entidad AIProposal."""
+        step_no = proposal.step_number if hasattr(proposal, "step_number") else None
+        if step_no is None and isinstance(proposal.source_inputs, dict):
+            step_no = proposal.source_inputs.get("step_number")
+
+        return cls(
+            proposal_id=proposal.proposal_id,
+            design_id=design_id,
+            target_field=proposal.target_field,
+            proposed_content=proposal.proposed_content,
+            confidence=float(proposal.confidence),
+            requires_review=bool(proposal.requires_review),
+            accepted=proposal.accepted,
+            reviewed_by=proposal.reviewed_by,
+            review_timestamp=proposal.review_timestamp,
+            rejection_reason=proposal.rejection_reason,
+            source_inputs=dict(proposal.source_inputs or {}),
+            step_number=step_no,
+        )

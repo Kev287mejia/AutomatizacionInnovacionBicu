@@ -29,14 +29,17 @@ class SQLitePersonaRepository(IPersonaRepository):
         sexo_candidato = (
             persona.sexo_normalizado
             or persona.sexo_original
-            or "M"
+            or ""
         ).strip().upper()
         if sexo_candidato in ("M", "MASCULINO", "VARON", "HOMBRE"):
             sexo_sql = "M"
+            estado_id = "IDENTIDAD_CONFIRMADA"
         elif sexo_candidato in ("F", "FEMENINO", "MUJER"):
             sexo_sql = "F"
+            estado_id = "IDENTIDAD_CONFIRMADA"
         else:
-            sexo_sql = "M"  # Fallback seguro que cumple la restricción CHECK
+            sexo_sql = "M"  # Fallback técnico para satisfacer CHECK(sexo IN ('M', 'F'))
+            estado_id = "IDENTIDAD_NO_RESUELTA"
 
         query = """
         INSERT INTO persona (
@@ -78,7 +81,7 @@ class SQLitePersonaRepository(IPersonaRepository):
             persona.municipio_persona,
             persona.discapacidad or "Ninguna",
             persona.telefono,
-            "IDENTIDAD_CONFIRMADA",
+            estado_id,
         )
         self._conn.execute(query, params)
 
@@ -159,6 +162,9 @@ class SQLitePersonaRepository(IPersonaRepository):
     @staticmethod
     def _row_to_entity(row: sqlite3.Row) -> Person:
         """Mapea una fila relacional de SQLite al modelo de dominio Person."""
+        estado_id = row["estado_identidad"] if "estado_identidad" in row.keys() else "IDENTIDAD_CONFIRMADA"
+        sexo_val = None if estado_id == "IDENTIDAD_NO_RESUELTA" else row["sexo"]
+
         return Person(
             id_persona_interno=row["id_persona_interno"],
             nombre_completo=row["nombre_completo"],
@@ -167,9 +173,9 @@ class SQLitePersonaRepository(IPersonaRepository):
             cedula=row["cedula"],  # Preserva None estricto si en SQLite es NULL (RN-C04)
             numero_unico=row["numero_institucional"],
             otro_id_institucional=row["otro_documento"],
-            sexo_original=row["sexo"],
+            sexo_original=sexo_val,
             sexo_fuente="SQLITE_SSOT",
-            sexo_normalizado=row["sexo"],
+            sexo_normalizado=sexo_val,
             fecha_nacimiento=row["fecha_nacimiento"],
             edad=row["edad_declarada"],
             etnia=row["etnia"],

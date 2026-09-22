@@ -7,6 +7,7 @@ Fase 29.11 — Implementación Controlada de la UI de Planificación Institucion
 
 from app.planning.ui.views.activities_list_view import PlannedActivitiesListView
 from app.planning.ui.views.activity_detail_view import PlannedActivityDetailView
+from app.planning.ui.views.ai_proposal_review_dialog import AIProposalReviewDialog
 from app.planning.ui.views.approval_dialog import ApprovalDialog
 from app.planning.ui.views.design_editor_view import MethodologicalDesignEditorView
 from app.planning.ui.views.planning_main_view import PlanningMainView
@@ -18,5 +19,6 @@ __all__ = [
     "MethodologicalDesignEditorView",
     "ValidationDialog",
     "ApprovalDialog",
+    "AIProposalReviewDialog",
     "PlanningMainView",
 ]

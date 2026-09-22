@@ -21,7 +21,7 @@ import uuid
 from typing import Any, Optional, Sequence
 
 from app.planning.domain.dtos import MethodologicalDesignDTO, PlanningSourceReadResultDTO
-from app.planning.domain.entities import MethodologicalDesign, PlannedActivity
+from app.planning.domain.entities import MethodologicalDesign, PlannedActivity, PlanningExecutionLink
 from app.planning.domain.value_objects import AIProposal, CatalogReference
 
 
@@ -93,6 +93,55 @@ class CatalogRepositoryPort(abc.ABC):
     @abc.abstractmethod
     def is_valid_code(self, catalog_name: str, code: str) -> bool:
         """Valida si un codigo pertenece al catalogo especificado."""
+        raise NotImplementedError
+
+
+class PlanningExecutionLinkRepositoryPort(abc.ABC):
+    """Puerto abstracto para persistencia y consulta de vínculos de trazabilidad.
+
+    Fuente: Fase 29.18.1 (PlanningExecutionLink).
+    Clasificación: DECISIÓN ARQUITECTÓNICA.
+
+    PRINCIPIO RECTOR: PLANIFICADO ≠ EJECUTADO.
+    Este puerto es el Único acceso a la tabla de trazabilidad planning_execution_links.
+    NO proporciona acceso a datos del dominio de ejecución más allá del id_actividad.
+
+    PROHIBICIONES (R-09 extendido):
+      - La IA no puede invocar save() ni revoke().
+      - No se pueden copiar datos personales, metas ni cifras entre dominios.
+    """
+
+    @abc.abstractmethod
+    def save(self, link: PlanningExecutionLink) -> None:
+        """Persiste un vínculo nuevo o actualiza uno existente (por link_id).
+
+        Precondición: El par (planning_internal_id, id_actividad) debe ser único
+        para vínculos ACTIVE. La unicidad es forzada a nivel de base de datos.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_by_id(self, link_id: uuid.UUID) -> Optional[PlanningExecutionLink]:
+        """Obtiene un vínculo por su UUID técnico."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_by_planning_id(
+        self, planning_internal_id: uuid.UUID
+    ) -> Sequence[PlanningExecutionLink]:
+        """Obtiene todos los vínculos de una actividad planificada (cualquier estado)."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_by_actividad_id(self, id_actividad: str) -> Sequence[PlanningExecutionLink]:
+        """Obtiene todos los vínculos de una actividad ejecutada (cualquier estado)."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_active_by_planning_id(
+        self, planning_internal_id: uuid.UUID
+    ) -> Optional[PlanningExecutionLink]:
+        """Obtiene el vínculo ACTIVE de una actividad planificada (None si no existe)."""
         raise NotImplementedError
 
 
@@ -207,6 +256,15 @@ class PlanningUnitOfWorkPort(abc.ABC):
     @property
     @abc.abstractmethod
     def catalogs(self) -> CatalogRepositoryPort:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def execution_links(self) -> PlanningExecutionLinkRepositoryPort:
+        """Acceso al repositorio de vínculos Planificación ↔ Ejecución.
+
+        Fase 29.18.1 — Trazabilidad controlada.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod

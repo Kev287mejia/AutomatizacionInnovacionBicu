@@ -16,6 +16,7 @@ import uuid
 import customtkinter as ctk
 
 from app.planning.domain.dtos import (
+    AIProposalDTO,
     FAQTableDTO,
     MethodologicalDesignDTO,
     OperationalActivityDTO,
@@ -24,6 +25,7 @@ from app.planning.domain.dtos import (
     ValidationReportDTO,
 )
 from app.planning.ui.services.planning_ui_service import PlanningUIError, PlanningUIService
+from app.planning.ui.views.ai_proposal_review_dialog import AIProposalReviewDialog
 from app.planning.ui.views.approval_dialog import ApprovalDialog
 from app.planning.ui.views.validation_dialog import ValidationDialog
 
@@ -50,6 +52,7 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
         # Listas dinámicas en memoria para Agenda y Matriz Operativa
         self.agenda_items: List[TimeBlockDTO] = []
         self.matrix_items: List[OperationalActivityDTO] = []
+        self.ai_buttons: List[ctk.CTkButton] = []
 
         self._init_ui()
         self.cargar_diseno()
@@ -97,6 +100,15 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
             height=26,
         )
         self.lbl_status_badge.grid(row=0, column=2, padx=14, pady=10, sticky="e")
+
+        self.lbl_pending_proposals = ctk.CTkLabel(
+            self.header_card,
+            text="",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color=("#E65100", "#FFB74D"),
+            anchor="w",
+        )
+        self.lbl_pending_proposals.grid(row=1, column=1, columnspan=2, padx=10, pady=(0, 6), sticky="w")
 
         # ---------------------------------------------------------------------
         # 2. PESTAÑAS DE LOS CINCO BLOQUES (Tabview)
@@ -147,25 +159,61 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
         scroll.grid(row=0, column=0, sticky="nsew", padx=6, pady=6)
         scroll.grid_columnconfigure(0, weight=1)
 
+        # Fila de Encabezado y Asistencia IA para Introducción
+        header_intro = ctk.CTkFrame(scroll, fg_color="transparent")
+        header_intro.pack(fill="x", pady=(8, 4))
+        header_intro.grid_columnconfigure(0, weight=1)
+
         lbl_intro = ctk.CTkLabel(
-            scroll,
+            header_intro,
             text="Contexto y Vinculación Institucional (Introducción):",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
         )
-        lbl_intro.pack(fill="x", pady=(8, 4))
+        lbl_intro.grid(row=0, column=0, sticky="w")
+
+        self.btn_ai_intro = ctk.CTkButton(
+            header_intro,
+            text="Solicitar asistencia IA",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            fg_color=("#0B3C5D", "#1A365D"),
+            hover_color=("#07263D", "#0F2442"),
+            height=28,
+            width=160,
+            command=lambda: self._on_request_ai_assistance("introduction"),
+        )
+        self.btn_ai_intro.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.ai_buttons.append(self.btn_ai_intro)
 
         self.txt_intro = ctk.CTkTextbox(scroll, height=140, font=ctk.CTkFont(family="Segoe UI", size=11))
         self.txt_intro.pack(fill="x", pady=(0, 14))
         self.txt_intro.bind("<<Modified>>", self._on_field_modified)
 
+        # Fila de Encabezado y Asistencia IA para Enfoque Metodológico
+        header_enfoque = ctk.CTkFrame(scroll, fg_color="transparent")
+        header_enfoque.pack(fill="x", pady=(4, 4))
+        header_enfoque.grid_columnconfigure(0, weight=1)
+
         lbl_enfoque = ctk.CTkLabel(
-            scroll,
+            header_enfoque,
             text="Enfoque Metodológico Institucional:",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
         )
-        lbl_enfoque.pack(fill="x", pady=(4, 4))
+        lbl_enfoque.grid(row=0, column=0, sticky="w")
+
+        self.btn_ai_enfoque = ctk.CTkButton(
+            header_enfoque,
+            text="Solicitar asistencia IA",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            fg_color=("#0B3C5D", "#1A365D"),
+            hover_color=("#07263D", "#0F2442"),
+            height=28,
+            width=160,
+            command=lambda: self._on_request_ai_assistance("methodological_approach"),
+        )
+        self.btn_ai_enfoque.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.ai_buttons.append(self.btn_ai_enfoque)
 
         self.txt_enfoque = ctk.CTkTextbox(scroll, height=110, font=ctk.CTkFont(family="Segoe UI", size=11))
         self.txt_enfoque.pack(fill="x", pady=(0, 8))
@@ -188,25 +236,61 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
         )
         info_lbl.pack(fill="x", pady=(8, 12))
 
+        # Fila de Encabezado y Asistencia IA para Objetivo 1
+        header_obj1 = ctk.CTkFrame(scroll, fg_color="transparent")
+        header_obj1.pack(fill="x", pady=(4, 2))
+        header_obj1.grid_columnconfigure(0, weight=1)
+
         lbl_obj1 = ctk.CTkLabel(
-            scroll,
+            header_obj1,
             text="Objetivo Específico 1:",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
         )
-        lbl_obj1.pack(fill="x", pady=(4, 2))
+        lbl_obj1.grid(row=0, column=0, sticky="w")
+
+        self.btn_ai_obj1 = ctk.CTkButton(
+            header_obj1,
+            text="Solicitar asistencia IA",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            fg_color=("#0B3C5D", "#1A365D"),
+            hover_color=("#07263D", "#0F2442"),
+            height=28,
+            width=160,
+            command=lambda: self._on_request_ai_assistance("objective_1"),
+        )
+        self.btn_ai_obj1.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.ai_buttons.append(self.btn_ai_obj1)
 
         self.txt_obj1 = ctk.CTkTextbox(scroll, height=75, font=ctk.CTkFont(family="Segoe UI", size=11))
         self.txt_obj1.pack(fill="x", pady=(0, 14))
         self.txt_obj1.bind("<<Modified>>", self._on_field_modified)
 
+        # Fila de Encabezado y Asistencia IA para Objetivo 2
+        header_obj2 = ctk.CTkFrame(scroll, fg_color="transparent")
+        header_obj2.pack(fill="x", pady=(4, 2))
+        header_obj2.grid_columnconfigure(0, weight=1)
+
         lbl_obj2 = ctk.CTkLabel(
-            scroll,
+            header_obj2,
             text="Objetivo Específico 2:",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
         )
-        lbl_obj2.pack(fill="x", pady=(4, 2))
+        lbl_obj2.grid(row=0, column=0, sticky="w")
+
+        self.btn_ai_obj2 = ctk.CTkButton(
+            header_obj2,
+            text="Solicitar asistencia IA",
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            fg_color=("#0B3C5D", "#1A365D"),
+            hover_color=("#07263D", "#0F2442"),
+            height=28,
+            width=160,
+            command=lambda: self._on_request_ai_assistance("objective_2"),
+        )
+        self.btn_ai_obj2.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        self.ai_buttons.append(self.btn_ai_obj2)
 
         self.txt_obj2 = ctk.CTkTextbox(scroll, height=75, font=ctk.CTkFont(family="Segoe UI", size=11))
         self.txt_obj2.pack(fill="x", pady=(0, 8))
@@ -414,6 +498,9 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
         # Configurar botones y permisos según estado
         self._update_action_buttons(is_approved)
 
+        # Actualizar advertencia de propuestas pendientes
+        self._check_pending_proposals()
+
         # Reiniciar bandera de cambios
         self.is_dirty = False
         self.lbl_save_status.configure(text="Diseño cargado correctamente.")
@@ -485,6 +572,11 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
         self.txt_new_agenda_min.configure(state="disabled")
         self.btn_add_agenda.configure(state="disabled")
         self.btn_sync_matrix.configure(state="disabled")
+        for btn in self.ai_buttons:
+            try:
+                btn.configure(state="disabled")
+            except Exception:
+                pass
 
     # -------------------------------------------------------------------------
     # GESTIÓN DE AGENDA Y MATRIZ
@@ -621,6 +713,7 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
             card = ctk.CTkFrame(self.scroll_matrix, fg_color=("gray92", "gray17"), corner_radius=6)
             card.pack(fill="x", pady=4, padx=2)
             card.grid_columnconfigure(1, weight=1)
+            card.grid_columnconfigure(2, weight=0)
 
             # Encabezado del paso
             step_header = f"Paso {item.step_number}: {item.phase_label} ({item.minutes} minutos)"
@@ -631,16 +724,16 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
                 text_color=("#0B3C5D", "#4FC3F7"),
                 anchor="w",
             )
-            lbl_h.grid(row=0, column=0, columnspan=2, padx=10, pady=(8, 4), sticky="w")
+            lbl_h.grid(row=0, column=0, columnspan=3, padx=10, pady=(8, 4), sticky="w")
 
             # Campos editables de la fila
             fields = [
-                ("Objetivo Operativo:", item.operative_goal, "goal"),
-                ("Procedimiento Metodológico:", item.procedure, "procedure"),
-                ("Materiales y Recursos:", item.materials, "materials"),
+                ("Objetivo Operativo:", item.operative_goal, "goal", "operative_goal"),
+                ("Procedimiento Metodológico:", item.procedure, "procedure", "procedure"),
+                ("Materiales y Recursos:", item.materials, "materials", None),
             ]
 
-            for f_idx, (f_label, f_val, f_type) in enumerate(fields, start=1):
+            for f_idx, (f_label, f_val, f_type, ai_target) in enumerate(fields, start=1):
                 lbl_f = ctk.CTkLabel(
                     card,
                     text=f_label,
@@ -651,12 +744,30 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
                 lbl_f.grid(row=f_idx, column=0, padx=10, pady=2, sticky="w")
 
                 ent_f = ctk.CTkEntry(card, height=28, font=ctk.CTkFont(family="Segoe UI", size=11))
-                ent_f.grid(row=f_idx, column=1, padx=10, pady=2, sticky="ew")
+                ent_f.grid(row=f_idx, column=1, padx=(10, 4), pady=2, sticky="ew")
                 ent_f.insert(0, f_val)
                 ent_f.bind("<KeyRelease>", lambda _, i=idx, t=f_type: self._on_matrix_field_change(i, t))
 
+                if ai_target is not None:
+                    btn_ai_field = ctk.CTkButton(
+                        card,
+                        text="Solicitar asistencia IA",
+                        font=ctk.CTkFont(family="Segoe UI", size=10),
+                        fg_color=("#0B3C5D", "#1A365D"),
+                        hover_color=("#07263D", "#0F2442"),
+                        height=26,
+                        width=140,
+                        command=lambda f=ai_target, s=item.step_number, p=item.phase_label: self._on_request_ai_assistance(
+                            f, step_number=s, phase_label=p
+                        ),
+                    )
+                    btn_ai_field.grid(row=f_idx, column=2, padx=(2, 10), pady=2, sticky="e")
+                    self.ai_buttons.append(btn_ai_field)
+
                 if self.design_dto and self.design_dto.approved_by:
                     ent_f.configure(state="disabled")
+                    if ai_target is not None:
+                        btn_ai_field.configure(state="disabled")
 
     def _on_matrix_field_change(self, idx: int, field_type: str) -> None:
         self.is_dirty = True
@@ -881,3 +992,181 @@ class MethodologicalDesignEditorView(ctk.CTkFrame):
             entry.delete(0, tk.END)
             if text:
                 entry.insert(0, text)
+
+    # -------------------------------------------------------------------------
+    # MÉTODOS DE INTEGRACIÓN DE ASISTENCIA IA (FASE 29.15)
+    # -------------------------------------------------------------------------
+    def _check_pending_proposals(self) -> None:
+        """Consulta si existen propuestas pendientes y actualiza la advertencia visual."""
+        if not self.design_dto:
+            self.lbl_pending_proposals.configure(text="")
+            return
+        try:
+            proposals = self.service.list_ai_proposals(self.design_dto.design_id)
+            pending = [p for p in proposals if p.is_pending]
+            if pending:
+                self.lbl_pending_proposals.configure(
+                    text=f"⚠️ Hay {len(pending)} propuesta(s) de asistencia pendiente(s) de revisión."
+                )
+            else:
+                self.lbl_pending_proposals.configure(text="")
+        except Exception:
+            self.lbl_pending_proposals.configure(text="")
+
+    def _get_current_field_content(self, target_field: str, step_number: Optional[int] = None) -> str:
+        """Obtiene el texto actual del campo solicitado desde los widgets de la UI."""
+        if target_field == "introduction":
+            return self.txt_intro.get("1.0", tk.END).strip()
+        if target_field == "methodological_approach":
+            return self.txt_enfoque.get("1.0", tk.END).strip()
+        if target_field == "objective_1":
+            return self.txt_obj1.get("1.0", tk.END).strip()
+        if target_field == "objective_2":
+            return self.txt_obj2.get("1.0", tk.END).strip()
+        if target_field in ("procedure", "operative_goal"):
+            matrix_items = self._collect_matrix_items_from_ui()
+            for it in matrix_items:
+                if it.step_number == step_number:
+                    return it.procedure if target_field == "procedure" else it.operative_goal
+        return ""
+
+    def _get_field_display_label(
+        self,
+        target_field: str,
+        step_number: Optional[int] = None,
+        phase_label: Optional[str] = None,
+    ) -> str:
+        """Retorna una etiqueta institucional comprensible para la visualización del campo."""
+        labels = {
+            "introduction": "Introducción y Contexto Institucional",
+            "methodological_approach": "Enfoque Metodológico Institucional",
+            "objective_1": "Objetivo Específico 1",
+            "objective_2": "Objetivo Específico 2",
+        }
+        if target_field in labels:
+            return labels[target_field]
+        if target_field == "procedure":
+            return f"Paso {step_number} ({phase_label or 'Fase'}): Procedimiento Metodológico"
+        if target_field == "operative_goal":
+            return f"Paso {step_number} ({phase_label or 'Fase'}): Objetivo Operativo"
+        return target_field
+
+    def _on_request_ai_assistance(
+        self,
+        target_field: str,
+        step_number: Optional[int] = None,
+        phase_label: Optional[str] = None,
+    ) -> None:
+        """Manejador del evento de solicitud de asistencia de IA para un campo autorizado."""
+        if not self.design_dto:
+            return
+        if self.design_dto.approved_by:
+            messagebox.showwarning(
+                "Diseño Aprobado",
+                "El diseño metodológico se encuentra en estado APROBADO e inmutable (R-08). "
+                "No se permite solicitar asistencia de IA.",
+                parent=self,
+            )
+            return
+
+        # Guardar cambios pendientes primero si aplica
+        if self.is_dirty:
+            try:
+                cmd = self._build_update_command()
+                self.design_dto = self.service.update_design_draft(cmd)
+                self.is_dirty = False
+            except PlanningUIError as e:
+                messagebox.showerror("Error al Guardar antes de Asistencia", e.message, parent=self)
+                return
+
+        try:
+            proposal = self.service.request_ai_proposal(
+                design_id=self.design_dto.design_id,
+                target_field=target_field,
+                step_number=step_number,
+                phase_label=phase_label,
+            )
+        except PlanningUIError as e:
+            messagebox.showerror(
+                "Asistencia de IA",
+                "No fue posible generar una propuesta en este momento. El diseño actual no fue modificado.",
+                parent=self,
+            )
+            return
+
+        # Obtener contenido actual según campo y abrir diálogo de revisión humana
+        current_content = self._get_current_field_content(target_field, step_number)
+        field_label = self._get_field_display_label(target_field, step_number, phase_label)
+
+        AIProposalReviewDialog(
+            self,
+            proposal=proposal,
+            current_content=current_content,
+            field_label=field_label,
+            on_accept=self._on_accept_ai_proposal,
+            on_reject=self._on_reject_ai_proposal,
+        )
+
+    def _on_accept_ai_proposal(self, proposal: AIProposalDTO, reviewer: str) -> None:
+        """Callback ejecutado cuando el usuario acepta la propuesta en el diálogo de revisión."""
+        if not self.design_dto:
+            return
+        try:
+            updated_dto = self.service.accept_ai_proposal(
+                design_id=self.design_dto.design_id,
+                proposal_id=proposal.proposal_id,
+                reviewer=reviewer,
+            )
+            self.design_dto = updated_dto
+            self.is_dirty = False
+
+            # Volcar contenido al campo correspondiente en la interfaz
+            field = proposal.target_field
+            content = proposal.proposed_content
+
+            if field == "introduction":
+                self._set_text(self.txt_intro, content)
+            elif field == "methodological_approach":
+                self._set_text(self.txt_enfoque, content)
+            elif field == "objective_1":
+                self._set_text(self.txt_obj1, content)
+            elif field == "objective_2":
+                self._set_text(self.txt_obj2, content)
+            elif field in ("procedure", "operative_goal"):
+                self.matrix_items = list(updated_dto.operational_matrix)
+                self._render_matrix_items()
+
+            self._check_pending_proposals()
+            self.lbl_save_status.configure(
+                text="✓ Propuesta de IA aceptada e incorporada al borrador (DRAFT)."
+            )
+            messagebox.showinfo(
+                "Propuesta Aceptada",
+                "La propuesta de asistencia ha sido incorporada exitosamente al borrador.\n"
+                "El diseño permanece en estado BORRADOR (DRAFT) para continuar su edición.",
+                parent=self,
+            )
+        except PlanningUIError as e:
+            messagebox.showerror("Error al Aceptar Propuesta", e.message, parent=self)
+
+    def _on_reject_ai_proposal(self, proposal: AIProposalDTO, reviewer: str, reason: str) -> None:
+        """Callback ejecutado cuando el usuario rechaza la propuesta en el diálogo de revisión."""
+        if not self.design_dto:
+            return
+        try:
+            updated_dto = self.service.reject_ai_proposal(
+                design_id=self.design_dto.design_id,
+                proposal_id=proposal.proposal_id,
+                reviewer=reviewer,
+                rejection_reason=reason,
+            )
+            self.design_dto = updated_dto
+            self._check_pending_proposals()
+            messagebox.showinfo(
+                "Propuesta Rechazada",
+                "La propuesta ha sido rechazada y registrada para fines de auditoría institucional.\n"
+                "El contenido original del diseño fue preservado intacto.",
+                parent=self,
+            )
+        except PlanningUIError as e:
+            messagebox.showerror("Error al Rechazar Propuesta", e.message, parent=self)

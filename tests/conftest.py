@@ -34,7 +34,7 @@ if sys.platform == "win32":
         pass
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def app_root():
     """Ventana raíz de CustomTkinter persistente para toda la sesión de pruebas."""
     import customtkinter as ctk

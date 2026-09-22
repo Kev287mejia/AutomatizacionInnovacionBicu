@@ -480,6 +480,15 @@ class AIProposal:
         """True si el humano rechazo la propuesta."""
         return self.accepted is False
 
+    @property
+    def step_number(self) -> Optional[int]:
+        """Retorna el step_number si la propuesta corresponde a una actividad operacional."""
+        if isinstance(self.source_inputs, dict):
+            val = self.source_inputs.get("step_number")
+            if isinstance(val, int):
+                return val
+        return None
+
     @classmethod
     def create(
         cls,

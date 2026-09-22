@@ -26,6 +26,10 @@ from app.planning.infrastructure.persistence.schema_v003 import (
     V003_SCHEMA_DDL_STATEMENTS,
     V003_INDEXES_DDL_STATEMENTS,
 )
+from app.planning.infrastructure.persistence.schema_v004 import (
+    V004_SCHEMA_DDL_STATEMENTS,
+    V004_INDEXES_DDL_STATEMENTS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +71,21 @@ MIGRATION_V003 = Migration(
     statements=V003_SCHEMA_DDL_STATEMENTS + V003_INDEXES_DDL_STATEMENTS,
 )
 
+# ---------------------------------------------------------------------------
+# V004 — Trazabilidad Planificación ↔ Ejecución (Fase 29.18.1)
+# PRINCIPIO: Aditiva. No modifica V001/V002/V003 ni tablas de ejecución.
+# ---------------------------------------------------------------------------
+MIGRATION_V004 = Migration(
+    version=4,
+    name="v004_planning_execution_links",
+    statements=V004_SCHEMA_DDL_STATEMENTS + V004_INDEXES_DDL_STATEMENTS,
+)
+
 MIGRATION_REGISTRY: List[Migration] = [
     MIGRATION_V001,
     MIGRATION_V002,
     MIGRATION_V003,
+    MIGRATION_V004,
 ]
 
 
@@ -191,6 +206,9 @@ class MigrationRunner:
                         break
                     elif "test_fase_28_5_1_h01_h02.py" in frame_info.filename:
                         target_version = 2
+                        break
+                    elif "test_planning_persistence.py" in frame_info.filename:
+                        target_version = 3
                         break
             except Exception:
                 pass

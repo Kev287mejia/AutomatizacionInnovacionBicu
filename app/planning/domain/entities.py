@@ -483,3 +483,177 @@ class MethodologicalDesign:
             matrix_section_label=matrix_section_label,
             operational_matrix=matrix_dtos,
         )
+
+
+# ---------------------------------------------------------------------------
+# PlanningExecutionLink — Entidad de Trazabilidad Planificación ↔ Ejecución
+#
+# Fase 29.18.1 — PRINCIPIO RECTOR: PLANIFICADO ≠ EJECUTADO.
+#
+# Esta entidad es el ÚNICO punto institucional que referencia a la vez:
+#   - planning_internal_id (UUID del dominio de planificación)
+#   - id_actividad (clave del dominio de ejecución)
+#
+# PROHIBICIÓN ABSOLUTA: No copia datos personales, metas, fechas ni cifras.
+# Solo registra la voluntad institucional auditada del vínculo.
+# La IA JAMÁS puede crear, modificar ni revocar vínculos (R-09 extendido).
+# ---------------------------------------------------------------------------
+@dataclass
+class PlanningExecutionLink:
+    """Entidad de trazabilidad institucional entre planificación y ejecución.
+
+    Principio Rector: PLANIFICADO ≠ EJECUTADO.
+    Esta entidad NO copia datos entre dominios. Solo registra:
+      - El par (planning_internal_id, id_actividad) vinculado.
+      - Quién lo vinculó (linked_by), cuándo (linked_at) y por qué (link_rationale).
+      - El ciclo de vida del vínculo (link_status, revocation fields).
+
+    Atributos:
+        link_id: UUID v4 técnico del vínculo. Inmutable tras creación.
+        planning_internal_id: UUID de PlannedActivity en el dominio de planificación.
+        id_actividad: Clave de actividad en el dominio de ejecución (solo referencia).
+        linked_by: Actor humano institucional responsable. NUNCA un agente IA.
+        linked_at: Marca temporal de creación del vínculo.
+        link_rationale: Justificación textual del vínculo (obligatoria).
+        numero_sesion: Número de sesión para actividades multi-sesión (None = única).
+        link_status: Estado del vínculo. Valores: 'ACTIVE', 'SUPERSEDED', 'REVOKED'.
+        revoked_by: Actor humano que revocó (None si no revocado).
+        revoked_at: Marca temporal de revocación (None si no revocado).
+        revocation_reason: Motivo de revocación (None si no revocado).
+    """
+
+    # --- IDENTIDAD (inmutable tras creación) ---
+    link_id: uuid.UUID
+    planning_internal_id: uuid.UUID
+    id_actividad: str  # Referencia al dominio de ejecución — solo identificador
+
+    # --- AUDITORÍA DE AUTORÍA (obligatoria) ---
+    linked_by: str
+    linked_at: datetime
+    link_rationale: str
+
+    # --- MULTI-SESIÓN (opcional) ---
+    numero_sesion: Optional[int] = None
+
+    # --- CICLO DE VIDA ---
+    link_status: str = "ACTIVE"
+
+    # --- REVOCACIÓN (solo si link_status = 'REVOKED') ---
+    revoked_by: Optional[str] = None
+    revoked_at: Optional[datetime] = None
+    revocation_reason: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        self._validate()
+
+    def _validate(self) -> None:
+        """Valida invariantes de la entidad PlanningExecutionLink."""
+        if not isinstance(self.link_id, uuid.UUID):
+            raise ValueError("PlanningExecutionLink.link_id debe ser instancia de uuid.UUID.")
+        if not isinstance(self.planning_internal_id, uuid.UUID):
+            raise ValueError(
+                "PlanningExecutionLink.planning_internal_id debe ser instancia de uuid.UUID."
+            )
+        if not self.id_actividad or not str(self.id_actividad).strip():
+            raise ValueError("PlanningExecutionLink.id_actividad es obligatorio y no puede ser vacío.")
+        if not self.linked_by or not str(self.linked_by).strip():
+            raise ValueError("PlanningExecutionLink.linked_by es obligatorio y no puede ser vacío.")
+        if not self.link_rationale or not str(self.link_rationale).strip():
+            raise ValueError(
+                "PlanningExecutionLink.link_rationale es obligatorio y no puede ser vacío."
+            )
+        valid_statuses = {"ACTIVE", "SUPERSEDED", "REVOKED"}
+        if self.link_status not in valid_statuses:
+            raise ValueError(
+                f"PlanningExecutionLink.link_status debe ser uno de {valid_statuses}. "
+                f"Recibido: '{self.link_status}'."
+            )
+        if self.link_status == "REVOKED":
+            if not self.revoked_by:
+                raise ValueError(
+                    "PlanningExecutionLink.revoked_by es obligatorio cuando link_status='REVOKED'."
+                )
+            if not self.revocation_reason:
+                raise ValueError(
+                    "PlanningExecutionLink.revocation_reason es obligatorio cuando "
+                    "link_status='REVOKED'."
+                )
+        if self.numero_sesion is not None and self.numero_sesion < 1:
+            raise ValueError(
+                "PlanningExecutionLink.numero_sesion debe ser >= 1 si está definido."
+            )
+
+    @classmethod
+    def create(
+        cls,
+        planning_internal_id: uuid.UUID,
+        id_actividad: str,
+        linked_by: str,
+        link_rationale: str,
+        numero_sesion: Optional[int] = None,
+    ) -> "PlanningExecutionLink":
+        """Factory — crea un nuevo vínculo ACTIVE con UUID v4 generado automáticamente.
+
+        PRECONDICIÓN: linked_by debe ser un actor humano institucional.
+        La IA no puede invocar este factory (R-09 extendido de Fase 29.18.1).
+
+        Args:
+            planning_internal_id: UUID de la PlannedActivity en dominio planificación.
+            id_actividad: Clave de la actividad en dominio ejecución (solo referencia).
+            linked_by: Actor humano responsable del vínculo.
+            link_rationale: Justificación textual del vínculo.
+            numero_sesion: Número de sesión si es multi-sesión (None = sesión única).
+
+        Returns:
+            PlanningExecutionLink con link_status='ACTIVE' y link_id generado.
+        """
+        return cls(
+            link_id=uuid.uuid4(),
+            planning_internal_id=planning_internal_id,
+            id_actividad=id_actividad,
+            linked_by=linked_by,
+            linked_at=datetime.now(),
+            link_rationale=link_rationale,
+            numero_sesion=numero_sesion,
+            link_status="ACTIVE",
+        )
+
+    def revoke(self, revoked_by: str, reason: str) -> "PlanningExecutionLink":
+        """Retorna una nueva instancia con link_status='REVOKED'.
+
+        INMUTABILIDAD: No modifica la instancia actual. Retorna una copia revocada.
+        PRECONDICIÓN: revoked_by debe ser un actor humano institucional.
+        La IA no puede revocar vínculos (R-09 extendido de Fase 29.18.1).
+
+        Args:
+            revoked_by: Actor humano que revoca el vínculo.
+            reason: Motivo de la revocación.
+
+        Returns:
+            Nueva instancia PlanningExecutionLink con link_status='REVOKED'.
+
+        Raises:
+            ValueError: Si el vínculo ya estaba revocado.
+        """
+        if self.link_status == "REVOKED":
+            raise ValueError(
+                f"PlanningExecutionLink '{self.link_id}' ya está revocado. "
+                "No se puede revocar dos veces."
+            )
+        if not revoked_by or not str(revoked_by).strip():
+            raise ValueError("revoked_by es obligatorio para revocar un vínculo.")
+        if not reason or not str(reason).strip():
+            raise ValueError("reason es obligatorio para revocar un vínculo.")
+        return PlanningExecutionLink(
+            link_id=self.link_id,
+            planning_internal_id=self.planning_internal_id,
+            id_actividad=self.id_actividad,
+            linked_by=self.linked_by,
+            linked_at=self.linked_at,
+            link_rationale=self.link_rationale,
+            numero_sesion=self.numero_sesion,
+            link_status="REVOKED",
+            revoked_by=revoked_by,
+            revoked_at=datetime.now(),
+            revocation_reason=reason,
+        )

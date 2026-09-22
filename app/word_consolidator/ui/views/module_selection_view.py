@@ -19,12 +19,14 @@ class ModuleSelectionView(ctk.CTkFrame):
         on_select_word_batch: Optional[Callable[[], None]] = None,
         on_select_matrices_word: Optional[Callable[[], None]] = None,
         on_select_planning: Optional[Callable[[], None]] = None,
+        on_select_reporting: Optional[Callable[[], None]] = None,
         **kwargs: Any,
     ):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.on_select_word_batch = on_select_word_batch
         self.on_select_matrices_word = on_select_matrices_word
         self.on_select_planning = on_select_planning
+        self.on_select_reporting = on_select_reporting
 
         self._init_ui()
 
@@ -85,7 +87,6 @@ class ModuleSelectionView(ctk.CTkFrame):
         cards_container.grid(row=2, column=0, sticky="ew")
         cards_container.grid_columnconfigure(0, weight=1)
         cards_container.grid_columnconfigure(1, weight=1)
-        cards_container.grid_columnconfigure(2, weight=1)
 
         # ---------------------------------------------------------------------
         # Tarjeta 1: WORD → MATRICES
@@ -97,7 +98,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             border_width=1,
             border_color=("gray80", "gray25"),
         )
-        card_w2m.grid(row=0, column=0, padx=(0, 8), pady=8, sticky="nsew")
+        card_w2m.grid(row=0, column=0, padx=(0, 6), pady=6, sticky="nsew")
         card_w2m.grid_columnconfigure(0, weight=1)
 
         w2m_badge = ctk.CTkLabel(
@@ -114,7 +115,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             text="PROCESAR INFORMES WORD → MATRICES M1–M5",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         w2m_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
@@ -129,7 +130,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=11),
             text_color=("gray40", "gray70"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         w2m_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
@@ -156,7 +157,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             border_width=1,
             border_color=("gray80", "gray25"),
         )
-        card_m2w.grid(row=0, column=1, padx=(8, 8), pady=8, sticky="nsew")
+        card_m2w.grid(row=0, column=1, padx=(6, 0), pady=6, sticky="nsew")
         card_m2w.grid_columnconfigure(0, weight=1)
 
         m2w_badge = ctk.CTkLabel(
@@ -173,7 +174,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             text="CONSOLIDAR MATRICES EXCEL → INFORMES WORD",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         m2w_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
@@ -188,7 +189,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=11),
             text_color=("gray40", "gray70"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         m2w_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
@@ -215,7 +216,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             border_width=1,
             border_color=("gray80", "gray25"),
         )
-        card_plan.grid(row=0, column=2, padx=(8, 0), pady=8, sticky="nsew")
+        card_plan.grid(row=1, column=0, padx=(0, 6), pady=6, sticky="nsew")
         card_plan.grid_columnconfigure(0, weight=1)
 
         plan_badge = ctk.CTkLabel(
@@ -232,7 +233,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             text="PLANIFICACIÓN Y DISEÑO METODOLÓGICO",
             font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         plan_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
@@ -247,7 +248,7 @@ class ModuleSelectionView(ctk.CTkFrame):
             font=ctk.CTkFont(family="Segoe UI", size=11),
             text_color=("gray40", "gray70"),
             anchor="w",
-            wraplength=260,
+            wraplength=360,
             justify="left",
         )
         plan_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
@@ -263,6 +264,65 @@ class ModuleSelectionView(ctk.CTkFrame):
             command=self._on_click_planning,
         )
         btn_plan.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
+
+        # ---------------------------------------------------------------------
+        # Tarjeta 4: REPORTES Y DASHBOARD (MÓDULO 4)
+        # ---------------------------------------------------------------------
+        card_rep = ctk.CTkFrame(
+            cards_container,
+            fg_color=("gray92", "gray17"),
+            corner_radius=6,
+            border_width=1,
+            border_color=("gray80", "gray25"),
+        )
+        card_rep.grid(row=1, column=1, padx=(6, 0), pady=6, sticky="nsew")
+        card_rep.grid_columnconfigure(0, weight=1)
+
+        rep_badge = ctk.CTkLabel(
+            card_rep,
+            text="MÓDULO 4",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color=("#0B3C5D", "#4FC3F7"),
+            anchor="w",
+        )
+        rep_badge.grid(row=0, column=0, padx=16, pady=(16, 4), sticky="w")
+
+        rep_title = ctk.CTkLabel(
+            card_rep,
+            text="REPORTES Y DASHBOARD INSTITUCIONAL",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            anchor="w",
+            wraplength=360,
+            justify="left",
+        )
+        rep_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
+
+        rep_desc = ctk.CTkLabel(
+            card_rep,
+            text=(
+                "Visualiza el Dashboard analítico institucional de 5 niveles con KPIs, "
+                "evaluación de cumplimiento POA y cobertura territorial. Genera los reportes "
+                "oficiales (REP-01 a REP-05) y expórtalos en XLSX, DOCX y CSV."
+            ),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=("gray40", "gray70"),
+            anchor="w",
+            wraplength=360,
+            justify="left",
+        )
+        rep_desc.grid(row=2, column=0, padx=16, pady=(0, 16), sticky="w")
+
+        btn_rep = ctk.CTkButton(
+            card_rep,
+            text="Iniciar Reportes y Dashboard  ➔",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            fg_color="#0B3C5D",
+            hover_color="#07263D",
+            height=34,
+            corner_radius=4,
+            command=self._on_click_reporting,
+        )
+        btn_rep.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
 
         # ---------------------------------------------------------------------
         # 3. PIE DE PÁGINA INSTITUCIONAL
@@ -290,3 +350,7 @@ class ModuleSelectionView(ctk.CTkFrame):
     def _on_click_planning(self) -> None:
         if self.on_select_planning:
             self.on_select_planning()
+
+    def _on_click_reporting(self) -> None:
+        if self.on_select_reporting:
+            self.on_select_reporting()

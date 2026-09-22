@@ -67,6 +67,10 @@ class Participation(BaseModel):
         default=None,
         description="Código de matriz institucional asignado tras el routing (M2..M5, COLA_REVISION) o None pre-routing."
     )
+    es_historico_preexistente: int = Field(
+        default=0,
+        description="Indica si la participación proviene de registros históricos patrimoniales (1) o ejecución actual (0)."
+    )
 
     @field_validator("categoria_participacion")
     @classmethod

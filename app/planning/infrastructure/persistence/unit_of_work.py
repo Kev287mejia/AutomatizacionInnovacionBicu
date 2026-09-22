@@ -19,6 +19,7 @@ from app.planning.infrastructure.persistence.repositories import (
     SQLiteCatalogRepository,
     SQLiteMethodologicalDesignRepository,
     SQLitePlannedActivityRepository,
+    SQLitePlanningExecutionLinkRepository,
 )
 
 
@@ -41,6 +42,7 @@ class PlanningUnitOfWork(PlanningUnitOfWorkPort):
         self._planned_activities: Optional[SQLitePlannedActivityRepository] = None
         self._methodological_designs: Optional[SQLiteMethodologicalDesignRepository] = None
         self._catalogs: Optional[SQLiteCatalogRepository] = None
+        self._execution_links: Optional[SQLitePlanningExecutionLinkRepository] = None
 
     @property
     def planned_activities(self) -> SQLitePlannedActivityRepository:
@@ -68,6 +70,15 @@ class PlanningUnitOfWork(PlanningUnitOfWorkPort):
                 "PlanningUnitOfWork no inicializado. Debe utilizarse dentro de un bloque 'with'."
             )
         return self._catalogs
+
+    @property
+    def execution_links(self) -> SQLitePlanningExecutionLinkRepository:
+        """Acceso al repositorio de vínculos Planificación ↔ Ejecución (V004)."""
+        if self._execution_links is None:
+            raise TransactionError(
+                "PlanningUnitOfWork no inicializado. Debe utilizarse dentro de un bloque 'with'."
+            )
+        return self._execution_links
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -100,6 +111,7 @@ class PlanningUnitOfWork(PlanningUnitOfWorkPort):
         self._planned_activities = SQLitePlannedActivityRepository(self._conn)
         self._methodological_designs = SQLiteMethodologicalDesignRepository(self._conn)
         self._catalogs = SQLiteCatalogRepository()
+        self._execution_links = SQLitePlanningExecutionLinkRepository(self._conn)
 
         return self
 
@@ -121,6 +133,7 @@ class PlanningUnitOfWork(PlanningUnitOfWorkPort):
                 self._planned_activities = None
                 self._methodological_designs = None
                 self._catalogs = None
+                self._execution_links = None
 
     def commit(self) -> None:
         """Confirma atómicamente la transacción activa."""

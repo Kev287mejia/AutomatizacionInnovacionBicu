@@ -69,6 +69,7 @@ class ConsolidatorApp(ctk.CTk):
     """
 
     _planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
+    _reporting_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
 
     @classmethod
     def set_planning_view_factory(
@@ -78,9 +79,18 @@ class ConsolidatorApp(ctk.CTk):
         """Registra la fábrica visual para el Módulo 3 (Planificación) sin acoplar paquetes."""
         cls._planning_view_factory = factory
 
+    @classmethod
+    def set_reporting_view_factory(
+        cls,
+        factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]],
+    ) -> None:
+        """Registra la fábrica visual para el Módulo 4 (Reportes y Dashboard) sin acoplar paquetes."""
+        cls._reporting_view_factory = factory
+
     def __init__(
         self,
         planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
+        reporting_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
         **kwargs: Any,
     ):
         # Configurar DPI antes de inicializar la ventana
@@ -139,6 +149,7 @@ class ConsolidatorApp(ctk.CTk):
             on_select_word_batch=self.mostrar_word_batch,
             on_select_matrices_word=self.mostrar_matrices_word,
             on_select_planning=self.mostrar_planning,
+            on_select_reporting=self.mostrar_reporting,
         )
         self.word_batch_view = WordBatchProcessingView(
             self.container,
@@ -150,13 +161,22 @@ class ConsolidatorApp(ctk.CTk):
         )
 
         # Fábrica de vista de planificación (inyección de dependencias desacoplada)
-        effective_factory = planning_view_factory or self._planning_view_factory
-        if effective_factory is not None:
-            self.planning_view: Optional[ctk.CTkFrame] = effective_factory(
+        effective_planning_factory = planning_view_factory or self._planning_view_factory
+        if effective_planning_factory is not None:
+            self.planning_view: Optional[ctk.CTkFrame] = effective_planning_factory(
                 self.container, self.mostrar_menu_principal
             )
         else:
             self.planning_view = None
+
+        # Fábrica de vista de reportes y dashboard (inyección de dependencias desacoplada)
+        effective_reporting_factory = reporting_view_factory or self._reporting_view_factory
+        if effective_reporting_factory is not None:
+            self.reporting_view: Optional[ctk.CTkFrame] = effective_reporting_factory(
+                self.container, self.mostrar_menu_principal
+            )
+        else:
+            self.reporting_view = None
 
         # Iniciar en el selector de módulos
         self.mostrar_menu_principal()
@@ -171,7 +191,7 @@ class ConsolidatorApp(ctk.CTk):
 
     def _ocultar_todas_las_vistas(self) -> None:
         """Oculta todas las vistas del contenedor."""
-        for v in (self.module_selection_view, self.word_batch_view, self.main_window, self.planning_view):
+        for v in (self.module_selection_view, self.word_batch_view, self.main_window, self.planning_view, self.reporting_view):
             if v is not None:
                 v.grid_forget()
 
@@ -202,6 +222,20 @@ class ConsolidatorApp(ctk.CTk):
             messagebox.showinfo(
                 "Módulo de Planificación",
                 "El Módulo 3 (Planificación y Diseño Metodológico) no está configurado en esta instancia.",
+            )
+
+    def mostrar_reporting(self) -> None:
+        """Muestra la vista del Módulo 4: Reportes y Dashboard Institucional."""
+        if self.reporting_view is not None:
+            self._ocultar_todas_las_vistas()
+            if hasattr(self.reporting_view, "refresh_dashboard"):
+                self.reporting_view.refresh_dashboard()
+            self.reporting_view.grid(row=0, column=0, sticky="nsew")
+        else:
+            from tkinter import messagebox
+            messagebox.showinfo(
+                "Módulo de Reportes y Dashboard",
+                "El Módulo 4 (Reportes y Dashboard Institucional) no está configurado en esta instancia.",
             )
 
 

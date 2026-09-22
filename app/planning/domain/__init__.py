@@ -8,11 +8,16 @@ from app.planning.domain.catalogs import (
     CATALOG_C4_TIPOS_EVENTO,
     CATALOG_C5_TIPOS_PROYECTO,
 )
+from app.planning.domain.ai_context_builder import AIContextBuilder
 from app.planning.domain.dtos import (
+    AcceptAIProposalCommand,
+    AIProposalDTO,
     FAQTableDTO,
     MethodologicalDesignDTO,
     OperationalActivityDTO,
     PlannedActivityDTO,
+    RejectAIProposalCommand,
+    RequestAIProposalCommand,
     TimeBlockDTO,
 )
 from app.planning.domain.entities import (
@@ -73,6 +78,12 @@ __all__ = [
     "OperationalActivityDTO",
     "FAQTableDTO",
     "MethodologicalDesignDTO",
+    "RequestAIProposalCommand",
+    "AcceptAIProposalCommand",
+    "RejectAIProposalCommand",
+    "AIProposalDTO",
+    # Context Builder
+    "AIContextBuilder",
     # Ports
     "PlannedActivityRepositoryPort",
     "MethodologicalDesignRepositoryPort",

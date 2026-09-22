@@ -1,260 +1,246 @@
-# BICU — Sistema de Gestión Institucional de Asistencias y Actividades
+# BICU — Sistema Institucional de Gestión, Planificación, Consolidación y Reporting
 
-Sistema de software orientado a la gestión, organización, validación, seguimiento y consolidación de información relacionada con las actividades institucionales de la **Bluefields Indian & Caribbean University (BICU)**.
+Sistema institucional de software para la gestión, organización, validación, seguimiento, consolidación y análisis de información de actividades académicas, de extensión e innovación de la **Bluefields Indian & Caribbean University (BICU)**.
 
-El sistema proporciona un entorno estructurado, determinista y auditable para procesar informes de ejecución universitaria, asegurar la calidad de datos y soportar la planificación metodológica institucional con generación documental oficial.
-
----
-
-## 1. Propósito del Sistema
-
-En el entorno universitario, la gestión de actividades comprende múltiples flujos de información: documentación de planificación académica, listas de participantes, evidencias de ejecución e informes de cumplimiento. Tradicionalmente, la consolidación de estos datos requiere procesos manuales propensos a inconsistencias, duplicidad y pérdida de trazabilidad.
-
-Este sistema resuelve dicha problemática mediante:
-
-* **Estandarización y Validación**: Aplicación sistemática de reglas de calidad institucional para verificar la coherencia de datos antes de su consolidación o aprobación.
-* **Persistencia Auditable**: Almacenamiento estructurado en base de datos relacional que preserva la trazabilidad completa desde el documento de origen hasta las matrices y documentos oficiales.
-* **Generación Documental Oficial**: Emisión automatizada de matrices en hojas de cálculo y documentos metodológicos en formato Word (`.docx`), respetando estrictamente las normas institucionales.
-* **Separación de Responsabilidades**: Aislamiento arquitectónico estricto entre los procesos de planificación y los registros de ejecución real.
+El sistema proporciona un entorno determinista, reproducible y auditable que abarca desde la planificación metodológica y la captura de evidencias en informes de ejecución, hasta la consolidación de matrices oficiales y la emisión de analítica institucional mediante dashboards y reportes ejecutivos.
 
 ---
 
-## 2. Alcance del Sistema
+## 1. Propósito del Sistema y Alcance Institucional
 
-El sistema comprende dos dominios funcionales independientes y complementarios:
+En el ámbito universitario, la gestión operativa y estratégica comprende flujos complejos de información: diseño metodológico de actividades, convocatorias, listas de asistencia de participantes, evidencias documentales de ejecución y balances de cumplimiento del Plan Operativo Anual (POA).
 
-### 2.1 Procesamiento de Ejecución (Word → Matrices M1–M5)
-Procesamiento automatizado de informes de actividades ejecutadas en formato Word (`.docx`), extracción de metadatos y participantes, validación de reglas de calidad, persistencia transaccional y generación de las cinco matrices consolidadas oficiales en hojas de cálculo.
+Tradicionalmente, la integración de estos datos entre sedes, recintos y áreas de conocimiento dependía de procesos manuales dispersos, vulnerables a duplicidades, inconsistencias demográficas y desarticulación entre lo planificado y lo efectivamente ejecutado.
 
-### 2.2 Planificación Institucional y Diseño Metodológico
-Modelado estructurado de actividades planificadas, gestión de diseños metodológicos, persistencia dedicada en SQLite V003, validación institucional y renderizado de documentos técnicos institucionales en formato Word (`.docx`).
+Este sistema resuelve dicha problemática mediante una solución técnica estructurada que garantiza:
 
-> **Principio Fundamental de Diseño:**<br>
-> **PLANIFICADO ≠ EJECUTADO**<br>
-> Una actividad planificada representa una intención formalizada y no constituye evidencia de ejecución real. El procesamiento de un informe de ejecución real no depende de la existencia previa de un diseño metodológico, garantizando la independencia operativa y la integridad de ambas etapas.
+1. **Estandarización y Validación Sistemática**: Evaluación rigurosa de datos mediante motores de reglas institucionales tanto en la fase de planificación (reglas V-MD) como en la fase de ejecución (reglas Q-01 a Q-20).
+2. **Persistencia Relacional Auditable**: Base de datos relacional local (SQLite) estructurada con migraciones deterministas y trazabilidad desde el documento fuente de origen hasta los consolidados y reportes finales.
+3. **Generación Documental Oficial Desacoplada**: Emisión automatizada de las cinco matrices institucionales en hojas de cálculo (`.xlsx`) y documentos metodológicos en Word (`.docx`) respetando especificaciones institucionales.
+4. **Inteligencia y Analítica Institucional**: Cálculo centralizado de indicadores de gestión, visualización ejecutiva en cinco niveles de dashboard y exportación de reportes periciales en formatos XLSX, DOCX y CSV.
+5. **Gobernanza Rigurosa del Dato**: Preservación estricta de valores ausentes (NULL sin imputaciones arbitrarias), aislamiento de registros históricos preexistentes y no contaminación de metas planificadas por eventos emergentes.
+
+---
+
+## 2. Flujo Funcional Completo del Sistema
+
+El sistema implementa una cadena de valor analítica unidireccional y estrictamente gobernada:
+
+```text
+       PLANIFICACIÓN INSTITUCIONAL
+                   ↓
+          DISEÑO METODOLÓGICO             (Objetivos, Agenda, Matriz Operativa, FAQs)
+                   ↓
+            EJECUCIÓN REAL                (Desarrollo en sedes, recintos y comunidades)
+                   ↓
+         INFORME WORD REAL (.docx)        (Listas de asistencia, evidencias y firmas)
+                   ↓
+               EXTRACCIÓN                 (Lectura de metadatos, participantes y roles)
+                   ↓
+               VALIDACIÓN                 (Reglas de calidad Q-01 a Q-20, desduplicación)
+                   ↓
+              PERSISTENCIA                (Almacenamiento transaccional en SQLite)
+                   ↓
+              ENRUTAMIENTO                (Clasificación a matrices oficiales por estamento)
+                   ↓
+       MATRICES OFICIALES M1–M5           (Productos patrimoniales primarios en Excel)
+                   ↓
+          CÁLCULO DE INDICADORES          (IndicatorCalculationService: lógica matemática pura)
+                   ↓
+             REPORTING DOMAIN             (ReportingService: estructuración analítica)
+                   ↓
+    ┌──────────────┴──────────────┐
+    ↓                             ↓
+DASHBOARD INSTITUCIONAL    REPORTES OFICIALES (REP-01..05)
+(5 Niveles de KPIs)        (Exportación derivada en XLSX, DOCX, CSV)
+```
+
+### Principio Rector: PLANIFICADO ≠ EJECUTADO
+* **Planificado**: Representa la programación formalizada en el POA y formalizada en diseños metodológicos aprobados.
+* **Ejecutado**: Representa la evidencia documental comprobada de intervenciones realizadas, validada y almacenada en el repositorio.
+* **Separación de responsabilidades**: Una actividad planificada no incrementa el cumplimiento real por el solo hecho de existir; requiere el procesamiento de su informe de ejecución. A su vez, una actividad ejecutada no planificada (emergente) se registra para fines de cobertura y volumen, pero **no incrementa artificialmente el porcentaje de cumplimiento del POA**.
 
 ---
 
 ## 3. Arquitectura del Sistema
 
-El proyecto sigue una arquitectura en capas fundamentada en principios de diseño orientado al dominio (*Domain-Driven Design*) y arquitectura limpia:
+La arquitectura está construida siguiendo principios de Diseño Guiado por el Dominio (*Domain-Driven Design*, DDD) y Arquitectura Limpia, manteniendo un aislamiento estricto entre capas:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           CAPA DE PRESENTACIÓN                          │
-│        Interfaz Gráfica de Usuario (CustomTkinter) / CLI / Workers      │
-└────────────────────────────────────┬────────────────────────────────────┘
-                                     │
-┌────────────────────────────────────▼────────────────────────────────────┐
-│                           CAPA DE APLICACIÓN                            │
-│           Servicios de Aplicación / Casos de Uso / Orquestadores         │
-└───────────────────┬─────────────────────────────────┬───────────────────┘
-                    │                                 │
-┌───────────────────▼─────────────────┐   ┌───────────▼───────────────────┐
-│         DOMINIO DE EJECUCIÓN        │   │    DOMINIO DE PLANIFICACIÓN   │
-│  Actividades, Personas, Evidencias, │   │  PlannedActivity, Methodological  │
-│  Reglas de Calidad Q-01..Q-20,      │   │  Design, FAQ, Agenda, Matriz     │
-│  Enrutamiento Institucional         │   │  Operativa, Reglas V-MD-01..14    │
-└───────────────────┬─────────────────┘   └───────────┬───────────────────┘
-                    │                                 │
-┌───────────────────▼─────────────────────────────────▼───────────────────┐
-│                         CAPA DE INFRAESTRUCTURA                         │
-│  • Persistencia: SQLite (V001, V002, V003 con migraciones deterministas)│
-│  • Extractores: WordActivityExtractor (.docx)                          │
-│  • Exportadores: OpenPyXL (M1–M5 con protección patrimonial)           │
-│  • Renderizadores: DocxMethodologicalDocumentRenderer (python-docx)    │
-└─────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CAPA DE PRESENTACIÓN (UI)                       │
+│  CustomTkinter: Menú de Módulos (Grid 2x2), Consolidadores, Vistas de   │
+│  Planificación, y Módulo 4: Reporting y Dashboard Institucional         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Inyección desacoplada
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                         COMPOSITION ROOT                               │
+│  run_consolidator.py: Fábricas de vistas (planning_view_factory,       │
+│  reporting_view_factory). Resuelve dependencias sin acoplar paquetes. │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                        CAPA DE APLICACIÓN                              │
+│  • WordConsolidationEngine / PipelineCoordinator                       │
+│  • PlanningService / MethodologicalDesignService                       │
+│  • IndicatorCalculationService (Cálculo puro de indicadores)           │
+│  • ReportingService (Orquestación de reportes y dashboard)             │
+│  • ReportingUIService (Fachada síncrona para la capa visual)           │
+└───────────────────┬────────────────────────────────┬───────────────────┘
+                    │                                │
+┌───────────────────▼────────────────┐   ┌───────────▼───────────────────┐
+│        DOMINIO DE EJECUCIÓN        │   │    DOMINIO DE PLANIFICACIÓN   │
+│  Actividades, Personas, Evidencias,│   │  PlannedActivity, Design,     │
+│  Participaciones, Enrutamiento,    │   │  Agenda, OperationalMatrix,   │
+│  Reglas de Calidad Q-01..Q-20      │   │  Trazabilidad V004            │
+└───────────────────┬────────────────┘   └───────────┬───────────────────┘
+                    │                                │
+┌───────────────────▼────────────────────────────────▼───────────────────┐
+│                     CAPA DE INFRAESTRUCTURA                            │
+│  • Persistencia: SQLite relacional gobernado por migraciones           │
+│    (V001: Ejecución, V002: Hashes, V003: Planning, V004: Enlaces)      │
+│  • Extractores: WordActivityExtractor (.docx con tablas institucionales)│
+│  • Generadores Patrimoniales: OpenPyXL (Matrices M1–M5 protegidas)     │
+│  • Exportadores Analíticos:                                            │
+│    - XLSXReportExporter (openpyxl con estilos institucionales)         │
+│    - DOCXReportExporter (python-docx con tablas y notas periciales)    │
+│    - CSVReportExporter  (estándar utf-8-sig estructurado)              │
+│  • Asistencia IA (restringida a Planning): GeminiAdapter vía Factory   │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. Flujos Principales de Información
+## 4. Módulos del Sistema
 
-Ambos dominios operan a través de flujos unidireccionales estrictamente separados:
+El sistema se organiza en cuatro módulos principales accesibles desde la ventana inicial:
 
-### 4.1 Flujo de Ejecución y Consolidación (Word → M1–M5)
+### Módulo 1: Procesamiento de Informes Word → Matrices Excel (M1–M5)
+Procesa lotes de informes Word (`.docx`), extrae datos de la actividad y nóminas de participantes, valida consistencia con reglas Q-01 a Q-20, persiste transaccionalmente en SQLite y distribuye a las matrices oficiales correspondientes.
 
-```text
-INFORME DE ACTIVIDAD WORD (.docx)
-              ↓
-          EXTRACCIÓN         (Metadatos de actividad, participantes, evidencias)
-              ↓
-          VALIDACIÓN         (Reglas de calidad Q-01 a Q-20, detección de duplicados)
-              ↓
-         PERSISTENCIA        (Registro transaccional en base de datos SQLite)
-              ↓
-         ENRUTAMIENTO        (Clasificación institucional por perfil y tipo de vínculo)
-              ↓
-            M1–M5            (Generación de las 5 matrices oficiales en formato Excel)
-```
+### Módulo 2: Consolidación Inversa Matrices Excel → Informes Word
+Herramienta de soporte para generar informes resumidos a partir de matrices consolidadas previas.
 
-### 4.2 Flujo de Planificación y Generación Documental (Planning → DOCX)
+### Módulo 3: Planificación y Diseño Metodológico
+Modelado de actividades planificadas del POA, gestión técnica de diseños metodológicos (objetivos, metodología, agenda cronometrada, matriz de planificación operativa, preguntas frecuentes), validación de reglas V-MD, transiciones de estado (`DRAFT` → `REVIEW` → `APPROVED`), congelamiento de diseños aprobados y exportación a documento formal Word (`.docx`).
 
-```text
-ACTIVIDAD PLANIFICADA
-          ↓
-DISEÑO METODOLÓGICO          (Estructuración de bloques institucionales: FAQs, Agenda, Matriz)
-          ↓
-      VALIDACIÓN             (Motor de reglas institucionales V-MD-01 a V-MD-14)
-          ↓
-      APROBACIÓN             (Transición de estados DRAFT → REVIEW → APPROVED con regla R-08)
-          ↓
-  PERSISTENCIA V003          (Almacenamiento transaccional segregado en SQLite)
-          ↓
-  RENDERIZADOR DOCX          (Generación desacoplada del documento oficial .docx)
-```
+### Módulo 4: Reporting y Dashboard Institucional
+Centro de inteligencia institucional. Visualiza KPIs analíticos en cinco niveles jerárquicos y emite los reportes ejecutivos oficiales de la universidad (REP-01 a REP-05) con exportación derivada en XLSX, DOCX y CSV.
 
 ---
 
-## 5. Matrices Institucionales Oficiales
+## 5. Matrices Institucionales Oficiales (M1–M5)
 
-El subsistema de consolidación genera cinco matrices en hojas de cálculo electrónicas (`.xlsx`), empleando plantillas base institucionales certificadas:
+Las cinco matrices en formato Excel (`.xlsx`) son los **productos primarios oficiales** de la gestión universitaria. Reporting y Dashboard son capas analíticas que consumen estos datos consolidados; **en ningún caso sustituyen las matrices patrimoniales**.
 
-* **M1 — Consolidado de Actividades**: Registro general de actividades ejecutadas, fecha, unidad académica, modalidad, tipo de evento y resumen cuantitativo de participación.
-* **M2 — Estudiantes**: Padrón detallado de estudiantes participantes, incluyendo carrera, año académico, sexo y desglose demográfico institucional.
-* **M3 — Académicos y Administrativos**: Registro de docentes, investigadores y personal administrativo involucrado en las actividades.
-* **M4 — Colaboradores**: Registro de personal de apoyo, enlaces comunitarios y facilitadores externos participantes.
-* **M5 — Protagonistas Beneficiados**: Detalle de beneficiarios comunitarios, productores, emprendedores o actores sociales atendidos por programas universitarios.
-
----
-
-## 6. Planificación Institucional y Diseño Metodológico
-
-El módulo de planificación (`app/planning/`) modela la fase preparatoria de las intervenciones universitarias, garantizando rigor técnico, consistencia metodológica y trazabilidad institucional.
-
-### 6.1 Componentes del Dominio
-* **`PlannedActivity`**: Entidad raíz que representa una actividad proyectada, con código institucional, título, fechas previstas, responsable y presupuesto estimado.
-* **`MethodologicalDesign`**: Entidad agregada que consolida el contenido técnico de la actividad bajo un ciclo de vida controlado (`DRAFT`, `REVIEW`, `APPROVED`, `REJECTED`, `ARCHIVED`).
-* **`FAQ`**: Registro estructurado de preguntas frecuentes y respuestas operativas para facilitadores y participantes.
-* **`Agenda`**: Cronograma detallado de sesiones, horarios, temas y responsables.
-* **`OperationalMatrix`**: Matriz operativa que alinea objetivos específicos, actividades, resultados esperados, indicadores y recursos requeridos.
-* **`AIProposal`**: Entidad para el registro auditable de sugerencias metodológicas asistidas (preparada para fases futuras).
-
-### 6.2 Bloques Institucionales del Diseño Metodológico
-Los documentos de Diseño Metodológico se estructuran en secciones institucionales normalizadas:
-
-1. **Encabezado y Metadatos**: Identificación institucional, nombre del taller o evento, código de actividad, fecha y responsables.
-2. **Introducción y Justificación**: Contexto, antecedentes institucionales y motivación de la intervención.
-3. **Objetivos Metodológicos**: Objetivo general y objetivos específicos alineados con las líneas estratégicas de la universidad.
-4. **Metodología y Resultados Esperados**: Enfoque pedagógico, dinámicas participativas y entregables previstos.
-5. **Preguntas Frecuentes (FAQ)**: Respuestas a dudas operativas clave sobre la actividad.
-6. **Programa / Agenda**: Estructura temporal y metodológica de la jornada.
-7. **Matriz de Planificación Operativa**: Tabla de articulación entre objetivos, metas, indicadores, fuentes de verificación y responsables.
-8. **Pie de Aprobación**: Registro formal de autorización institucional con identificador del aprobador.
+* **M1 — Consolidado de Actividades**: Catálogo general de actividades ejecutadas, fecha, unidad académica, modalidad, tipo de evento y resumen cuantitativo de participación.
+* **M2 — Estudiantes**: Padrón de participantes clasificados como estudiantes universitarios, carrera, año académico y desglose demográfico.
+* **M3 — Académicos y Administrativos**: Registro de docentes, investigadores y colaboradores administrativos.
+* **M4 — Colaboradores**: Personal de apoyo técnico, enlaces comunitarios y facilitadores externos.
+* **M5 — Protagonistas Beneficiados**: Padrón de protagonistas comunitarios, productores, emprendedores y actores territoriales atendidos por programas universitarios.
 
 ---
 
-## 7. Persistencia, Integridad y Generación Documental
+## 6. Catálogo de Reportes Oficiales (REP-01 a REP-05)
 
-### 7.1 Persistencia Relacional en SQLite
-El sistema utiliza SQLite como motor de persistencia relacional local, estructurado en esquemas versionados y gobernados por migraciones deterministas (`MigrationRunner`):
-* **Migración V001**: Tablas fundamentales de actividades ejecutadas, personas, perfiles institucionales, asistencias, evidencias, informes de actividades y auditoría de eventos de consolidación.
-* **Migración V002**: Agregación métrica y tablas de soporte analítico.
-* **Migración V003**: Esquema segregado de planificación (`planning_planned_activities`, `planning_methodological_designs`, `planning_design_faqs`, `planning_design_agenda`, `planning_design_operational_matrix`, `planning_ai_proposals`).
+El subsistema de reportes implementa exclusivamente los cinco reportes normalizados por la gobernanza de la institución:
 
-La segregación de esquemas asegura que las operaciones del módulo de planificación no inserten, modifiquen ni consulten registros en las tablas de ejecución histórica, garantizando el principio `PLANIFICADO ≠ EJECUTADO`.
-
-### 7.2 Garantías de Integridad del Sistema
-* **Validación de Reglas de Calidad**:
-  - Dominio de Ejecución: Reglas Q-01 a Q-20 para validación de datos de entrada, consistencia demográfica y no duplicación.
-  - Dominio de Planificación: Reglas V-MD-01 a V-MD-14 para completitud metodológica, coherencia de objetivos (R-07) y requisitos de estructura antes de transiciones de estado.
-* **Transaccionalidad (Unit of Work)**: Todas las operaciones de guardado y actualización se ejecutan bajo transacciones atómicas con reversión automática en caso de error.
-* **Idempotencia**: La creación de borradores para una actividad existente y la re-exportación de documentos son operaciones idempotentes que impiden estados inconsistentes.
-* **Reconstrucción desde Persistencia**: Los agregados de dominio pueden ser reconstituidos íntegramente desde SQLite mediante nuevas conexiones independientes sin pérdida de relaciones hijas (FAQs, agenda, matriz operativa).
-* **Inmutabilidad de Estados Aprobados (Regla R-08)**: Un diseño metodológico en estado `APPROVED` queda permanentemente congelado; cualquier intento de modificación de contenido, retroceso de estado o segunda aprobación es rechazado a nivel de servicio y dominio.
-* **Trazabilidad Integral**: Cada entidad registra identificadores de autoría, modificación, fechas y usuario aprobador institucional.
-
-### 7.3 Generador Documental DOCX Desacoplado
-La exportación a documento Word (`.docx`) se realiza mediante un motor de renderizado independiente (`DocxMethodologicalDocumentRenderer`):
-* **Aislamiento Total**: No posee dependencias con la base de datos ni con el consolidador de matrices (`app.word_consolidator`). Opera exclusivamente a partir de objetos de transferencia de datos (`MethodologicalDesignDTO`).
-* **Estándar Visual Institucional**: Aplica especificaciones tipográficas, jerarquías de títulos, estilos de tablas y metadatos de aprobación conforme a la normativa de la universidad.
-* **Verificación de 11 Criterios**: Todo documento generado satisface 11 criterios estructurales, incluyendo integridad ZIP/OpenXML, presencia de metadatos, justificación, objetivos, tablas de agenda y matriz operativa, y pie de aprobación.
+| Código | Denominación Oficial | Propósito y Contenido Técnico |
+|---|---|---|
+| **REP-01** | Balance Ejecutivo de Gestión Institucional | Cumplimiento global, presupuesto ejecutado, volumen general de actividades y cobertura de personas por estamento. |
+| **REP-02** | Evaluación de Cumplimiento del POA | Cumplimiento de metas planificadas por área de conocimiento, diferenciando estrictamente las actividades emergentes. |
+| **REP-03** | Cobertura Demográfica y Atención de Protagonistas | Desglose demográfico de participantes por sexo, pueblos originarios/étnicos y condición de vulnerabilidad. |
+| **REP-04** | Extensión y Descentralización Territorial | Cobertura territorial desagregada por sedes, municipios, comunidades y recintos de la Costa Caribe. |
+| **REP-05** | Auditoría de Trazabilidad, Gobernanza y Salud del Dato | Integridad de identificaciones, estado de vinculación POA (V004), discrepancias y notas periciales de calidad. |
 
 ---
 
-## 8. Checkpoint Certificado: Fase 29.12
+## 7. Dashboard Institucional de 5 Niveles
 
-### Integración Operativa Planificación → Diseño → Validación → Aprobación → DOCX
+El Dashboard consume de manera directa y exclusiva el contrato `DashboardDataDTO`, estructurado en cinco niveles de supervisión:
 
-* **Objetivo:** Demostrar y certificar la integración operativa de extremo a extremo del flujo institucional completo de planificación académica utilizando capacidades públicas certificadas, sin mocks y sobre bases de datos reales.
-* **Alcance:** Creación de actividad planificada, estructuración del diseño metodológico, validación institucional con reglas bloqueantes, transición a revisión, aprobación formal con congelamiento, reconstrucción limpia desde SQLite y renderizado del documento oficial en formato Word (`.docx`).
-* **Capacidades Verificadas:**
-  1. Flujo operativo secuencial de 19 pasos completado con éxito de punta a punta.
-  2. Idempotencia en la inicialización de borradores y exportación documental.
-  3. Aplicación estricta de la regla R-08 (inmutabilidad de diseños aprobados ante intentos de edición o transición).
-  4. Reconstrucción completa del diseño desde una conexión SQLite limpia e independiente.
-  5. Verificación pericial de los 11 criterios físicos y semánticos del archivo DOCX generado.
-  6. Cumplimiento estricto de `PLANIFICADO ≠ EJECUTADO`: 0 registros insertados en las 18 tablas funcionales de ejecución e histórico.
-  7. Aislamiento de auditoría: 0 registros insertados en `auditoria_evento`.
-  8. Aislamiento estático (AST): 0 importaciones cruzadas entre `app.word_consolidator` y `app.planning`.
-* **Pruebas Realizadas:**
-  - Suite E2E de Integración Operativa (`tests/test_planning_operational_integration_e2e.py`): 3/3 PASS.
-  - Suite de Persistencia de Planificación (`tests/test_planning_persistence.py`): 20/20 PASS.
-  - Suite de Interfaz de Planificación (`tests/test_planning_ui.py`): 17/17 PASS.
-  - Suite Completa de Planificación (`tests/test_planning/`): 147/147 PASS.
-  - Suite Global de Regresión: 1,183/1,183 PASS.
-* **Resultado General:** **1,183 pruebas aprobadas, 0 fallos, 0 errores**.
-* **Restricciones:** Operación libre de modelos de inteligencia artificial en esta fase; preservación de la arquitectura Word $\rightarrow$ M1–M5 y plantillas patrimoniales.
-* **Estado del Módulo:** **Certificado e Integrado Operativamente.**
+1. **Nivel 1 — Resumen Ejecutivo**: Indicador Global de Gestión (% ponderado), cobertura total de personas atendidas, ratio de eficiencia territorial y semáforo de salud del repositorio.
+2. **Nivel 2 — Actividades y Cumplimiento POA**: Volumen de actividades ejecutadas, índice de cumplimiento de metas POA y contabilización separada de eventos emergentes.
+3. **Nivel 3 — Participación y Demografía**: Protagonistas únicos (desduplicados por identificación verificada), índice de equidad de género (% mujeres) y porcentaje de inclusión étnica.
+4. **Nivel 4 — Cobertura Territorial**: Sedes activas, municipios impactados y tasa de descentralización territorial fuera del campus principal.
+5. **Nivel 5 — Trazabilidad y Salud del Dato**: Porcentaje de registros con cédula verificada, tasa de enlace planificación-ejecución (V004) y estado de completitud de datos en M5.
 
 ---
 
-## 9. Calidad y Control de Pruebas Automatizadas
+## 8. Stack Tecnológico
 
-El proyecto aplica una directiva estricta de aseguramiento de calidad:
-**EXTEND before MODIFY · ISOLATE before INTEGRATE · TEST before ADVANCE**
+### Tecnologías Utilizadas
+* **Lenguaje**: Python 3.11+ (certificado y validado en Python 3.14.5).
+* **Interfaz de Usuario**: CustomTkinter (interfaz nativa de escritorio, paleta institucional `#0B3C5D`, soporte para modo claro/oscuro).
+* **Persistencia Relacional**: SQLite3 (base de datos local ACID, esquemas versionados V001 a V004 con transacciones controladas).
+* **Procesamiento de Hojas de Cálculo**: `openpyxl` (para lectura y escritura de matrices oficiales M1–M5 y exportador analítico XLSX).
+* **Procesamiento Documental Word**: `python-docx` (para extracción de tablas de asistencia, renderizado de diseños metodológicos y exportador DOCX).
+* **Manipulación de Datos**: `pandas` (apoyo en agregaciones y normalización).
+* **Aseguramiento de Calidad**: `pytest`, `pytest-cov`, `anyio` (batería de pruebas automatizadas y análisis estático).
+* **Control de Versiones**: Git y GitHub (control estricto de procedencia, trazabilidad e integridad de cambios).
 
-### 9.1 Resultados Agregados de Pruebas
-```text
-============================== test session starts ==============================
-Total de pruebas automatizadas: 1,183 passed
-Fallos (Failures):             0
-Errores (Errors):              0
-Warnings:                      39 (compatibilidad openpyxl preexistentes)
-Tiempo de ejecución:           ~392s
-Estado de la suite:            100% PASS
-=================================================================================
-```
-
-### 9.2 Integridad Patrimonial Certificada
-El sistema custodia seis componentes patrimoniales institucionales cuya integridad criptográfica se audita de forma continua:
-* Plantilla M1 (Consolidado de Actividades)
-* Plantilla M2 (Estudiantes)
-* Plantilla M3 (Académicos y Administrativos)
-* Plantilla M4 (Colaboradores)
-* Plantilla M5 (Protagonistas Beneficiados)
-* Ejecutable institucional certificado (`BICU_Consolidador.exe`)
-
-Los seis componentes han sido verificados y permanecen íntegros, inalterados y conformes con sus especificaciones de referencia.
+### Decisiones Arquitectónicas: Tecnologías Deliberadamente No Utilizadas
+* **Matplotlib / Gráficos Pesados**: No utilizado en el aplicativo de escritorio para preservar la velocidad de respuesta y evitar dependencias complejas de renderizado gráfico; los KPIs se representan mediante tarjetas nativas semaforizadas.
+* **Motores PDF (ReportLab, wkhtmltopdf)**: No utilizados. La exportación institucional se enfoca en XLSX, DOCX y CSV para permitir auditoría, edición y procesamiento por las instancias académicas.
+* **Modelos de IA en Reporting y Dashboard**: No se utiliza IA en el cálculo de indicadores, dashboard ni reportes oficiales. Las cifras institucionales son 100% deterministas y auditables.
+* **Migración V005**: No implementada. La base de datos opera sobre las migraciones certificadas V001 a V004 sin alterar las estructuras vigentes.
 
 ---
 
-## 10. Seguridad y Privacidad de la Información
+## 9. Calidad de Software y Gobernanza del Dato
 
-* **Protección de Datos Institucionales**: Los documentos institucionales reales, listas de asistencia de participantes, identificadores personales, números telefónicos y bases de datos con información institucional sensible **no forman parte del repositorio público**.
-* **Exclusión Rigurosa en `.gitignore`**: Se excluyen de forma irrestricta bases de datos locales (`*.db`, `*.sqlite`), hojas de cálculo institucionales, informes Word, archivos temporales, ejecutables, logs y variables de entorno (`.env`).
-* **Pruebas con Datos Sintéticos**: La totalidad de las pruebas automatizadas públicas opera exclusivamente sobre fixtures controlados, datos sintéticos y estructuras anonimizadas.
-* **Gestión de Credenciales**: El repositorio no almacena credenciales, claves criptográficas, certificados privados, llaves de API ni contraseñas de ningún tipo.
+### Calidad de Software
+* **Batería de Pruebas Automatizadas**: 1,378 pruebas unitarias, de integración, E2E y de aislamiento arquitectónico aprobadas (100% PASS, 0 fallos, 0 errores, 1 prueba omitida por configuración).
+* **Aislamiento Arquitectónico Estático (AST)**: Pruebas automatizadas inspeccionan el árbol de sintaxis abstracta para garantizar que:
+  - `app.reporting` no contenga dependencias de interfaz gráfica (`customtkinter`), motores gráficos (`matplotlib`) ni servicios de IA.
+  - `app.reporting_ui` no contenga llamadas directas a `sqlite3` ni sentencias SQL.
+  - `app.word_consolidator` no importe componentes de `app.reporting_ui` (desacoplamiento total vía Composition Root).
+* **Inmutabilidad y Preservación Patrimonial**: Verificación criptográfica permanente mediante SHA-256 de las cinco plantillas patrimoniales de Excel y del binario ejecutable oficial (**6/6 hashes MATCH**).
+* **Idempotencia y Transaccionalidad**: Operaciones de inserción y exportación diseñadas para ser reproducibles sin generar duplicados ni corromper estados previos.
 
----
-
-## 11. Evolución del Proyecto y Roadmap
-
-### 11.1 Hitos Completados
-* **Consolidación Word → M1–M5**: Extracción, validación de reglas Q-01 a Q-20, enrutamiento por perfil y generación de matrices consolidadas.
-* **Validación y Certificación de Matrices**: Verificación de no alteración de plantillas oficiales y preservación patrimonial.
-* **Dominio de Planificación y Reglas Institucionales**: Entidades, value objects, catálogo institucional y reglas V-MD-01 a V-MD-14.
-* **Persistencia Relacional SQLite V003**: Esquema segregado, transacciones atómicas, Unit of Work y repositorios especializados.
-* **Motor de Renderizado DOCX**: Generación desacoplada de documentos Word institucionales conforme a especificación visual oficial.
-* **Capa de Interfaz de Usuario de Planificación**: Interfaz gráfica en CustomTkinter con vistas de catálogo, detalle, editor y diálogos de validación/aprobación.
-* **Integración Operativa E2E (Fase 29.12)**: Certificación de punta a punta del flujo Planificación $\rightarrow$ Diseño $\rightarrow$ Validación $\rightarrow$ Aprobación $\rightarrow$ DOCX sin mocks y con aislamiento total.
-
-### 11.2 En Planificación (Fases Futuras)
-* Integración de servicios asistenciales para sugerencias metodológicas controladas (Fase 29.13).
-* Generación de informes comparativos de cumplimiento entre actividades planificadas y actividades efectivamente ejecutadas.
-* Exportación de reportes institucionales consolidados por período académico.
+### Gobernanza de Datos Institucionales
+* **Prohibición de Fabricación de Datos**: No se crean ni se infieren registros inexistentes.
+* **Preservación Estricta de Nulos (NULL)**: La información ausente se conserva como `NULL` o se etiqueta con categorías normalizadas (`No Especificado`, `Municipio No Especificado`, `Sin Fecha en POA`, `No Aplica`). Queda terminantemente prohibida la imputación estadística automática.
+* **Aislamiento de Registros Históricos**: Los 32 registros preexistentes de la Matriz M5 marcados como `es_historico_preexistente = 1` permanecen aislados del período analítico actual.
+* **Cómputo Metodológico Multisesión**: En modo `COHORT_UNIQUE` (predeterminado), una actividad planificada con N sesiones operativas computa como 1 cumplimiento de meta sobre la cohorte atendida, evitando inflaciones artificiales del porcentaje de cumplimiento.
 
 ---
 
-**BICU — Bluefields Indian & Caribbean University**  
-*Desarrollado con disciplina de ingeniería de software, arquitectura limpia y resguardo de la integridad institucional.*
+## 10. Estado Actual del Proyecto
+
+| Módulo / Componente | Estado | Alcance y Certificación |
+|---|---|---|
+| **Pipeline Word → Matrices M1–M5** | **Implementado y Validado** | Certificado en Fase 29.20.2 (casos D-01 a D-10, extracción, validación Q-01..Q-20 y routing). |
+| **Consolidación Matrices → Word** | **Implementado y Validado** | Módulo 2 operativo para generación documental a partir de consolidados. |
+| **Planificación Institucional** | **Implementado y Validado** | Certificado en Fases 29.12 a 29.19 (V003, V004, validación V-MD, renderizado DOCX). |
+| **Asistencia IA en Planificación** | **Implementado y Validado** | Asistencia controlada para redacción metodológica (Gemini API / Mock fallback). |
+| **Motor de Indicadores Institucionales** | **Implementado y Validado** | `IndicatorCalculationService` certificado con cálculo matemático puro sobre SQLite. |
+| **Reporting Oficial (REP-01 a REP-05)** | **Implementado y Validado** | Certificado en Fase 29.20.3 (generación y exportación a XLSX, DOCX y CSV). |
+| **Dashboard Institucional (5 Niveles)** | **Implementado y Validado** | Certificado en Fase 29.20.3 (visualización jerárquica con filtros de período y sede). |
+| **Integración UI Módulo 4** | **Implementado y Validado** | Certificado en Fase 29.20.3.1 (Composition Root en `run_consolidator.py`, menú en grid 2x2). |
+| **Exportador PDF** | **Fuera de Alcance** | Deliberadamente descartado por política institucional de formatos editables. |
+
+---
+
+## 11. Información de Release
+
+* **Versión del Sistema**: BICU Consolidador & Reporting Institucional — Release Consolidado Fase 29.20.3.
+* **Ejecución y Despliegue**:
+  ```bash
+  # Iniciar la aplicación desde el Composition Root
+  python run_consolidator.py
+  ```
+* **Ejecución de Pruebas**:
+  ```bash
+  # Ejecutar suite de pruebas de Reporting y Dashboard
+  python -m pytest tests/test_fase_29_20_3_reporting_dashboard.py -v
+
+  # Ejecutar suite completa de regresión
+  python -m pytest -q
+  ```
+* **Requisitos**: Python 3.11+ con dependencias listadas en el entorno institucional (`customtkinter`, `openpyxl`, `python-docx`, `pandas`, `pydantic`, `pytest`).
+
+---
+
+**Bluefields Indian & Caribbean University (BICU)**  
+*Desarrollado bajo estándares de ingeniería de software, arquitectura limpia, trazabilidad institucional y resguardo patrimonial del dato.*
