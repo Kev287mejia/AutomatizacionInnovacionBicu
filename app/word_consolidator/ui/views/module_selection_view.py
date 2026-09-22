@@ -20,6 +20,7 @@ class ModuleSelectionView(ctk.CTkFrame):
         on_select_matrices_word: Optional[Callable[[], None]] = None,
         on_select_planning: Optional[Callable[[], None]] = None,
         on_select_reporting: Optional[Callable[[], None]] = None,
+        on_select_review_queue: Optional[Callable[[], None]] = None,
         **kwargs: Any,
     ):
         super().__init__(master, fg_color="transparent", **kwargs)
@@ -27,6 +28,7 @@ class ModuleSelectionView(ctk.CTkFrame):
         self.on_select_matrices_word = on_select_matrices_word
         self.on_select_planning = on_select_planning
         self.on_select_reporting = on_select_reporting
+        self.on_select_review_queue = on_select_review_queue
 
         self._init_ui()
 
@@ -62,8 +64,8 @@ class ModuleSelectionView(ctk.CTkFrame):
         # ---------------------------------------------------------------------
         # 2. CUERPO CENTRAL: SELECCIÓN DE PROCESO
         # ---------------------------------------------------------------------
-        center_frame = ctk.CTkFrame(self, fg_color="transparent")
-        center_frame.grid(row=1, column=0, sticky="nsew", padx=24, pady=20)
+        center_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        center_frame.grid(row=1, column=0, sticky="nsew", padx=24, pady=10)
         center_frame.grid_columnconfigure(0, weight=1)
 
         prompt_title = ctk.CTkLabel(
@@ -325,6 +327,65 @@ class ModuleSelectionView(ctk.CTkFrame):
         btn_rep.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
 
         # ---------------------------------------------------------------------
+        # Tarjeta 5: COLA DE REVISIÓN (GOBERNANZA DE DATOS)
+        # ---------------------------------------------------------------------
+        card_rev = ctk.CTkFrame(
+            cards_container,
+            fg_color=("gray92", "gray17"),
+            corner_radius=6,
+            border_width=1,
+            border_color=("gray80", "gray25"),
+        )
+        card_rev.grid(row=2, column=0, columnspan=2, padx=0, pady=8, sticky="nsew")
+        card_rev.grid_columnconfigure(0, weight=1)
+
+        rev_badge = ctk.CTkLabel(
+            card_rev,
+            text="GOBERNANZA DE DATOS — CALIDAD Y CONTROL",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color=("#D32F2F", "#EF5350"),
+            anchor="w",
+        )
+        rev_badge.grid(row=0, column=0, padx=16, pady=(14, 4), sticky="w")
+
+        rev_title = ctk.CTkLabel(
+            card_rev,
+            text="GESTIÓN Y RESOLUCIÓN DE COLA DE REVISIÓN (COLA_REVISION)",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            anchor="w",
+            wraplength=720,
+            justify="left",
+        )
+        rev_title.grid(row=1, column=0, padx=16, pady=(0, 6), sticky="w")
+
+        rev_desc = ctk.CTkLabel(
+            card_rev,
+            text=(
+                "Inspecciona asistencias y participantes con estamento ambiguo, falta de cédula "
+                "o inconsistencias detectadas. Permite asentar decisiones periciales explícitas bajo auditoría "
+                "forense inmutable (DISCREPANCY_RESOLVE) y habilitar su posterior proyección a matrices M2 a M5."
+            ),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=("gray40", "gray70"),
+            anchor="w",
+            wraplength=720,
+            justify="left",
+        )
+        rev_desc.grid(row=2, column=0, padx=16, pady=(0, 14), sticky="w")
+
+        btn_rev = ctk.CTkButton(
+            card_rev,
+            text="Gestionar Cola de Revisión  ➔",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            fg_color="#0B3C5D",
+            hover_color="#07263D",
+            height=34,
+            corner_radius=4,
+            command=self._on_click_review_queue,
+        )
+        btn_rev.grid(row=3, column=0, padx=16, pady=(0, 16), sticky="ew")
+
+        # ---------------------------------------------------------------------
         # 3. PIE DE PÁGINA INSTITUCIONAL
         # ---------------------------------------------------------------------
         footer_frame = ctk.CTkFrame(self, fg_color="transparent", height=24)
@@ -354,3 +415,7 @@ class ModuleSelectionView(ctk.CTkFrame):
     def _on_click_reporting(self) -> None:
         if self.on_select_reporting:
             self.on_select_reporting()
+
+    def _on_click_review_queue(self) -> None:
+        if self.on_select_review_queue:
+            self.on_select_review_queue()

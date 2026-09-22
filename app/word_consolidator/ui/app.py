@@ -70,6 +70,7 @@ class ConsolidatorApp(ctk.CTk):
 
     _planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
     _reporting_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
+    _review_queue_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None
 
     @classmethod
     def set_planning_view_factory(
@@ -87,10 +88,19 @@ class ConsolidatorApp(ctk.CTk):
         """Registra la fábrica visual para el Módulo 4 (Reportes y Dashboard) sin acoplar paquetes."""
         cls._reporting_view_factory = factory
 
+    @classmethod
+    def set_review_queue_view_factory(
+        cls,
+        factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]],
+    ) -> None:
+        """Registra la fábrica visual para la Cola de Revisión sin acoplar paquetes."""
+        cls._review_queue_view_factory = factory
+
     def __init__(
         self,
         planning_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
         reporting_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
+        review_queue_view_factory: Optional[Callable[[Any, Callable[[], None]], ctk.CTkFrame]] = None,
         **kwargs: Any,
     ):
         # Configurar DPI antes de inicializar la ventana
@@ -150,6 +160,7 @@ class ConsolidatorApp(ctk.CTk):
             on_select_matrices_word=self.mostrar_matrices_word,
             on_select_planning=self.mostrar_planning,
             on_select_reporting=self.mostrar_reporting,
+            on_select_review_queue=self.mostrar_cola_revision,
         )
         self.word_batch_view = WordBatchProcessingView(
             self.container,
@@ -178,6 +189,15 @@ class ConsolidatorApp(ctk.CTk):
         else:
             self.reporting_view = None
 
+        # Fábrica de vista de cola de revisión (inyección de dependencias desacoplada)
+        effective_review_factory = review_queue_view_factory or self._review_queue_view_factory
+        if effective_review_factory is not None:
+            self.review_queue_view: Optional[ctk.CTkFrame] = effective_review_factory(
+                self.container, self.mostrar_menu_principal
+            )
+        else:
+            self.review_queue_view = None
+
         # Iniciar en el selector de módulos
         self.mostrar_menu_principal()
 
@@ -191,7 +211,7 @@ class ConsolidatorApp(ctk.CTk):
 
     def _ocultar_todas_las_vistas(self) -> None:
         """Oculta todas las vistas del contenedor."""
-        for v in (self.module_selection_view, self.word_batch_view, self.main_window, self.planning_view, self.reporting_view):
+        for v in (self.module_selection_view, self.word_batch_view, self.main_window, self.planning_view, self.reporting_view, self.review_queue_view):
             if v is not None:
                 v.grid_forget()
 
@@ -236,6 +256,20 @@ class ConsolidatorApp(ctk.CTk):
             messagebox.showinfo(
                 "Módulo de Reportes y Dashboard",
                 "El Módulo 4 (Reportes y Dashboard Institucional) no está configurado en esta instancia.",
+            )
+
+    def mostrar_cola_revision(self) -> None:
+        """Muestra la vista de Gestión y Resolución de Cola de Revisión."""
+        if self.review_queue_view is not None:
+            self._ocultar_todas_las_vistas()
+            if hasattr(self.review_queue_view, "recargar_bandeja"):
+                self.review_queue_view.recargar_bandeja()
+            self.review_queue_view.grid(row=0, column=0, sticky="nsew")
+        else:
+            from tkinter import messagebox
+            messagebox.showinfo(
+                "Cola de Revisión",
+                "La vista de Gestión de Cola de Revisión no está configurada en esta instancia.",
             )
 
 

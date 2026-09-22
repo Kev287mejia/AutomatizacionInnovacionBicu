@@ -2,9 +2,10 @@
 """
 run_consolidator.py
 
-Lanzador Institucional del Consolidador Word BICU (Fase 14.9 / Fase 29.20.3).
+Lanzador Institucional del Consolidador Word BICU (Fase 14.9 / Fase 29.20.3 / Fase 29.22.1).
 Permite iniciar la aplicación de escritorio directamente desde la raíz del proyecto.
-Composition Root: conecta las fábricas de vista de Módulo 3 y Módulo 4 de forma desacoplada.
+Composition Root: conecta las fábricas de vista de Planificación, Reportes/Dashboard
+y Gestión de Cola de Revisión de forma desacoplada y transaccional.
 """
 
 import sys
@@ -39,12 +40,31 @@ def create_reporting_view(container, on_back):
     return ReportingMainView(container, ui_service=ui_svc, on_volver_menu=on_back)
 
 
+def create_review_queue_view(container, on_back):
+    """Composition root para la Gestión y Resolución de Cola de Revisión (COLA_REVISION)."""
+    from app.infrastructure.persistence.config import DatabaseConfig
+    from app.infrastructure.persistence.connection import SQLiteConnectionManager
+    from app.review.application.service import ReviewQueueApplicationService
+    from app.review.infrastructure.sqlite_review_repository import (
+        SQLiteReviewQueueRepository,
+    )
+    from app.review.ui.views.review_queue_view import ReviewQueueView
+
+    cfg = DatabaseConfig()
+    mgr = SQLiteConnectionManager(cfg)
+    conn = mgr.get_connection()
+    repo = SQLiteReviewQueueRepository(conn)
+    service = ReviewQueueApplicationService(repo)
+    return ReviewQueueView(container, service=service, on_volver_menu=on_back)
+
+
 def main() -> None:
     app = ConsolidatorApp(
         planning_view_factory=lambda container, on_back: PlanningMainView(
             container, on_volver_menu=on_back
         ),
         reporting_view_factory=create_reporting_view,
+        review_queue_view_factory=create_review_queue_view,
     )
     app.mainloop()
 
