@@ -8,7 +8,7 @@ Genera reportes de consola y persiste el contrato técnico en output/reporte_pla
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from app.audit.audit_logger import get_logger
 from app.templates_analysis.inspector import TemplateInspector
@@ -19,6 +19,7 @@ from app.templates_analysis.models import (
     ReporteInspeccionPlantillas,
 )
 from app.templates_analysis.template_validator import TemplateValidator
+from app.core.resources import resolver_ruta_templates
 
 logger = get_logger(__name__)
 
@@ -40,23 +41,24 @@ class TemplateReporter:
     @classmethod
     def ejecutar_inspeccion_global(
         cls,
-        carpeta_templates: Path,
+        carpeta_templates: Optional[Union[str, Path]] = None,
         carpeta_fixtures: Optional[Path] = None,
     ) -> ReporteInspeccionPlantillas:
         """
         Ejecuta la inspección completa de las 5 matrices respetando la jerarquía de prioridad:
-        1. Plantilla oficial real en carpeta_templates.
+        1. Plantilla oficial real en carpeta_templates (resuelta de forma robusta).
         2. Si no existe en carpeta_templates, busca fixture en carpeta_fixtures (solo para pruebas).
         3. Si no existe en ningún lado, documenta su ausencia formal.
 
         Args:
-            carpeta_templates: Directorio oficial de plantillas (templates/).
+            carpeta_templates: Directorio de plantillas oficiales o None para resolver automáticamente.
             carpeta_fixtures: Directorio opcional de fixtures para pruebas (tests/fixtures/templates/).
 
         Returns:
             ReporteInspeccionPlantillas auditado.
         """
         logger.info("Iniciando Inspección Global de Plantillas Oficiales (Fase 8).")
+        carpeta_templates = resolver_ruta_templates(carpeta_templates)
         esquemas: Dict[str, EsquemaPlantilla] = {}
         manifestos: Dict[str, MappingManifesto] = {}
         ausentes: List[str] = []

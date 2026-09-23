@@ -23,6 +23,7 @@ from app.word_consolidator.ui.services.error_translator import (
 from app.word_consolidator.ui.services.word_batch_service import (
     WordBatchAppService,
 )
+from app.core.resources import resolver_ruta_templates
 
 
 class WordBatchEventType(str, Enum):
@@ -248,6 +249,7 @@ class WordBatchWorker(threading.Thread):
                 recursivo=False,
                 exportar_matrices=True,
                 carpeta_salida=self.carpeta_salida,
+                carpeta_templates=str(resolver_ruta_templates()),
                 dry_run=self.dry_run,
                 advertir_posibles_duplicados=True,
             )

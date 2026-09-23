@@ -61,6 +61,8 @@ a = Analysis(
         # --- Módulos Base de la Aplicación ---
         'app',
         'app.main',
+        'app.core',
+        'app.core.resources',
         # --- Módulo 1 & Pipeline de Ingesta Word (Fase 28.2 / Fase 29.20.2) ---
         'app.application',
         'app.application.commands',

@@ -32,6 +32,7 @@ from app.application.dto.export_dtos import (
     ExportacionPreparadaDTO,
     PoliticaExportacionRevision,
 )
+from app.core.resources import resolver_ruta_templates
 
 logger = get_logger(__name__)
 
@@ -341,7 +342,7 @@ class ExportACL:
             ManifiestoExportacion formal generado y auditado por el ExportCoordinator.
         """
         salida_path = Path(carpeta_salida)
-        templates_path = Path(carpeta_templates) if carpeta_templates else Path("templates")
+        templates_path = resolver_ruta_templates(carpeta_templates)
         fixtures_path = Path(carpeta_fixtures) if carpeta_fixtures else None
 
         logger.info(

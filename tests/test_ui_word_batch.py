@@ -144,17 +144,7 @@ class TestWordBatchWorker:
 class TestUIComponentsWordBatch:
     """Pruebas de los componentes visuales de CustomTkinter."""
 
-    @pytest.fixture
-    def app_root(self):
-        """Raíz de CustomTkinter para pruebas visuales headless."""
-        import customtkinter as ctk
-        root = ctk.CTk()
-        root.withdraw()
-        yield root
-        try:
-            root.destroy()
-        except Exception:
-            pass
+    # app_root se hereda con scope='session' desde tests/conftest.py
 
     def test_module_selection_view_callbacks(self, app_root):
         """ModuleSelectionView invoca correctamente los callbacks de navegación."""
