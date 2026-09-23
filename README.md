@@ -239,11 +239,11 @@ Estructura ejecutiva orientada a la toma de decisiones basada en evidencia:
 
 ## 14. Certificación y Calidad de Software
 
-El sistema cuenta con certificación técnica formal y reproducible. Estado oficial del Release v1.1.0:
+El sistema cuenta con certificación técnica formal y reproducible. Estado oficial del Release v1.1.1:
 
 ```text
 Batería de Pruebas:
-1,485 APROBADAS (PASS)
+1,492 APROBADAS (PASS)
 1 OMITIDA (SKIP - Configuración de entorno)
 0 FALLOS (FAIL)
 0 ERRORES (ERROR)
@@ -251,10 +251,15 @@ Batería de Pruebas:
 Hashes Patrimoniales Custodiados (M1–M5):
 5/5 COINCIDENTES (MATCH)
 
-Ejecutable Oficial v1.1.0:
+Ejecutable Oficial v1.1.1:
+SHA-256: 693D84D9AEAAF15AF9EC0CA6C07CE9A41D43ED823509C6FC954A8343A956E8BF
+Tamaño:  16,176,876 bytes
+Estado:  CERTIFICADO Y PUBLICADO (release/BICU_Consolidador.exe)
+
+Artefacto Histórico Preservado v1.1.0:
 SHA-256: 41E80FD377DE31AE5CB9B05F05C607D5D51070910E3A7B16C0C5BEAC7474D4F3
 Tamaño:  16,173,879 bytes
-Estado:  CERTIFICADO Y PUBLICADO (release/BICU_Consolidador.exe)
+Estado:  PRESERVADO (release/BICU_Consolidador_v1.1.0_historico.exe)
 
 Registros Históricos M5:
 32/32 INTACTOS (1,696 celdas inmutables)
@@ -267,6 +272,7 @@ V004 ACTIVA E INTACTA
 V005 DESCARTADA E INEXISTENTE
 
 Módulos y Servicios Integrados:
+Resolución Autónoma de Recursos y Plantillas — OPERATIVO Y CERTIFICADO
 Consolidación Word -> Matrices M1-M5 — OPERATIVO Y CERTIFICADO
 Planificación POA y Diseño Metodológico — OPERATIVO Y CERTIFICADO
 Motor de Indicadores y Trazabilidad — OPERATIVO Y CERTIFICADO
@@ -283,6 +289,7 @@ Preflight Operacional Multigrupo — OPERATIVO Y CERTIFICADO
 
 | Componente / Iniciativa | Estado Institucional | Observaciones Técnicas |
 |---|---|---|
+| **Resolución Autónoma de Recursos** | **Certificado y Operativo** | Detección determinista de rutas y plantillas independiente del CWD (Fase 29.25.1). |
 | **Consolidación Word ➔ Matrices M1–M5** | **Certificado y Operativo** | Procesamiento transaccional de informes y distribución oficial. |
 | **Planificación y Diseño Metodológico** | **Certificado y Operativo** | Gestión de POA, reglas V-MD y renderizado de documentos oficiales. |
 | **Motor de Indicadores y Trazabilidad** | **Certificado y Operativo** | Cálculo determinista sobre esquema V004. |
@@ -292,12 +299,13 @@ Preflight Operacional Multigrupo — OPERATIVO Y CERTIFICADO
 | **Backup Institucional Seguro** | **Certificado y Operativo** | SQLite Online Backup API, formato .bicu.bak, validación multicapa (Fase 29.24.1). |
 | **Restauración Controlada** | **Certificado y Operativo** | Safety snapshot, reemplazo atómico, post-verificación (Fase 29.24.1). |
 | **Preflight Operacional** | **Certificado y Operativo** | 5 grupos de verificación, reporte estructurado READY/WARNING/FATAL (Fase 29.24.1). |
-| **Distribución Ejecutable v1.1.0** | **Publicado Oficialmente** | Binario promovido bajo custodia SHA-256 en release/BICU_Consolidador.exe. |
+| **Distribución Ejecutable v1.1.1** | **Publicado Oficialmente** | Binario promovido bajo custodia SHA-256 en release/BICU_Consolidador.exe. |
 
 **Estado Oficial:**
-> **Release Institucional v1.1.0: CERTIFICADO, PROMOVIDO Y PUBLICADO.**
+> **Release Institucional v1.1.1: CERTIFICADO, PROMOVIDO Y PUBLICADO.**
 
 ---
 
 **Bluefields Indian & Caribbean University (BICU)**  
 *Dirección de Innovación y Emprendimiento — Sistema Institucional de Gestión y Calidad de la Información.*
+

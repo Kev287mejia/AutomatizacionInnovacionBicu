@@ -1,19 +1,29 @@
 ================================================================================
 RELEASE MANIFEST — BICU Sistema Institucional de Gestión y Reporting
-Fase 29.24.5 — Publicación Formal del Release Institucional v1.1.0
+Fase 29.25.3 — Publicación Formal del Release Institucional v1.1.1
 ================================================================================
 
 FECHA DE PUBLICACIÓN:   2026-09-22
-VERSIÓN DEL SISTEMA:    1.1.0
+VERSIÓN DEL SISTEMA:    1.1.1
 RAMA:                   main
 ESQUEMA SQLITE:         V004 (activo, estable, íntegro)
-ESTADO:                 RELEASE INSTITUCIONAL PUBLICADO (v1.1.0)
+ESTADO:                 RELEASE INSTITUCIONAL PUBLICADO (v1.1.1)
 
 ================================================================================
-CAPACIDADES IMPLEMENTADAS EN ESTA FASE
+CAPACIDADES Y MEJORAS INTEGRADAS EN ESTA VERSIÓN
 ================================================================================
 
-[A] BACKUP INSTITUCIONAL SEGURO
+[A] RESOLUCIÓN AUTÓNOMA DE RECURSOS E INDEPENDENCIA DE CWD (Fase 29.25.1)
+    - app/core/resources.py: módulo centralizado para resolución determinista
+      de plantillas y recursos institucionales (resolver_ruta_templates y
+      resolver_ruta_recurso).
+    - Detección transparente del entorno de ejecución empaquetado (sys._MEIPASS
+      en PyInstaller onedir) o en desarrollo (raíz del proyecto).
+    - Corrección en export_acl.py, reporter.py y worker de interfaz UI,
+      garantizando la exportación correcta de matrices M1–M5 independientemente
+      del directorio de trabajo desde donde se invoque el ejecutable.
+
+[B] BACKUP INSTITUCIONAL SEGURO
     - BackupService: generación de respaldos consistentes vía SQLite Online
       Backup API. Nunca copia en caliente con shutil.
     - Formato .bicu.bak: ZIP estándar con database.sqlite + manifest.json +
@@ -22,7 +32,7 @@ CAPACIDADES IMPLEMENTADAS EN ESTA FASE
       migrations_applied, python_version, platform.
     - Nombre de archivo: BICU_BACKUP_v{VERSION}_schV{SCHEMA}_{UTC}_{HASH6}.bicu.bak
 
-[B] VALIDACIÓN DE BACKUP MULTICAPA
+[C] VALIDACIÓN DE BACKUP MULTICAPA
     - Nivel 1: Existencia del archivo.
     - Nivel 2: Integridad ZIP.
     - Nivel 3: Presencia de los 3 componentes (sqlite, manifest, signature).
@@ -33,7 +43,7 @@ CAPACIDADES IMPLEMENTADAS EN ESTA FASE
     - Nivel 8: Tablas mínimas presentes (18 tablas obligatorias V001+).
     - Nivel 9: Compatibilidad de versión de esquema.
 
-[C] RESTAURACIÓN CONTROLADA
+[D] RESTAURACIÓN CONTROLADA
     - RestoreService: flujo 8-etapas con confirmación explícita del operador.
     - Safety backup automático de la BD activa ANTES de cualquier reemplazo.
     - Reemplazo atómico con os.replace (mismo volumen).
@@ -41,14 +51,14 @@ CAPACIDADES IMPLEMENTADAS EN ESTA FASE
     - Fallback de recuperación si el reemplazo falla.
     - Post-verificación de la BD restaurada (integrity_check).
 
-[D] SNAPSHOT PREVENTIVO
+[E] SNAPSHOT PREVENTIVO
     - Todo proceso de restauración genera primero un snapshot de la BD activa.
     - El snapshot se deposita en {db_dir}/safety_snapshots/.
     - Si el snapshot falla, la restauración se cancela y los datos originales
       quedan intactos.
     - La ruta al snapshot se incluye en RestoreResult para el operador.
 
-[E] PREFLIGHT OPERACIONAL
+[F] PREFLIGHT OPERACIONAL
     - ReleasePreflightChecker: 5 grupos, 12+ verificaciones individuales.
     - Grupo 1: Ruta (OneDrive, local institucional).
     - Grupo 2: SQLite (cabecera, integrity_check, foreign_key_check).
@@ -57,21 +67,18 @@ CAPACIDADES IMPLEMENTADAS EN ESTA FASE
     - Grupo 5: Entorno (Python >= 3.9, SQLite >= 3.35).
     - Retorna PreflightReport con estado global y resumen de líneas para UI.
 
-[F] TRATAMIENTO CORRECTO DE ERRORES DE INICIALIZACIÓN
-    - El bloque except Exception: pass silenciado en app.py fue reemplazado por:
-      * Logging estructurado en logger "bicu.startup".
-      * messagebox.showwarning no bloqueante para el operador.
-      * La ventana abre incluso ante error de migración, con advertencia visible.
+[G] TRATAMIENTO CORRECTO DE ERRORES DE INICIALIZACIÓN
+    - Logging estructurado en logger "bicu.startup".
+    - messagebox.showwarning no bloqueante para el operador.
+    - La ventana abre incluso ante error de migración, con advertencia visible.
 
-[G] DECLARACIÓN CORRECTA DE DEPENDENCIAS
-    - requirements.txt: agregado requests>=2.31,<3.0 (dependencia real del
-      gemini_adapter.py existente desde Fase 29.x).
-    - BICU_Consolidador.spec: actualizado con hiddenimports completos para:
-      app.backup.*, zipfile, tempfile, traceback, logging, requests, urllib3.
+[H] DECLARACIÓN COMPLETA DE DEPENDENCIAS Y HIDDEN IMPORTS
+    - requirements.txt: requests>=2.31,<3.0 declarado.
+    - BICU_Consolidador.spec: actualizado con app.core y app.core.resources.
 
-================================================================================
+===============================================================================
 INVARIANTES INSTITUCIONALES PRESERVADOS
-================================================================================
+===============================================================================
 
 INV-01: V005 NO existe. (PASS)
 INV-02: Ninguna fórmula ni rango de Matriz_1 fue modificada. (PASS)
@@ -82,49 +89,38 @@ INV-06: Ningún dato histórico fue insertado, modificado ni eliminado. (PASS)
 INV-07: La BD activa no fue modificada durante el análisis ni durante el backup. (PASS)
 INV-08: El backup no almacena credenciales, claves API ni rutas personales. (PASS)
 
-================================================================================
+===============================================================================
 COBERTURA DE TESTS
-================================================================================
+===============================================================================
 
-Nuevos tests creados (Fase 29.24.1):
+Nuevos tests creados en Fase 29.25.1:
+  - tests/test_resource_resolution.py (7 tests deterministas de resolución de rutas)
+Total suite de resolución: 7/7 APROBADOS (PASS)
+
+Tests de backup, restauración y preflight (Fase 29.24.1):
   - tests/test_backup_service.py   (26 tests: generación, validación, precondiciones, API)
   - tests/test_restore_service.py  (14 tests: flujo principal, validación, safety backup)
   - tests/test_preflight.py        (24 tests: checks individuales, estados, OneDrive)
-  Total suite nueva: 64/64 APROBADOS (PASS)
+  Total suite operativa: 64/64 APROBADOS (PASS)
 
-Regresión pre-implementación:
-  1,420 PASS | 1 SKIP | 0 FAIL | 0 ERROR  (baseline confirmado en aislamiento)
+Regresión total del sistema tras Fase 29.25.1 / 29.25.2:
+  1,492 PASS | 1 SKIP | 0 FAIL | 0 ERROR
 
-Regresión total del sistema tras Fase 29.24.1:
-  1,484 PASS | 1 SKIP | 0 FAIL | 0 ERROR
+===============================================================================
+ARCHIVOS CREADOS / MODIFICADOS
+===============================================================================
 
-================================================================================
-ARCHIVOS CREADOS / MODIFICADOS EN ESTA FASE
-================================================================================
+CREADOS EN FASE 29.25.1:
+  app/core/resources.py
+  tests/test_resource_resolution.py
 
-CREADOS:
-  app/backup/__init__.py
-  app/backup/domain/__init__.py
-  app/backup/domain/models.py
-  app/backup/domain/ports.py
-  app/backup/application/__init__.py
-  app/backup/application/backup_service.py
-  app/backup/application/restore_service.py
-  app/backup/application/preflight.py
-  tests/test_backup_service.py
-  tests/test_restore_service.py
-  tests/test_preflight.py
-  docs/MANUAL_DE_USUARIO_INSTITUCIONAL.md
-  docs/GUIA_DE_DESPLIEGUE_Y_MANTENIMIENTO.md
+MODIFICADOS EN FASE 29.25.1 Y 29.25.3:
+  app/application/export_acl/export_acl.py
+  app/templates_analysis/reporter.py
+  app/word_consolidator/ui/workers/word_batch_worker.py
+  BICU_Consolidador.spec
+  README.md
   RELEASE_MANIFEST.txt (este archivo)
-  FASE_29_24_1_IMPLEMENTACION_CONSOLIDACION_OPERATIVA.md
-
-MODIFICADOS:
-  app/word_consolidator/ui/app.py   — excepción de startup con logging y notificación
-  requirements.txt                  — requests>=2.31,<3.0 declarado
-  BICU_Consolidador.spec            — hiddenimports de app.backup + stdlib completo
-  config/settings.yaml              — persistencia: sqlite y modo WAL declarativo
-  README.md                         — secciones 14 y 15 actualizadas
 
 NO MODIFICADOS (custodia patrimonial garantizada):
   templates/Matriz_1_Consolidado_Actividades.xlsx
@@ -132,13 +128,12 @@ NO MODIFICADOS (custodia patrimonial garantizada):
   templates/Matriz_3_Academicos_Administrativos.xlsx
   templates/Matriz_4_Colaboradores.xlsx
   templates/Matriz_5_Protagonistas_Beneficiados.xlsx
-  release/BICU_Consolidador.exe
   app/infrastructure/persistence/schema.py             (V004 intacto)
   app/infrastructure/persistence/migrations.py         (V005 no existe)
 
-================================================================================
-CUSTODIA PATRIMONIAL AUDITADA (Fase 29.24.3)
-================================================================================
+===============================================================================
+CUSTODIA PATRIMONIAL AUDITADA (Fases 29.25.1 y 29.25.2)
+===============================================================================
 
   M1:  fdaebcb36cbcfaf7189cd03056e961bda1e1d8d1093c501bd4fa3951618ad2ad [MATCH]
   M2:  11419cd22d986e195694f27d15236204afa22526812f18cb4f2e1b7540f64400 [MATCH]
@@ -147,26 +142,29 @@ CUSTODIA PATRIMONIAL AUDITADA (Fase 29.24.3)
   M5:  a3dff20ec209de209f59dd8b1ad1be84aa7aebd1536ced406c59453a08973dc3 [MATCH]
 
 IDENTIFICACIÓN DE EJECUTABLES:
-  EXE Oficial v1.1.0:   41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3 [PUBLICADO - release/BICU_Consolidador.exe - 16,173,879 bytes]
+  EXE Oficial v1.1.1:   693d84d9aeaaf15af9ec0ca6c07ce9a41d43ed823509c6fc954a8343a956e8bf [PUBLICADO - release/BICU_Consolidador.exe - 16,176,876 bytes]
+  EXE Histórico v1.1.0: 41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3 [LINEAGE HISTÓRICO - release/BICU_Consolidador_v1.1.0_historico.exe - 16,173,879 bytes]
   EXE Histórico v1.0.3: 0a94be44de80079ffceee8abe34025cb6f604bc8a3126e209d221e4828df214b [LINEAGE HISTÓRICO - 15,214,693 bytes]
 
-Resultado de Custodia: 5/5 Matrices Patrimoniales MATCH + Binario Oficial v1.1.0 Publicado
+Resultado de Custodia: 5/5 Matrices Patrimoniales MATCH + Binario Oficial v1.1.1 Publicado
 
-================================================================================
+===============================================================================
 DICTAMEN DE PUBLICACIÓN DE RELEASE INSTITUCIONAL
-================================================================================
+===============================================================================
 
-Estado: RELEASE INSTITUCIONAL v1.1.0 PUBLICADO (Fase 29.24.5)
+Estado: RELEASE INSTITUCIONAL v1.1.1 PUBLICADO (Fase 29.25.3)
 Certificado y Publicado por: Software Project Leader + Senior Python Engineer + Release Engineer + Auditor Técnico Institucional
 Fecha: 2026-09-22
-================================================================================
+===============================================================================
 AUTORIZACIÓN
-================================================================================
+===============================================================================
 
-Esta release fue implementada bajo autorización explícita de la institución
-en la Fase 29.24.1, tomando como especificación base el documento:
-  FASE_29_24_ANALISIS_DISENO_CONSOLIDACION_OPERATIVA.md
+Esta release fue implementada y auditada bajo autorización explícita institucional:
+  - Fase 29.25.1: Corrección de Recursos del Release Candidate v1.1.1
+  - Fase 29.25.2: Auditoría Final del Release Candidate v1.1.1
+  - Fase 29.25.3: Publicación Formal del Release Institucional v1.1.1
 
-Commit de inicio garantizado: cd56562f4c0993182a4c3e1f7fcea5d547a6662f
+Commit de corrección certificado: fb3c8bcd0974e8d0be5fef9e4fc6be870e8cdf59
+Tag anterior preservado: v1.1.0 (bf6dc57e01fde49494a07850e81960830133a7ee)
 
-================================================================================
+===============================================================================
