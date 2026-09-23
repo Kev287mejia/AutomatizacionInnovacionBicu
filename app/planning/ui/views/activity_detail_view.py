@@ -239,12 +239,17 @@ class PlannedActivityDetailView(ctk.CTkFrame):
         # Rellenar Metas de Participantes
         goals = act.participant_goals
         if goals:
+            tot_grado = goals.est_grado_m + goals.est_grado_f
+            tot_post = goals.est_postgrado_m + goals.est_postgrado_f
+            tot_doc = goals.docentes_m + goals.docentes_f
+            tot_adm = goals.administrativos_m + goals.administrativos_f
+            tot_ext = goals.externos_m + goals.externos_f
             goal_rows = [
-                ("Estudiantes de Grado:", f"{goals.est_grado_total} (M: {goals.est_grado_m}, F: {goals.est_grado_f})"),
-                ("Estudiantes de Postgrado:", f"{goals.est_postgrado_total} (M: {goals.est_postgrado_m}, F: {goals.est_postgrado_f})"),
-                ("Docentes:", f"{goals.docentes_total} (M: {goals.docentes_m}, F: {goals.docentes_f})"),
-                ("Administrativos:", f"{goals.administrativos_total} (M: {goals.administrativos_m}, F: {goals.administrativos_f})"),
-                ("Externos:", f"{goals.externos_total} (M: {goals.externos_m}, F: {goals.externos_f})"),
+                ("Estudiantes de Grado:", f"{tot_grado} (M: {goals.est_grado_m}, F: {goals.est_grado_f})"),
+                ("Estudiantes de Postgrado:", f"{tot_post} (M: {goals.est_postgrado_m}, F: {goals.est_postgrado_f})"),
+                ("Docentes:", f"{tot_doc} (M: {goals.docentes_m}, F: {goals.docentes_f})"),
+                ("Administrativos:", f"{tot_adm} (M: {goals.administrativos_m}, F: {goals.administrativos_f})"),
+                ("Externos:", f"{tot_ext} (M: {goals.externos_m}, F: {goals.externos_f})"),
                 ("TOTAL PROTAGONISTAS:", f"{goals.total()}"),
             ]
         else:

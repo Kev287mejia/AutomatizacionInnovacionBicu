@@ -524,19 +524,27 @@ class TestPlanningUI:
                 assert token not in content, f"Token prohibido '{token}' detectado en {pf}"
 
     def test_ui_18_aislamiento_ast_sin_sqlite3_en_vistas(self):
-        """UI-18: Análisis AST verificando que las vistas no importan sqlite3 directamente."""
-        views_dir = Path(__file__).resolve().parent.parent / "app" / "planning" / "ui" / "views"
-        py_files = list(views_dir.rglob("*.py"))
+        """UI-18: Análisis AST verificando que las vistas y servicios UI no importan sqlite3 ni ejecutan SQL."""
+        ui_dir = Path(__file__).resolve().parent.parent / "app" / "planning" / "ui"
+        py_files = list(ui_dir.rglob("*.py"))
         assert len(py_files) > 0
 
         for pf in py_files:
-            tree = ast.parse(pf.read_text(encoding="utf-8"), filename=str(pf))
+            content = pf.read_text(encoding="utf-8")
+            tree = ast.parse(content, filename=str(pf))
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
-                        assert alias.name != "sqlite3", f"sqlite3 importado directamente en vista: {pf}"
+                        assert alias.name != "sqlite3", f"sqlite3 importado directamente en {pf}"
+                        assert not alias.name.startswith("app.word_consolidator"), f"word_consolidator importado en {pf}"
                 elif isinstance(node, ast.ImportFrom):
-                    assert node.module != "sqlite3", f"from sqlite3 import ... en vista: {pf}"
+                    assert node.module != "sqlite3", f"from sqlite3 import ... en {pf}"
+                    if node.module:
+                        assert not node.module.startswith("app.word_consolidator"), f"from app.word_consolidator import ... en {pf}"
+
+            # Verificación de no SQL directo en UI
+            for sql_keyword in ["SELECT ", "INSERT INTO", "UPDATE ", "DELETE FROM", "CREATE TABLE", "DROP TABLE"]:
+                assert sql_keyword not in content, f"Sentencia SQL directa '{sql_keyword}' encontrada en archivo UI: {pf}"
 
     def test_ui_e2e_flujo_completo(self, ui_service: PlanningUIService, tmp_path: Path):
         """UI-E2E: Escenario integral: POA -> SIN_DISENO -> CREAR DRAFT -> COMPLETAR -> VALIDAR -> APROBAR -> DOCX."""
@@ -614,3 +622,300 @@ class TestPlanningUI:
         exported = ui_service.export_docx(draft.design_id, docx_path)
         assert Path(exported).exists()
         assert Path(exported).stat().st_size > 1000  # Archivo Word con contenido real
+
+    def test_ui_ingest_planning_source_success(self, ui_service: PlanningUIService, tmp_path: Path):
+        """UI Service: Ingestión exitosa de actividades POA y reflejo en list_activities()."""
+        import openpyxl
+        fpath = str(tmp_path / "poa_valido.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Programas, proyectos y act"
+        # Encabezados
+        ws.cell(1, 1, "No")
+        ws.cell(1, 2, "Sede")
+        ws.cell(1, 3, "Actividad")
+        ws.cell(1, 4, "Área_responsable")
+        ws.cell(1, 5, "Eje_estrategia")
+        ws.cell(1, 6, "Programa")
+        ws.cell(1, 7, "Tipo_Evento")
+        ws.cell(1, 8, "Total, estud_M_grado")
+        ws.cell(1, 9, "Total, estud_F_grado")
+        # Fila 2
+        ws.cell(2, 1, "101")
+        ws.cell(2, 2, "Bluefields")
+        ws.cell(2, 3, "Taller de Robótica Submarina")
+        ws.cell(2, 4, "Innovación")
+        ws.cell(2, 5, "EJE_11")
+        ws.cell(2, 6, "PGM_07")
+        ws.cell(2, 7, "EVT_CAPACITACION")
+        ws.cell(2, 8, 15)
+        ws.cell(2, 9, 20)
+        wb.save(fpath)
+        wb.close()
+
+        # Ingestar mediante PlanningUIService
+        report = ui_service.ingest_planning_matrix(fpath)
+        assert report.rows_accepted == 1
+        assert report.rows_rejected == 0
+        assert len(report.created_activity_ids) == 1
+        created_pid = report.created_activity_ids[0]
+
+        # Verificar disponibilidad en list_activities()
+        activities = ui_service.list_activities(search_term="Robótica Submarina")
+        assert len(activities) == 1
+        act = activities[0]
+        assert act.activity_name == "Taller de Robótica Submarina"
+        assert act.sede == "Bluefields"
+        assert act.total_participants == 35
+        assert act.design_status == "SIN_DISENO"
+
+    def test_ui_ingest_planning_source_error_handling(self, ui_service: PlanningUIService, tmp_path: Path):
+        """UI Service: Manejo riguroso de errores en archivos inexistentes o no válidos sin persistencia parcial."""
+        # 1. Archivo inexistente
+        report_nonexistent = ui_service.ingest_planning_matrix("ruta_totalmente_inexistente.xlsx")
+        assert len(report_nonexistent.errors) > 0
+        assert report_nonexistent.rows_accepted == 0
+        assert "no existe" in report_nonexistent.errors[0]
+
+        # 2. Archivo sin columnas obligatorias
+        import openpyxl
+        fpath_invalid = str(tmp_path / "poa_sin_columnas.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Programas, proyectos y act"
+        ws.cell(1, 1, "ColumnaA")
+        ws.cell(1, 2, "ColumnaB")
+        ws.cell(2, 1, "ValorA")
+        ws.cell(2, 2, "ValorB")
+        wb.save(fpath_invalid)
+        wb.close()
+
+        report_invalid = ui_service.ingest_planning_matrix(fpath_invalid)
+        assert len(report_invalid.errors) > 0
+        assert report_invalid.rows_accepted == 0
+        assert "No se encontraron los encabezados institucionales mínimos" in report_invalid.errors[0]
+
+    def test_ui_ingest_planning_source_r08_protection(self, ui_service: PlanningUIService, tmp_path: Path):
+        """UI Service: Protección estricta R-08 al reimportar una actividad con diseño metodológico APPROVED."""
+        import openpyxl
+        fpath = str(tmp_path / "poa_r08.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Programas, proyectos y act"
+        ws.cell(1, 1, "No")
+        ws.cell(1, 2, "Sede")
+        ws.cell(1, 3, "Actividad")
+        ws.cell(1, 4, "Área_responsable")
+        ws.cell(1, 5, "Eje_estrategia")
+        ws.cell(1, 6, "Programa")
+        ws.cell(1, 7, "Tipo_Evento")
+        ws.cell(1, 8, "Total, estud_M_grado")
+        ws.cell(1, 9, "Total, estud_F_grado")
+        ws.cell(2, 1, "202")
+        ws.cell(2, 2, "Bilwi")
+        ws.cell(2, 3, "Taller de Tecnologías Limpias")
+        ws.cell(2, 4, "Innovación")
+        ws.cell(2, 5, "EJE_11")
+        ws.cell(2, 6, "PGM_07")
+        ws.cell(2, 7, "EVT_CAPACITACION")
+        ws.cell(2, 8, 10)
+        ws.cell(2, 9, 15)
+        wb.save(fpath)
+        wb.close()
+
+        # 1. Ingestión inicial
+        rep1 = ui_service.ingest_planning_matrix(fpath)
+        assert rep1.rows_accepted == 1
+        pid = rep1.created_activity_ids[0]
+
+        # 2. Crear borrador, completar 5 bloques y aprobar diseño
+        draft = ui_service.create_design_draft(pid, created_by="Responsable Certificado")
+        agenda = (
+            TimeBlockDTO(sequence=1, label="Apertura", minutes=30),
+            TimeBlockDTO(sequence=2, label="Desarrollo", minutes=90),
+        )
+        matrix = (
+            OperationalActivityDTO(
+                step_number=1,
+                phase_label="Apertura",
+                operative_goal="Sensibilización",
+                procedure="Presentación",
+                materials="Material digital",
+                minutes=30,
+            ),
+            OperationalActivityDTO(
+                step_number=2,
+                phase_label="Desarrollo",
+                operative_goal="Práctica guiada",
+                procedure="Taller",
+                materials="Equipos",
+                minutes=90,
+            ),
+        )
+        faq = FAQTableDTO(
+            q1_que_es=draft.faq.q1_que_es if draft.faq else "Taller",
+            q2_para_que="Aprender tecnologías limpias",
+            q3_sesiones="Sesión única",
+            q4_protagonistas=draft.faq.q4_protagonistas if draft.faq else "25 participantes",
+            q5_facilitador="Facilitador",
+            q6_materiales="Materiales",
+            q7_duracion="120 minutos",
+        )
+        cmd = UpdateMethodologicalDesignCommand(
+            design_id=draft.design_id,
+            introduction_text="Introducción formal al taller de tecnologías limpias...",
+            methodological_approach="Metodología teórico-práctica participativa.",
+            objectives=("Objetivo formativo 1.", "Objetivo aplicativo 2."),
+            faq=faq,
+            agenda=agenda,
+            operational_matrix=matrix,
+        )
+        ui_service.update_design_draft(cmd)
+        approved = ui_service.approve_design(draft.design_id, approved_by="Autoridad Institucional")
+        assert approved.approved_by == "Autoridad Institucional"
+
+        # 3. Re-ingestar la misma fuente
+        rep2 = ui_service.ingest_planning_matrix(fpath)
+        assert rep2.rows_accepted == 1
+        assert any("APPROVED" in dup and "inmutable R-08" in dup for dup in rep2.duplicates_detected)
+
+        # 4. Comprobar que el diseño sigue en estado APPROVED y la actividad permanece intacta
+        detail = ui_service.get_activity_detail(pid)
+        assert detail is not None
+        assert detail.design_status == "APPROVED"
+        assert detail.design_id == draft.design_id
+
+    def test_ui_view_has_cargar_poa_button_and_dialog(self, ui_service: PlanningUIService):
+        """PlannedActivitiesListView: El botón de carga existe y maneja la cancelación limpia."""
+        import customtkinter as ctk
+        root = ctk.CTk()
+        try:
+            view = PlannedActivitiesListView(root, service=ui_service)
+            assert hasattr(view, "_on_click_cargar_poa")
+            assert hasattr(view, "_mostrar_reporte_ingestion")
+
+            # Simular cancelación en filedialog (retorna "")
+            with patch("tkinter.filedialog.askopenfilename", return_value=""):
+                with patch.object(ui_service, "ingest_planning_matrix") as mock_ingest:
+                    view._on_click_cargar_poa()
+                    mock_ingest.assert_not_called()
+        finally:
+            root.destroy()
+
+    def test_ui_ingest_rejection_and_warnings_reporting(self, ui_service: PlanningUIService, tmp_path: Path):
+        """Reporte riguroso de rechazos con fila/motivo y advertencias por inconsistencias detectadas."""
+        import openpyxl
+        fpath = str(tmp_path / "poa_con_rechazos.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Programas, proyectos y act"
+        ws.cell(1, 1, "No")
+        ws.cell(1, 2, "Sede")
+        ws.cell(1, 3, "Actividad")
+        ws.cell(1, 4, "Área_responsable")
+        ws.cell(1, 5, "Eje_estrategia")
+        ws.cell(1, 6, "Programa")
+        ws.cell(1, 7, "Tipo_Evento")
+        ws.cell(1, 8, "Total, estud_M_grado")
+        ws.cell(1, 9, "Total, estud_F_grado")
+
+        # Fila 2: Válida
+        ws.cell(2, 1, "1")
+        ws.cell(2, 2, "Bluefields")
+        ws.cell(2, 3, "Actividad Válida A")
+        ws.cell(2, 4, "Innovación")
+        ws.cell(2, 5, "EJE_11")
+        ws.cell(2, 6, "PGM_07")
+        ws.cell(2, 7, "EVT_CAPACITACION")
+        ws.cell(2, 8, 5)
+        ws.cell(2, 9, 5)
+
+        # Fila 3: Rechazada (Actividad vacía)
+        ws.cell(3, 1, "2")
+        ws.cell(3, 2, "Bluefields")
+        ws.cell(3, 3, "")
+        ws.cell(3, 4, "Innovación")
+        ws.cell(3, 5, "EJE_11")
+        ws.cell(3, 6, "PGM_07")
+        ws.cell(3, 7, "EVT_CAPACITACION")
+        ws.cell(3, 8, 5)
+        ws.cell(3, 9, 5)
+
+        # Fila 4: Rechazada (Meta negativa)
+        ws.cell(4, 1, "3")
+        ws.cell(4, 2, "Bluefields")
+        ws.cell(4, 3, "Actividad con Meta Negativa")
+        ws.cell(4, 4, "Innovación")
+        ws.cell(4, 5, "EJE_11")
+        ws.cell(4, 6, "PGM_07")
+        ws.cell(4, 7, "EVT_CAPACITACION")
+        ws.cell(4, 8, -10)
+        ws.cell(4, 9, 5)
+
+        wb.save(fpath)
+        wb.close()
+
+        rep = ui_service.ingest_planning_matrix(fpath)
+        assert rep.total_rows_examined == 3
+        assert rep.rows_accepted == 1
+        assert rep.rows_rejected == 2
+        assert len(rep.rejection_reasons) == 2
+        filas_rechazadas = [r[0] for r in rep.rejection_reasons]
+        assert 3 in filas_rechazadas
+        assert 4 in filas_rechazadas
+
+    def test_ui_ingest_invalid_or_corrupt_file(self, ui_service: PlanningUIService, tmp_path: Path):
+        """Manejo de archivo corrupto o con formato no Excel."""
+        fpath_corrupt = tmp_path / "archivo_corrupto.xlsx"
+        fpath_corrupt.write_text("Este no es un archivo excel binario valido", encoding="utf-8")
+
+        rep = ui_service.ingest_planning_matrix(str(fpath_corrupt))
+        assert rep.rows_accepted == 0
+        assert len(rep.errors) > 0
+
+    def test_ui_view_refreshes_list_after_successful_ingestion(self, ui_service: PlanningUIService, tmp_path: Path):
+        """PlannedActivitiesListView refresca el listado visual inmediatamente tras ingesta exitosa."""
+        import openpyxl
+        import customtkinter as ctk
+
+        fpath = str(tmp_path / "poa_refresh.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Programas, proyectos y act"
+        ws.cell(1, 1, "No")
+        ws.cell(1, 2, "Sede")
+        ws.cell(1, 3, "Actividad")
+        ws.cell(1, 4, "Área_responsable")
+        ws.cell(1, 5, "Eje_estrategia")
+        ws.cell(1, 6, "Programa")
+        ws.cell(1, 7, "Tipo_Evento")
+        ws.cell(2, 1, "999")
+        ws.cell(2, 2, "Bilwi")
+        ws.cell(2, 3, "Actividad de Prueba Refresco UI")
+        ws.cell(2, 4, "Innovación")
+        ws.cell(2, 5, "EJE_11")
+        ws.cell(2, 6, "PGM_07")
+        ws.cell(2, 7, "EVT_CAPACITACION")
+        wb.save(fpath)
+        wb.close()
+
+        root = ctk.CTk()
+        try:
+            view = PlannedActivitiesListView(root, service=ui_service)
+            # Inicialmente sin la actividad
+            acts_init = ui_service.list_activities(search_term="Refresco UI")
+            assert len(acts_init) == 0
+
+            with patch("tkinter.filedialog.askopenfilename", return_value=fpath):
+                with patch.object(view, "_mostrar_reporte_ingestion") as mock_modal:
+                    view._on_click_cargar_poa()
+                    mock_modal.assert_called_once()
+
+            # Comprobar que el listado visual ahora refleja la actividad cargada
+            acts_after = ui_service.list_activities(search_term="Refresco UI")
+            assert len(acts_after) == 1
+            assert acts_after[0].activity_name == "Actividad de Prueba Refresco UI"
+        finally:
+            root.destroy()
+
+

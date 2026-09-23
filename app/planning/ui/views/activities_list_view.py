@@ -7,13 +7,14 @@ Fase 29.11 — Implementación Controlada de la UI de Planificación Institucion
 
 from __future__ import annotations
 
+from pathlib import Path
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 from typing import Any, Callable, Optional
 
 import customtkinter as ctk
 
-from app.planning.domain.dtos import PlannedActivitySummaryDTO
+from app.planning.domain.dtos import PlannedActivitySummaryDTO, PlanningIngestionReportDTO
 from app.planning.ui.services.planning_ui_service import PlanningUIError, PlanningUIService
 
 SEDES_BICU = [
@@ -37,6 +38,206 @@ ESTADOS_DISENO = [
     "GENERATED",
     "APPROVED",
 ]
+
+
+class IngestionReportDialog(ctk.CTkToplevel):
+    """Ventana modal institucional que presenta el resumen de la ingestión de matriz POA."""
+
+    def __init__(self, master: Any, report: PlanningIngestionReportDTO, **kwargs: Any) -> None:
+        super().__init__(master, **kwargs)
+        self.report = report
+
+        self.title("BICU — Resumen de Ingestión de Matriz POA")
+        self.geometry("680x520")
+        self.minsize(580, 420)
+        self.grab_set()
+
+        self._init_ui()
+
+    def _init_ui(self) -> None:
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+
+        # 1. Banner
+        has_errors = bool(self.report.errors)
+        has_rejections = self.report.rows_rejected > 0
+        if has_errors:
+            banner_bg = ("#C62828", "#B71C1C")
+            banner_title = "⚠️ ATENCIÓN — OBSERVACIONES ESTRUCTURALES EN LA FUENTE POA"
+            banner_sub = "No se pudieron procesar las actividades debido a inconsistencias en el archivo."
+        elif has_rejections:
+            banner_bg = ("#E65100", "#BF360C")
+            banner_title = "⚠️ INGESTIÓN PARCIAL DE ACTIVIDADES POA"
+            banner_sub = "Algunas actividades fueron aceptadas pero otras se rechazaron por falta de datos obligatorios."
+        else:
+            banner_bg = ("#2E7D32", "#1B5E20")
+            banner_title = "✓ INGESTIÓN COMPLETADA EXITOSAMENTE"
+            banner_sub = "Las actividades del Plan Operativo Anual (POA) fueron incorporadas a la base institucional."
+
+        banner = ctk.CTkFrame(self, fg_color=banner_bg[0], corner_radius=0)
+        banner.grid(row=0, column=0, sticky="ew")
+        banner.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(
+            banner,
+            text=banner_title,
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color="white",
+            anchor="w",
+        ).grid(row=0, column=0, padx=16, pady=(10, 2), sticky="w")
+
+        ctk.CTkLabel(
+            banner,
+            text=banner_sub,
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color="#E0E0E0",
+            anchor="w",
+        ).grid(row=1, column=0, padx=16, pady=(0, 10), sticky="w")
+
+        # 2. Métricas y Metadatos de la Fuente
+        summary_frame = ctk.CTkFrame(self, fg_color=("gray90", "gray18"), corner_radius=6)
+        summary_frame.grid(row=1, column=0, sticky="ew", padx=16, pady=(10, 6))
+        summary_frame.grid_columnconfigure(0, weight=1)
+        summary_frame.grid_columnconfigure(1, weight=1)
+        summary_frame.grid_columnconfigure(2, weight=1)
+
+        source_name = Path(self.report.source_file).name if self.report.source_file else "Desconocido"
+        sheet_info = f"Hoja: {self.report.sheet_name}" if self.report.sheet_name else "Hoja automática"
+        ctk.CTkLabel(
+            summary_frame,
+            text=f"Fuente: {source_name}  |  {sheet_info}",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            anchor="w",
+        ).grid(row=0, column=0, columnspan=3, padx=12, pady=(8, 4), sticky="w")
+
+        # Fila métricas
+        m1_text = f"Filas examinadas: {self.report.total_rows_examined}\nAceptadas (creadas): {len(self.report.created_activity_ids)}"
+        m2_text = f"Actualizadas in-place: {len(self.report.updated_activity_ids)}\nRechazadas: {self.report.rows_rejected}"
+        m3_text = f"Duplicados / R-08: {len(self.report.duplicates_detected)}\nAdvertencias: {len(self.report.warnings)}"
+
+        ctk.CTkLabel(summary_frame, text=m1_text, font=ctk.CTkFont(family="Segoe UI", size=11), justify="left", anchor="w").grid(row=1, column=0, padx=12, pady=(0, 8), sticky="w")
+        ctk.CTkLabel(summary_frame, text=m2_text, font=ctk.CTkFont(family="Segoe UI", size=11), justify="left", anchor="w").grid(row=1, column=1, padx=12, pady=(0, 8), sticky="w")
+        ctk.CTkLabel(summary_frame, text=m3_text, font=ctk.CTkFont(family="Segoe UI", size=11), justify="left", anchor="w").grid(row=1, column=2, padx=12, pady=(0, 8), sticky="w")
+
+        # 3. Detalle scrollable de observaciones
+        scroll_details = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        scroll_details.grid(row=2, column=0, sticky="nsew", padx=16, pady=6)
+        scroll_details.grid_columnconfigure(0, weight=1)
+
+        row_idx = 0
+
+        # Errores estructurales
+        if self.report.errors:
+            lbl_err_title = ctk.CTkLabel(
+                scroll_details,
+                text="Errores Estructurales de la Fuente:",
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                text_color=("#C62828", "#EF5350"),
+                anchor="w",
+            )
+            lbl_err_title.grid(row=row_idx, column=0, sticky="w", pady=(4, 2))
+            row_idx += 1
+            for err in self.report.errors:
+                ctk.CTkLabel(
+                    scroll_details,
+                    text=f"• {err}",
+                    font=ctk.CTkFont(family="Segoe UI", size=11),
+                    text_color=("#C62828", "#EF5350"),
+                    wraplength=600,
+                    justify="left",
+                    anchor="w",
+                ).grid(row=row_idx, column=0, sticky="w", padx=12, pady=1)
+                row_idx += 1
+
+        # Filas rechazadas con motivos
+        if self.report.rejection_reasons:
+            lbl_rej_title = ctk.CTkLabel(
+                scroll_details,
+                text="Filas Rechazadas (Datos Obligatorios o Inválidos):",
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                text_color=("#D84315", "#FF7043"),
+                anchor="w",
+            )
+            lbl_rej_title.grid(row=row_idx, column=0, sticky="w", pady=(8, 2))
+            row_idx += 1
+            for r_num, reason in self.report.rejection_reasons:
+                ctk.CTkLabel(
+                    scroll_details,
+                    text=f"• {reason}",
+                    font=ctk.CTkFont(family="Segoe UI", size=11),
+                    wraplength=600,
+                    justify="left",
+                    anchor="w",
+                ).grid(row=row_idx, column=0, sticky="w", padx=12, pady=1)
+                row_idx += 1
+
+        # Duplicados / R-08
+        if self.report.duplicates_detected:
+            lbl_dup_title = ctk.CTkLabel(
+                scroll_details,
+                text="Notas de Deduplicación y Protección R-08:",
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                text_color=("#0B3C5D", "#4FC3F7"),
+                anchor="w",
+            )
+            lbl_dup_title.grid(row=row_idx, column=0, sticky="w", pady=(8, 2))
+            row_idx += 1
+            for dup in self.report.duplicates_detected:
+                ctk.CTkLabel(
+                    scroll_details,
+                    text=f"• {dup}",
+                    font=ctk.CTkFont(family="Segoe UI", size=11),
+                    wraplength=600,
+                    justify="left",
+                    anchor="w",
+                ).grid(row=row_idx, column=0, sticky="w", padx=12, pady=1)
+                row_idx += 1
+
+        # Advertencias
+        if self.report.warnings:
+            lbl_warn_title = ctk.CTkLabel(
+                scroll_details,
+                text="Advertencias de Lectura:",
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                text_color=("#F57F17", "#FFEE58"),
+                anchor="w",
+            )
+            lbl_warn_title.grid(row=row_idx, column=0, sticky="w", pady=(8, 2))
+            row_idx += 1
+            for w in self.report.warnings:
+                ctk.CTkLabel(
+                    scroll_details,
+                    text=f"• {w}",
+                    font=ctk.CTkFont(family="Segoe UI", size=11),
+                    wraplength=600,
+                    justify="left",
+                    anchor="w",
+                ).grid(row=row_idx, column=0, sticky="w", padx=12, pady=1)
+                row_idx += 1
+
+        if not self.report.errors and not self.report.rejection_reasons and not self.report.duplicates_detected and not self.report.warnings:
+            ctk.CTkLabel(
+                scroll_details,
+                text="Todas las actividades examinadas fueron validadas y persistidas correctamente sin observaciones.",
+                font=ctk.CTkFont(family="Segoe UI", size=12),
+                text_color=("#2E7D32", "#81C784"),
+                anchor="w",
+            ).grid(row=row_idx, column=0, sticky="w", padx=4, pady=12)
+
+        # 4. Botón de cierre
+        bottom_frame = ctk.CTkFrame(self, fg_color="transparent", height=40)
+        bottom_frame.grid(row=3, column=0, sticky="ew", padx=16, pady=10)
+        ctk.CTkButton(
+            bottom_frame,
+            text="Aceptar y Cerrar",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            fg_color="#0B3C5D",
+            hover_color="#07263D",
+            width=140,
+            height=32,
+            corner_radius=4,
+            command=self.destroy,
+        ).pack(side="right")
 
 
 class PlannedActivitiesListView(ctk.CTkFrame):
@@ -147,6 +348,17 @@ class PlannedActivitiesListView(ctk.CTkFrame):
         )
         btn_limpiar.pack(side="left")
 
+        btn_cargar_poa = ctk.CTkButton(
+            subfilter_frame,
+            text="📥 Cargar Matriz POA (.xlsx)",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            fg_color="#2E7D32",
+            hover_color="#1B5E20",
+            height=30,
+            command=self._on_click_cargar_poa,
+        )
+        btn_cargar_poa.pack(side="right")
+
         # ---------------------------------------------------------------------
         # 2. LISTA DE ACTIVIDADES (SCROLLABLE)
         # ---------------------------------------------------------------------
@@ -168,6 +380,43 @@ class PlannedActivitiesListView(ctk.CTkFrame):
             anchor="w",
         )
         self.lbl_totals.pack(side="left")
+
+    def _on_click_cargar_poa(self) -> None:
+        """Abre el selector de archivos Excel para incorporar actividades POA."""
+        file_path = filedialog.askopenfilename(
+            parent=self,
+            title="Seleccionar Matriz POA Institucional (Excel)",
+            filetypes=[("Matriz POA institucional", "*.xlsx")],
+        )
+        if not file_path:
+            return  # Cancelación limpia sin efectos secundarios
+
+        try:
+            report = self.service.ingest_planning_matrix(file_path)
+            self._mostrar_reporte_ingestion(report)
+            self.refrescar_actividades()
+        except PlanningUIError as e:
+            messagebox.showerror(
+                "Error al Cargar Matriz POA",
+                e.message,
+                parent=self,
+            )
+
+    def _mostrar_reporte_ingestion(self, report: PlanningIngestionReportDTO) -> None:
+        """Muestra el diálogo modal institucional con el resumen pericial de la ingestión."""
+        try:
+            dlg = IngestionReportDialog(self, report=report)
+            dlg.wait_window()
+        except Exception:
+            # Fallback seguro
+            msg = (
+                f"Matriz POA procesada:\n"
+                f"• Filas examinadas: {report.total_rows_examined}\n"
+                f"• Aceptadas (creadas): {len(report.created_activity_ids)}\n"
+                f"• Actualizadas in-place: {len(report.updated_activity_ids)}\n"
+                f"• Rechazadas: {report.rows_rejected}"
+            )
+            messagebox.showinfo("Resumen de Ingestión POA", msg, parent=self)
 
     def _limpiar_filtros(self) -> None:
         self.txt_search.delete(0, tk.END)

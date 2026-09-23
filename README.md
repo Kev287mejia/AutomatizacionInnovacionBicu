@@ -377,9 +377,9 @@ El sistema cuenta con certificación técnica formal emitida mediante auditoría
 
 En apego irrestricto a la **regla institucional de veracidad y transparencia documental**:
 
-1. **Capacidad de Carga de Matrices POA (Módulo 3)**:
-   * El núcleo del sistema cuenta con un componente especializado de infraestructura para la lectura programática de matrices del Plan Operativo Anual (POA) a partir de hojas de cálculo, con capacidad para procesar formatos institucionales agregados y detallados, mapear sinónimos de encabezados y convalidar campos numéricos y de fechas.
-   * **Estado Real de Interfaz**: Dicha capacidad existe a nivel de servicios internos del sistema, pero **no se encuentra expuesta actualmente como un asistente o botón de carga en la interfaz gráfica de usuario**. Las actividades que se visualizan en el módulo corresponden a las preexistentes en el repositorio relacional. La integración de un diálogo interactivo para la importación directa de nuevos archivos de POA por parte de los operadores queda identificada como una oportunidad de mejora para una versión posterior.
+1. **Capacidad de Carga de Matrices POA (Módulo 3)** *(Disponible desde v1.2.0)*:
+   * El sistema cuenta con un componente especializado de infraestructura para la lectura programática de matrices del Plan Operativo Anual (POA) a partir de hojas de cálculo institucionales (`.xlsx`), con capacidad para procesar formatos agregados y detallados, mapear sinónimos de encabezados y convalidar campos numéricos y de fechas.
+   * **Estado de Interfaz (v1.2.0)**: La ingestión de matrices POA **está plenamente disponible** en la interfaz gráfica del Módulo 3 — Planificación y Diseño Metodológico. El operador accede mediante el botón `📥 Cargar Matriz POA (.xlsx)` en el panel de actividades planificadas. Una vez cargadas, las actividades quedan inmediatamente disponibles para la creación de diseños metodológicos, validación, aprobación y generación del documento Word oficial. La protección institucional R-08 garantiza que ninguna reimportación modifique actividades con diseño APROBADO.
 
 2. **Notificaciones de Validación de Formatos Externos**:
    * Durante la lectura de hojas de cálculo complejas con reglas de validación de celdas preexistentes, pueden emitirse advertencias informativas por parte de los lectores de documentos. Dichas advertencias son de carácter meramente informativo y no comprometen la exactitud matemática de los cálculos, la integridad de las matrices ni la fidelidad de los datos consolidados.
@@ -389,6 +389,8 @@ En apego irrestricto a la **regla institucional de veracidad y transparencia doc
 ## 23. Cierre Institucional
 
 El presente documento constituye la especificación formal del estado consolidado y publicado del **Sistema Institucional de Gestión, Planificación, Consolidación y Reporting** de la **Bluefields Indian & Caribbean University (BICU)**, desarrollado bajo la dirección de la **Dirección de Innovación y Emprendimiento** para el fortalecimiento de la calidad, transparencia y pertinencia universitaria en la Costa Caribe de Nicaragua.
+
+**Versión actual: v1.2.0** — Conexión Controlada de Ingestión POA en el Módulo 3 de Planificación y Diseño Metodológico (Fase 29.26.1). Versión anterior publicada: v1.1.1.
 
 ---
 

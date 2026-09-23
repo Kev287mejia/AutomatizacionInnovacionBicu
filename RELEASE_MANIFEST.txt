@@ -1,19 +1,32 @@
 ================================================================================
 RELEASE MANIFEST — BICU Sistema Institucional de Gestión y Reporting
-Fase 29.25.3 — Publicación Formal del Release Institucional v1.1.1
+Fase 29.26.3 — Publicación Formal de la Conexión POA en Módulo 3 (v1.2.0)
 ================================================================================
 
 FECHA DE PUBLICACIÓN:   2026-09-22
-VERSIÓN DEL SISTEMA:    1.1.1
+VERSIÓN DEL SISTEMA:    1.2.0
 RAMA:                   main
 ESQUEMA SQLITE:         V004 (activo, estable, íntegro)
-ESTADO:                 RELEASE INSTITUCIONAL PUBLICADO (v1.1.1)
+ESTADO:                 RELEASE INSTITUCIONAL PUBLICADO (v1.2.0)
 
 ================================================================================
 CAPACIDADES Y MEJORAS INTEGRADAS EN ESTA VERSIÓN
 ================================================================================
 
-[A] RESOLUCIÓN AUTÓNOMA DE RECURSOS E INDEPENDENCIA DE CWD (Fase 29.25.1)
+[A] CONEXIÓN CONTROLADA DE INGESTIÓN POA EN MÓDULO 3 (Fase 29.26.1)
+    - Ingestión de actividades del Plan Operativo Anual (POA) institucional
+      directamente desde matrices Excel (.xlsx) a través de la interfaz gráfica.
+    - Método en fachada desacoplada de UI: PlanningUIService.ingest_planning_matrix().
+    - Botón de carga "📥 Cargar Matriz POA (.xlsx)" integrado en PlannedActivitiesListView.
+    - Diálogo modal interactivo IngestionReportDialog que detalla actividades aceptadas,
+      rechazadas con fila y motivo explícito, advertencias de inconsistencias y errores.
+    - Refresco dinámico inmediato del listado y contadores de actividades planificadas.
+    - Corrección en el cómputo de metas de participantes en PlannedActivityDetailView.
+    - Cumplimiento inmutable de la Regla R-08: reingesta idempotente que preserva
+      las actividades y diseños metodológicos en estado APPROVED.
+    - Principio de separación preservado: Planificado ≠ Ejecutado (cero contaminación de M1–M5).
+
+[B] RESOLUCIÓN AUTÓNOMA DE RECURSOS E INDEPENDENCIA DE CWD (Fase 29.25.1)
     - app/core/resources.py: módulo centralizado para resolución determinista
       de plantillas y recursos institucionales (resolver_ruta_templates y
       resolver_ruta_recurso).
@@ -88,39 +101,38 @@ INV-05: Ninguna plantilla patrimonial fue modificada. (PASS)
 INV-06: Ningún dato histórico fue insertado, modificado ni eliminado. (PASS)
 INV-07: La BD activa no fue modificada durante el análisis ni durante el backup. (PASS)
 INV-08: El backup no almacena credenciales, claves API ni rutas personales. (PASS)
+INV-09: Regla R-08 activa y verificada: diseños APPROVED inmutables ante reingesta POA. (PASS)
+INV-10: Aislamiento arquitectónico de UI: cero sqlite3 ni acceso directo a repositorios. (PASS)
 
 ===============================================================================
 COBERTURA DE TESTS
 ===============================================================================
 
-Nuevos tests creados en Fase 29.25.1:
-  - tests/test_resource_resolution.py (7 tests deterministas de resolución de rutas)
-Total suite de resolución: 7/7 APROBADOS (PASS)
+Pruebas específicas de Módulo 3 y conexión POA (Fase 29.26.1):
+  - tests/test_planning_ui.py (24 tests: navegación, carga POA, reporte, refresco, R-08)
+  - tests/test_planning_e2e_real_poa_to_ui_list.py (E2E con matriz POA real institucional)
+  - tests/test_methodological_design_service.py (25 tests: lógica de diseño y R-08)
+Total suite focalizada Módulo 3: 96/96 APROBADOS (PASS)
 
-Tests de backup, restauración y preflight (Fase 29.24.1):
-  - tests/test_backup_service.py   (26 tests: generación, validación, precondiciones, API)
-  - tests/test_restore_service.py  (14 tests: flujo principal, validación, safety backup)
-  - tests/test_preflight.py        (24 tests: checks individuales, estados, OneDrive)
-  Total suite operativa: 64/64 APROBADOS (PASS)
-
-Regresión total del sistema tras Fase 29.25.1 / 29.25.2:
-  1,492 PASS | 1 SKIP | 0 FAIL | 0 ERROR
+Regresión total del sistema tras Fase 29.26.1 / 29.26.2 / 29.26.3:
+  1,492 PASS | 9 SKIP | 0 FAIL | 0 ERROR (en 606.71s)
 
 ===============================================================================
 ARCHIVOS CREADOS / MODIFICADOS
 ===============================================================================
 
-CREADOS EN FASE 29.25.1:
-  app/core/resources.py
-  tests/test_resource_resolution.py
+CREADOS EN FASE 29.26.1:
+  tests/test_planning_e2e_real_poa_to_ui_list.py
 
-MODIFICADOS EN FASE 29.25.1 Y 29.25.3:
-  app/application/export_acl/export_acl.py
-  app/templates_analysis/reporter.py
-  app/word_consolidator/ui/workers/word_batch_worker.py
-  BICU_Consolidador.spec
+MODIFICADOS EN FASE 29.26.1 Y 29.26.3:
+  app/planning/ui/services/planning_ui_service.py
+  app/planning/ui/views/activities_list_view.py
+  app/planning/ui/views/activity_detail_view.py
+  tests/test_planning_ui.py
   README.md
   RELEASE_MANIFEST.txt (este archivo)
+  release/RELEASE_MANIFEST.txt
+  release/README.txt
 
 NO MODIFICADOS (custodia patrimonial garantizada):
   templates/Matriz_1_Consolidado_Actividades.xlsx
@@ -128,8 +140,9 @@ NO MODIFICADOS (custodia patrimonial garantizada):
   templates/Matriz_3_Academicos_Administrativos.xlsx
   templates/Matriz_4_Colaboradores.xlsx
   templates/Matriz_5_Protagonistas_Beneficiados.xlsx
-  app/infrastructure/persistence/schema.py             (V004 intacto)
-  app/infrastructure/persistence/migrations.py         (V005 no existe)
+  app/planning/infrastructure/persistence/schema_v003.py  (V003 intacto)
+  app/infrastructure/persistence/schema.py                (V004 intacto)
+  app/infrastructure/persistence/migrations.py            (V005 no existe)
 
 ===============================================================================
 CUSTODIA PATRIMONIAL AUDITADA (Fases 29.25.1 y 29.25.2)
@@ -152,7 +165,7 @@ Resultado de Custodia: 5/5 Matrices Patrimoniales MATCH + Binario Oficial v1.1.1
 DICTAMEN DE PUBLICACIÓN DE RELEASE INSTITUCIONAL
 ===============================================================================
 
-Estado: RELEASE INSTITUCIONAL v1.1.1 PUBLICADO (Fase 29.25.3)
+Estado: RELEASE INSTITUCIONAL v1.2.0 PUBLICADO (Fase 29.26.3)
 Certificado y Publicado por: Software Project Leader + Senior Python Engineer + Release Engineer + Auditor Técnico Institucional
 Fecha: 2026-09-22
 ===============================================================================
@@ -160,11 +173,11 @@ AUTORIZACIÓN
 ===============================================================================
 
 Esta release fue implementada y auditada bajo autorización explícita institucional:
-  - Fase 29.25.1: Corrección de Recursos del Release Candidate v1.1.1
-  - Fase 29.25.2: Auditoría Final del Release Candidate v1.1.1
-  - Fase 29.25.3: Publicación Formal del Release Institucional v1.1.1
+  - Fase 29.26.1: Conexión Controlada de Ingestión POA en el Módulo 3
+  - Fase 29.26.2: Auditoría Pericial Independiente de la Conexión POA en Módulo 3
+  - Fase 29.26.3: Publicación Formal de la Conexión POA en Módulo 3
 
-Commit de corrección certificado: fb3c8bcd0974e8d0be5fef9e4fc6be870e8cdf59
-Tag anterior preservado: v1.1.0 (bf6dc57e01fde49494a07850e81960830133a7ee)
+Tag anterior preservado: v1.1.1 (c61f34a4ea551078319c1a19316f02c14f2aebf3)
+Tag previo preservado:   v1.1.0 (bf6dc57e01fde49494a07850e81960830133a7ee)
 
 ===============================================================================

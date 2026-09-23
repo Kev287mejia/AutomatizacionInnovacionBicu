@@ -20,6 +20,7 @@ from app.infrastructure.persistence.connection import SQLiteConnectionManager
 from app.planning.application.services import (
     MethodologicalDesignService,
     MethodologicalDocumentExportService,
+    PlannedActivityIngestionService,
 )
 from app.planning.domain.dtos import (
     AcceptAIProposalCommand,
@@ -27,12 +28,13 @@ from app.planning.domain.dtos import (
     MethodologicalDesignDTO,
     PlannedActivityDetailDTO,
     PlannedActivitySummaryDTO,
+    PlanningIngestionReportDTO,
     RejectAIProposalCommand,
     RequestAIProposalCommand,
     UpdateMethodologicalDesignCommand,
     ValidationReportDTO,
 )
-from app.planning.domain.ports import AIAssistancePort
+from app.planning.domain.ports import AIAssistancePort, PlanningSourceReaderPort
 from app.planning.domain.validator import MethodologicalDesignValidator
 from app.planning.infrastructure.ai import get_ai_assistance_adapter
 from app.planning.infrastructure.ai.mock_adapter import LocalMockAIAssistanceAdapter
@@ -44,6 +46,7 @@ from app.planning.infrastructure.persistence import (
     PlanningUnitOfWork,
     SQLiteMethodologicalDesignRepository,
 )
+from app.planning.infrastructure.readers.excel_planning_reader import ExcelPlanningReader
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +73,8 @@ class PlanningUIService:
         export_service: Optional[MethodologicalDocumentExportService] = None,
         connection_manager: Optional[SQLiteConnectionManager] = None,
         ai_assistance_port: Optional[AIAssistancePort] = None,
+        ingestion_service: Optional[PlannedActivityIngestionService] = None,
+        planning_reader: Optional[PlanningSourceReaderPort] = None,
     ) -> None:
         self._connection_manager = connection_manager or SQLiteConnectionManager()
 
@@ -101,6 +106,64 @@ class PlanningUIService:
                 design_repository=design_repo,
                 renderer=renderer,
             )
+
+        if ingestion_service is not None:
+            self._ingestion_service = ingestion_service
+        else:
+            uow_ingestion = getattr(self._design_service, "_uow", None) or PlanningUnitOfWork(
+                connection_manager=self._connection_manager
+            )
+            reader = planning_reader or ExcelPlanningReader()
+            self._ingestion_service = PlannedActivityIngestionService(
+                reader=reader,
+                uow=uow_ingestion,
+            )
+
+    def ingest_planning_matrix(
+        self,
+        file_path: str,
+        sheet_name: Optional[str] = None,
+        default_area_responsable: Optional[str] = None,
+        default_eje_estrategia: Optional[str] = None,
+        default_programa: Optional[str] = None,
+        default_tipo_evento: Optional[str] = None,
+    ) -> PlanningIngestionReportDTO:
+        """Lee e ingiere actividades desde una matriz POA institucional (.xlsx).
+
+        Args:
+            file_path: Ruta al archivo Excel institucional.
+            sheet_name: Nombre específico de hoja opcional.
+            default_area_responsable: Valor por defecto opcional para área responsable.
+            default_eje_estrategia: Valor por defecto opcional para eje estratégico.
+            default_programa: Valor por defecto opcional para programa.
+            default_tipo_evento: Valor por defecto opcional para tipo de evento.
+
+        Returns:
+            PlanningIngestionReportDTO con métricas periciales y detalle de la operación.
+
+        Raises:
+            PlanningUIError: Si ocurre un error no controlado durante la lectura o persistencia.
+        """
+        def_area = default_area_responsable or "Dirección de Innovación y Emprendimiento"
+        def_eje = default_eje_estrategia or "EJE_11"
+        def_prog = default_programa or "PGM_07"
+        def_evento = default_tipo_evento or "EVT_CAPACITACION"
+
+        try:
+            return self._ingestion_service.ingest_planning_source(
+                file_path=file_path,
+                sheet_name=sheet_name,
+                default_area_responsable=def_area,
+                default_eje_estrategia=def_eje,
+                default_programa=def_prog,
+                default_tipo_evento=def_evento,
+            )
+        except Exception as e:
+            logger.error(f"Error inesperado al ingerir matriz POA desde '{file_path}': {e}", exc_info=True)
+            raise PlanningUIError(
+                "Ocurrió un error inesperado al procesar la matriz de planificación POA.",
+                technical_details=str(e),
+            ) from e
 
     def list_activities(
         self,
