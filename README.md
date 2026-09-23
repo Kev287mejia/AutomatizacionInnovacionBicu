@@ -1,311 +1,399 @@
 # BICU — Sistema Institucional de Gestión, Planificación, Consolidación y Reporting
 
-Sistema institucional de software para la gestión integral, planificación estratégica, diseño metodológico, consolidación de evidencias, validación pericial, trazabilidad, emisión de matrices oficiales, cálculo de indicadores y reporting analítico de la **Bluefields Indian & Caribbean University (BICU)**.
+---
 
-La plataforma implementa un ciclo determinista, reproducible y auditable que garantiza el gobierno institucional de la información generada en actividades académicas, de innovación, extensión y atención comunitaria en la Costa Caribe nicaragüense.
+## 1. Presentación Institucional
+
+La **Bluefields Indian & Caribbean University (BICU)** es una institución comunitaria e intercultural de educación superior de la Costa Caribe nicaragüense, comprometida con el desarrollo social, cultural, científico y productivo de los pueblos originarios, afrodescendientes y comunidades mestizas de la región. Con presencia multicampus distribuida a través de sedes y recintos universitarios en Bluefields, Bilwi, Las Minas, Nueva Guinea, Waspam, Paiwas, El Rama, Bonanza, Rosita y Siuna, la universidad despliega un amplio conjunto de programas académicos, proyectos de innovación comunitaria, iniciativas de extensión y jornadas de atención formativa.
+
+Para dar respuesta a los requerimientos de gobernanza y transparencia, la universidad cuenta con el **Sistema Institucional de Gestión, Planificación, Consolidación y Reporting**, una plataforma formal de procesamiento y análisis orientada a custodiar, procesar y auditar de manera pericial toda la información emanada de las intervenciones universitarias.
 
 ---
 
-## 1. Propósito Institucional
+## 2. Propósito del Sistema
 
-El sistema provee una infraestructura centralizada para administrar el ciclo completo de información de las intervenciones institucionales. Su propósito fundamental es erradicar la dispersión documental, prevenir la duplicidad de participantes, asegurar la consistencia demográfica y garantizar una articulación estricta y transparente entre la programación del Plan Operativo Anual (POA) y las evidencias documentales efectivas de ejecución.
-
----
-
-## 2. Alcance del Sistema
-
-Las capacidades operativas y analíticas del sistema abarcan:
-
-* **Planificación Operativa de Actividades**: Registro estructurado de metas institucionales del POA.
-* **Diseño Metodológico**: Estructuración técnica previa de intervenciones (objetivos, agenda cronometrada, matriz operativa de roles y recursos).
-* **Ejecución y Procesamiento de Informes**: Extracción estandarizada de información y nóminas de asistencia desde informes documentales oficiales.
-* **Validación Pericial de Calidad**: Aplicación de motores deterministas de consistencia, validación de formatos y control de duplicidades.
-* **Generación de Matrices Institucionales Oficiales**: Emisión patrimonial de las cinco matrices universitarias en hojas de cálculo.
-* **Cola de Revisión Institucional (`COLA_REVISION`)**: Gestión controlada, inspección forense y resolución humana auditada de discrepancias y casos ambiguos.
-* **Trazabilidad Planificación ↔ Ejecución**: Vinculación relacional de auditoría entre actividades planificadas y sus informes de ejecución.
-* **Indicadores Institucionales**: Motor matemático puro para la medición del desempeño institucional y cobertura territorial.
-* **Reporting Ejecutivo Oficial**: Generación de balances y reportes periciales institucionalizados (REP-01 a REP-05) exportables en formatos auditables.
-* **Dashboard Institucional**: Visualización ejecutiva jerárquica en cinco niveles de supervisión estratégica.
-* **Gobernanza Rigurosa del Dato**: Políticas institucionales innegociables de no fabricación, preservación de nulos y custodia patrimonial.
+El propósito fundamental del sistema es erradicar la dispersión documental y la inconsistencia en el registro de actividades, participantes y beneficiarios. Establece un entorno centralizado y determinista que asegura la inmutabilidad de los datos, previene el doble cómputo de asistencias, verifica la rigurosidad sociodemográfica y garantiza una articulación transparente y demostrable entre lo programado formalmente y lo ejecutado en el territorio regional.
 
 ---
 
-## 3. Ciclo de Vida Institucional de la Información
+## 3. Objetivo General
 
-El sistema opera mediante una cadena de valor analítica unidireccional y estrictamente controlada:
+Proveer a las autoridades, directores de área, coordinadores de sede y equipos técnicos de la universidad una solución informática centralizada, reproducible y pericial para la administración integral del ciclo operativo universitario: formulación y diseño metodológico de actividades, procesamiento formal de informes de ejecución, resolución asistida de discrepancias, consolidación patrimonial en matrices institucionales oficiales, medición rigurosa de indicadores de gestión y visualización analítica a través de reportes normados y tableros de supervisión ejecutiva.
+
+---
+
+## 4. Alcance
+
+El alcance institucional de la plataforma abarca todas las fases operativas y analíticas de la información universitaria:
+
+* **Planificación Institucional**: Registro estructurado de metas y actividades formalizadas en el Plan Operativo Anual (POA).
+* **Estructuración Metodológica**: Formulación técnica previa de cada intervención (objetivos, resultados, agenda cronometrada, desglose presupuestario y asignación de roles operativos).
+* **Ingesta y Procesamiento Documental**: Extracción estructurada y pericial de datos generales y nóminas de asistencia a partir de informes oficiales de ejecución.
+* **Aseguramiento de Calidad y Gobernanza**: Validación determinista de estamentos, detección de duplicidades y resolución pericial mediante cola de revisión con supervisión humana.
+* **Generación de Entregables Patrimoniales**: Construcción y actualización automatizada de las cinco matrices institucionales oficiales (M1 a M5).
+* **Trazabilidad Integral**: Vinculación relacional inmutable entre metas planificadas y sesiones de ejecución comprobadas.
+* **Cálculo de Indicadores**: Motor de cómputo analítico puro para la evaluación de cobertura, inclusión, descentralización y eficiencia institucional.
+* **Generación de Reportes Formales**: Emisión de los balances ejecutivos y reportes técnicos normados (REP-01 a REP-05).
+* **Supervisión Ejecutiva**: Tablero de control multinivel para la monitorización gerencial por período y sede.
+* **Seguridad y Custodia de Datos**: Servicios de respaldo consistente, verificación de integridad multicapa y restauración controlada.
+
+---
+
+## 5. Flujo Integral del Sistema
+
+El tratamiento de la información se rige por un flujo lineal, determinista y auditable en el que cada etapa certifica la integridad de los datos antes de permitir su avance:
 
 ```text
-PROPÓSITO INSTITUCIONAL
-        ↓
-GESTIÓN DE ACTIVIDADES
-        ↓
-PLANIFICACIÓN (POA)
-        ↓
-DISEÑO METODOLÓGICO
-        ↓
-EJECUCIÓN REAL (Informes Oficiales)
-        ↓
-CONSOLIDACIÓN Y EXTRACCIÓN
-        ↓
-VALIDACIÓN PERICIAL
-        ↓
-COLA DE REVISIÓN (Casos con Discrepancia)
-        ↓
-MATRICES OFICIALES (M1–M5)
-        ↓
-TRAZABILIDAD
-        ↓
-INDICADORES INSTITUCIONALES
-        ↓
-REPORTES OFICIALES (REP-01..05)
-        ↓
-DASHBOARD (5 Niveles)
-        ↓
-GOBERNANZA Y CONTROL DEL DATO
+================================================================================
+                      FLUJO INTEGRAL DEL SISTEMA INSTITUCIONAL
+================================================================================
+
+ [1. PLANIFICACIÓN POA]
+         │  Programación anual de actividades, metas institucionales y presupuesto
+         ▼
+ [2. DISEÑO METODOLÓGICO]
+         │  Definición de objetivos, agenda cronometrada, matriz de roles y recursos
+         ▼
+ [3. EJECUCIÓN TERRITORIAL]
+         │  Desarrollo de la intervención en sedes, municipios o comunidades
+         ▼
+ [4. INFORME OFICIAL DE EJECUCIÓN]
+         │  Documento formal con nóminas de participantes y evidencias
+         ▼
+ [5. INGESTA Y EXTRACCIÓN PERICIAL]
+         │  Procesamiento determinista de datos generales, firmas y asistencias
+         ▼
+ [6. VALIDACIÓN Y CONTROL DE CALIDAD]
+         ├── Casos conformes ──────────────────────────────────────────┐
+         │                                                             │
+         └── Casos con ambigüedad o discrepancia                       │
+                     ▼                                                 │
+             [COLA DE REVISIÓN]                                        │
+                     │  Inspección y resolución pericial humana        │
+                     ▼                                                 │
+ [7. PROYECCIÓN A MATRICES PATRIMONIALES (M1–M5)] ◄────────────────────┘
+         │  Asignación estricta según estamento institucional comprobado
+         ▼
+ [8. TRAZABILIDAD RELACIONAL (Planificado ↔ Ejecutado)]
+         │  Enlace explícito de auditoría entre meta y evidencia
+         ▼
+ [9. MOTOR DE INDICADORES INSTITUCIONALES]
+         │  Cálculo analítico sobre datos consolidados (sin alterar la base)
+         ▼
+ [10. REPORTING EJECUTIVO Y TABLERO DE CONTROL]
+         │  Emisión de reportes normados (REP-01..05) y visualización en 5 niveles
+         ▼
+ [11. RESPALDO Y CUSTODIA HISTÓRICA]
+            Empaquetado criptográfico, verificación multicapa y preservación
+================================================================================
 ```
 
 ---
 
-## 4. Principio Rector: Planificado ≠ Ejecutado
+## 6. Descripción de los Módulos
 
-El sistema impone una separación conceptual y operativa inmutable:
+### Módulo 1: Ingesta, Extracción y Consolidación Documental
+Encargado de procesar por lotes los informes oficiales de ejecución. Extrae metadatos institucionales (unidad académica, sede, fecha, tipo de evento) y el listado de participantes, verificando la consistencia de cada registro. Genera balances de procesamiento que detallan el total de personas leídas, registros convalidados y casos derivados a revisión.
 
-```text
-PLANIFICADO ≠ EJECUTADO
-```
+### Módulo 2: Emisión Patrimonial de Matrices Institucionales
+Gestiona la actualización de las cinco matrices universitarias. Con base en la clasificación estamentaria formal, incorpora los nuevos registros en sus plantillas oficiales correspondientes sin alterar fórmulas institucionales de totales, encabezados patrimoniales ni registros históricos protegidos.
 
-* **Planificado**: Define la programación previa formalizada en el POA y estructurada en diseños metodológicos aprobados.
-* **Ejecutado**: Representa la evidencia documental comprobada de intervenciones efectivamente realizadas en territorio.
-* **Independencia Operativa**: La existencia de una meta planificada no incrementa el cumplimiento real hasta que se procesan y validan sus evidencias de ejecución. A su vez, las actividades ejecutadas no contempladas inicialmente en el POA (actividades emergentes) se registran para cómputo de volumen y cobertura comunitaria, pero **no incrementan artificialmente el porcentaje de cumplimiento de metas planificadas**.
+### Módulo 3: Planificación y Diseño Metodológico
+Permite gestionar las actividades planificadas del POA y estructurar su diseño metodológico integral. Facilita la elaboración de objetivos, resultados esperados, agendas detalladas, distribución de responsabilidades y presupuesto estimado, posibilitando la convalidación de reglas metodológicas y la exportación de documentos oficiales formalizados.
 
----
+### Módulo 4: Indicadores Institucionales, Reporting y Tablero de Control
+Provee el motor analítico que calcula de manera matemática y determinista el comportamiento institucional. Genera el catálogo cerrado de reportes normados y alimenta el tablero de control gerencial jerárquico.
 
-## 5. Trazabilidad Institucional
+### Módulo de Gobernanza: Cola de Revisión Institucional
+Gestiona registros que presentan ambigüedades nominales, falta de documento de identificación o estamentos no clasificados automáticamente. Proporciona una interfaz forense para la decisión humana asistida con registro inmutable de auditoría.
 
-El sistema mantiene una relación controlada y auditable en todo momento:
-
-```text
-Actividad planificada ➔ Diseño metodológico ➔ Ejecución real ➔ Registro de actividad
-```
-
-* Una actividad planificada puede asociarse formalmente con una o varias sesiones de ejecución cuando la naturaleza de la intervención lo requiere.
-* Las actividades ejecutadas emergentes conservan su identidad íntegra en el repositorio sin forzar enlaces artificiales a metas no correspondientes.
+### Módulo de Servicios Operativos: Respaldo y Restauración
+Proporciona utilidades para la generación de copias de seguridad íntegras, validación multicapa de consistencia física y lógica, y procedimientos de restauración atómica con copia preventiva de seguridad obligatoria.
 
 ---
 
-## 6. Matrices Institucionales Oficiales (M1–M5)
+## 7. Matrices Oficiales M1–M5
 
-Las cinco matrices constituyen los **entregables institucionales primarios y oficiales** de la universidad. Los módulos analíticos de Reporting y Dashboard consumen estos datos consolidados; **en ningún caso los sustituyen**:
+Las matrices institucionales constituyen los **activos documentales primarios** de la universidad. El sistema las mantiene actualizadas y consolidadas; los módulos analíticos y de reporte consumen su información sin sustituir jamás su rol patrimonial:
 
-* **Matriz 1 — Consolidado de Actividades**: Catálogo unificado de actividades ejecutadas, fecha, unidad académica responsable, modalidad, tipo de evento y resumen cuantitativo de participación.
-* **Matriz 2 — Estudiantes**: Padrón oficial de participantes clasificados como estudiantes universitarios, carrera, año académico y desglose sociodemográfico.
-* **Matriz 3 — Académicos y Administrativos**: Registro de docentes, investigadores y personal administrativo universitario.
-* **Matriz 4 — Colaboradores**: Nómina de apoyo técnico, enlaces comunitarios y aliados institucionales externos.
-* **Matriz 5 — Protagonistas Beneficiados**: Padrón de beneficiarios directos, productores, emprendedores y actores comunitarios atendidos por programas universitarios.
-
----
-
-## 7. Principios de Calidad y Gobernanza del Dato
-
-La integridad institucional se fundamenta en cinco principios analíticos rectores:
-
-```text
-DETECTAR ≠ CORREGIR
-
-EVIDENCIA ≠ SUPOSICIÓN
-
-DATOS ≠ INDICADORES
-
-INDICADORES ≠ REPORTES
-
-REPORTES ≠ DASHBOARD
-```
-
-* **Detectar ≠ Corregir**: La detección de una anomalía o estamento ambiguo suspende la incorporación automática del registro y lo remite a supervisión humana.
-* **Evidencia ≠ Suposición**: Queda terminantemente prohibida la invención de identidades, nombres, cédulas o estamentos. La ausencia de evidencia permanece inmutable como ausencia de evidencia.
-* **Datos ≠ Indicadores**: Los datos representan transacciones de asistencia y ejecución; los indicadores son agregaciones analíticas que no modifican los registros base.
-* **Indicadores ≠ Reportes**: Los indicadores constituyen métricas formales; los reportes son instrumentos contextualizados y normalizados para la toma de decisiones institucionales.
-* **Reportes ≠ Dashboard**: Los reportes constituyen documentos oficiales auditables; el dashboard es una interfaz de visualización gerencial que sintetiza su comportamiento sin reemplazar la consulta pericial.
+* **Matriz 1 — Consolidado de Actividades**: Catálogo general de actividades ejecutadas, fecha, sede, unidad responsable, modalidad y síntesis de participación.
+* **Matriz 2 — Estudiantes**: Padrón de participantes pertenecientes al cuerpo estudiantil universitario, registrando carrera, año académico y variables demográficas.
+* **Matriz 3 — Académicos y Administrativos**: Registro formal de docentes, facilitadores, investigadores y personal administrativo institucional.
+* **Matriz 4 — Colaboradores**: Nómina de colaboradores externos, enlaces de cooperación, apoyo técnico y aliados comunitarios.
+* **Matriz 5 — Protagonistas Beneficiados**: Padrón de beneficiarios directos, productores locales, emprendedores y miembros comunitarios atendidos.
 
 ---
 
-## 8. Cola de Revisión Institucional (`COLA_REVISION`)
+## 8. Procesamiento de Informes Word
 
-La **Cola de Revisión Institucional** es el componente de gobernanza diseñado para gestionar participaciones cuya categorización institucional o identidad presenta ambigüedad, falta de cédula o inconsistencias documentales antes de su proyección a las matrices oficiales.
+El sistema procesa los informes oficiales elaborados en formato de procesador de texto estructurado por los equipos docentes y técnicos en territorio:
 
-### Flujo de Resolución Controlada:
-```text
-Registro observado
-        ↓
-COLA DE REVISIÓN
-        ↓
-Inspección Forense Humana
-        ↓
-Decisión Explícita (Estamento / Identidad / No Resoluble)
-        ↓
-Validación Determinista
-        ↓
-Transacción Atómica (BEGIN IMMEDIATE ... COMMIT)
-        ↓
-Asiento de Auditoría Inmutable (DISCREPANCY_RESOLVE)
-        ↓
-Actualización Controlada (requiere_revision = 0)
-        ↓
-Proyección a Matriz Oficial (M2, M3, M4 o M5)
-```
-
-### Reglas Innegociables de Revisión:
-1. **No Corrección Automática**: El sistema nunca reclasifica un registro ambiguo sin la intervención explícita de un operador autorizado.
-2. **Catálogo Institucional Cerrado**: El operador selecciona exclusivamente entre estamentos institucionales válidos (`ESTUDIANTE` ➔ M2, `DOCENTE` ➔ M3, `ADMINISTRATIVO` ➔ M3, `COLABORADOR` ➔ M4, `BENEFICIADO` ➔ M5). Cero texto libre.
-3. **Identidad Rigurosa**: Acreditación permitida únicamente mediante vinculación a persona previamente verificada o asignación de cédula física con algoritmo de validación de 14 dígitos y checksum de control. En ausencia de evidencia, se preserva estrictamente `cedula = NULL`.
-4. **Candidatos Sugeridos como Consulta**: Los algoritmos de aproximación nominal presentan candidatos de manera estrictamente consultiva; prohíben cualquier asociación automática.
-5. **Justificación y Trazabilidad Obligatoria**: Toda resolución exige un motivo técnico explícito, registrando el usuario operador, marca temporal ISO 8601 y los estados previos y posteriores en la tabla de auditoría forense (`auditoria_evento`).
-6. **Conservación en Casos No Resolubles**: Declarar un caso como `NO_RESOLUBLE` registra la imposibilidad de acreditación pericial, manteniendo la fila en el repositorio con su debida justificación sin fabricar datos ni destruir información.
+1. **Lectura Estructural**: Identifica encabezados formales, bloques descriptivos y tablas institucionales de asistencia.
+2. **Extracción Demográfica**: Recupera nombres, números de cédula, sexo, edad, pertenencia a pueblos originarios o afrodescendientes, comunidad de procedencia y rol en la intervención.
+3. **Validación de Identificación**: Aplica algoritmos de comprobación sintáctica y dígito verificador sobre los números de cédula física, preservando la ausencia de datos cuando el informe no contenga el documento correspondiente.
+4. **Protección de Evidencias**: El procesamiento no altera los archivos documentales fuente; la información se lee, normaliza y transfiere de forma segura al repositorio relacional.
 
 ---
 
-## 9. Protección Patrimonial del Histórico M5
+## 9. Planificación y Diseño Metodológico
 
-Los **32 registros históricos preexistentes de la Matriz 5** constituyen patrimonio documental e histórico protegido de la universidad.
+El sistema concibe la planificación como un acto formal previo y obligatorio para garantizar la calidad académica y la pertinencia comunitaria:
 
-Bajo ninguna circunstancia operativa:
-* Ingresan a la Cola de Revisión.
-* Son modificados, reasignados o eliminados.
-* Son alterados por transacciones de consolidación o resolución pericial.
-
-Todas las consultas operativas del sistema excluyen rigurosamente los registros marcados como `es_historico_preexistente = 1`.
+* **Registro de Actividades Planificadas**: Catalogación de iniciativas vinculadas a ejes estratégicos, programas y metas de gestión.
+* **Formulación de Diseños Metodológicos**: Estructuración técnica de cada evento formativo o de extensión, integrando justificación, objetivos específicos, resultados esperados, agenda detallada por bloques de tiempo, recursos necesarios y responsables directos.
+* **Validación de Consistencia Metodológica**: Verificación automática contra el conjunto de reglas institucionales (coherencia temporal, suficiencia descriptiva, correspondencia de objetivos y resultados) antes de autorizar la emisión del documento oficial.
+* **Emisión de Documentos Formales**: Exportación de diseños metodológicos aprobados en formatos de texto enriquecido listos para su firma y archivo institucional.
 
 ---
 
-## 10. Control de Cambios y Versionamiento Estructural
+## 10. Reportes y Dashboard
 
-La persistencia del sistema se rige por un esquema relacional unificado y estrictamente versionado:
+### Catálogo Cerrado de Reportes Institucionales (REP-01 a REP-05)
+El sistema emite exclusivamente los cinco instrumentos formales aprobados por el gobierno universitario, exportables para auditoría y archivo:
 
-```text
-Línea Estructural Vigente: V001 ➔ V002 ➔ V003 ➔ V004
-```
-
-* **V001**: Estructura relacional base de ejecución, personas, asistencias y auditoría inmutable.
-* **V002**: Integridad criptográfica, verificación de hashes y agregaciones métricas.
-* **V003**: Planificación estratégica, diseño metodológico y matrices operativas.
-* **V004**: Enlace relacional y trazabilidad entre metas de planificación y eventos ejecutados.
-
-**Regla de Estabilidad**: La arquitectura vigente (V004) demostró suficiencia técnica absoluta para incorporar la Cola de Revisión Institucional sin requerir alteraciones al modelo relacional. La versión **V005 permanece formalmente descartada**.
-
----
-
-## 11. Indicadores Institucionales
-
-Los indicadores constituyen proyecciones analíticas matemáticas puras calculadas sobre el repositorio relacional consolidado:
-
-* **Inalterabilidad**: No modifican ni sobreescriben los datos fuente.
-* **Complementariedad**: No sustituyen las matrices oficiales M1–M5.
-* **Diferenciación Operativa**: Distinguen estrictamente metas programadas de intervenciones emergentes.
-* **Rigor Multisesión**: En actividades multisesión computan la cohorte única de participantes atendidos, evitando distorsiones por doble conteo de asistencia en una misma intervención.
-* **Protección Histórica**: Aíslan los 32 registros patrimoniales de M5 en los períodos de evaluación corrientes.
-
----
-
-## 12. Catálogo Oficial de Reportes y Dashboard
-
-### Reportes Institucionales Oficiales (REP-01 a REP-05)
-El sistema genera exclusivamente los cinco reportes formalizados por la institución, exportables en hojas de cálculo, documentos de texto enriquecido y archivos planos estructurados:
-
-* **REP-01 — Balance Ejecutivo de Gestión Institucional**: Desempeño global, volumen de actividades y cobertura de participantes por estamento.
-* **REP-02 — Evaluación de Cumplimiento POA**: Nivel de cumplimiento de metas planificadas por área institucional, aislando eventos emergentes.
-* **REP-03 — Cobertura Demográfica y Atención de Protagonistas**: Desglose sociodemográfico por sexo, pueblos originarios, comunidades étnicas y condiciones prioritarias.
-* **REP-04 — Extensión y Descentralización Territorial**: Cobertura territorial desagregada por sedes, municipios, recintos y comunidades de la Costa Caribe.
-* **REP-05 — Auditoría de Trazabilidad, Gobernanza y Salud del Dato**: Estado de completitud de identificaciones, vinculación POA (V004), resoluciones de discrepancias y métricas de salud del dato.
+* **REP-01 — Balance Ejecutivo de Gestión Institucional**: Panorama consolidado de actividades realizadas, total de participantes atendidos y distribución por estamentos.
+* **REP-02 — Evaluación de Cumplimiento POA**: Nivel de cumplimiento de metas planificadas por unidad académica, separando estrictamente intervenciones programadas de eventos emergentes.
+* **REP-03 — Cobertura Demográfica y Atención de Protagonistas**: Caracterización sociodemográfica de participantes, paridad de género, pueblos indígenas y comunidades étnicas atendidas.
+* **REP-04 — Extensión y Descentralización Territorial**: Cobertura geográfica desagregada por sedes universitarias, recintos, municipios y territorios comunales de la Costa Caribe.
+* **REP-05 — Auditoría de Trazabilidad, Gobernanza y Salud del Dato**: Métricas de completitud de identificaciones, estado de enlaces relacionales, resoluciones en cola de revisión y salud integral del repositorio.
 
 ### Dashboard Institucional de 5 Niveles
-Estructura ejecutiva orientada a la toma de decisiones basada en evidencia:
-* **Nivel 1**: Indicadores globales y semáforo de salud institucional.
-* **Nivel 2**: Cumplimiento de metas del POA y balance de actividades planificadas vs. emergentes.
-* **Nivel 3**: Participación ciudadana, balance de género e inclusión sociodemográfica.
-* **Nivel 4**: Descentralización territorial e impacto geográfico regional.
-* **Nivel 5**: Auditoría de trazabilidad y gobernanza del repositorio institucional.
+Herramienta de visualización directiva que estructura la supervisión institucional en cinco niveles jerárquicos:
+* **Nivel 1 — Salud Global**: Resumen de indicadores clave y alertas de calidad.
+* **Nivel 2 — Gestión Operativa**: Metas planificadas frente a metas ejecutadas.
+* **Nivel 3 — Inclusión Sociodemográfica**: Diversidad cultural y balance participativo.
+* **Nivel 4 — Impacto Territorial**: Presencia efectiva en municipios y comunidades regionales.
+* **Nivel 5 — Gobernanza y Trazabilidad**: Transparencia documental y auditoría de datos.
 
 ---
 
-## 13. Seguridad Institucional y Separación de Responsabilidades
+## 11. Cola de Revisión
 
-* **Aislamiento Arquitectónico Estricto**: Separación unidireccional entre las interfaces visuales, la lógica de aplicación, las entidades de dominio y la infraestructura de persistencia.
-* **Prohibición de Acceso Directo**: Las interfaces de usuario no interactúan directamente con motores de base de datos ni ejecutan sentencias relacionales.
-* **Composición Desacoplada**: Todas las vistas y servicios se articulan a través de un punto de composición centralizado (*Composition Root*).
-* **Ausencia de Credenciales**: El código fuente se encuentra libre de claves de acceso, secretos o rutas personales hardcodeadas.
-* **Resguardo Criptográfico**: Validación continua de integridad de activos institucionales mediante algoritmos SHA-256.
+La **Cola de Revisión Institucional** es el componente de control de calidad que interviene cuando un registro de participación no puede ser clasificado con certeza absoluta de forma automática:
+
+* **Criterios de Entrada**: Ausencia de número de cédula, nombres ambiguos, roles organizacionales no reconocidos en el catálogo estándar o datos incompletos en el informe de origen.
+* **Inspección Pericial Humana**: El operador visualiza el contexto original del registro (actividad de procedencia, texto registrado, observaciones del facilitador).
+* **Catálogo Estricto de Resolución**: La reclasificación exige seleccionar únicamente entre estamentos válidos normados (`ESTUDIANTE`, `DOCENTE`, `ADMINISTRATIVO`, `COLABORADOR`, `BENEFICIADO`).
+* **Casos No Resolubles**: Si la evidencia documental resulta insuficiente y no es posible contactar al responsable, el registro puede declararse formalmente como `NO_RESOLUBLE`, preservando el registro en el archivo de auditoría sin forzar una asignación ficticia.
+* **Auditoría Forense Inmutable**: Cada resolución genera un asiento obligatorio que almacena la decisión, justificación técnica, usuario responsable y marca temporal.
 
 ---
 
-## 14. Certificación y Calidad de Software
+## 12. Reglas de Integridad de Datos
 
-El sistema cuenta con certificación técnica formal y reproducible. Estado oficial del Release v1.1.1:
+La gestión de datos en el sistema opera bajo cinco axiomas analíticos e inquebrantables:
 
 ```text
-Batería de Pruebas:
-1,492 APROBADAS (PASS)
-1 OMITIDA (SKIP - Configuración de entorno)
-0 FALLOS (FAIL)
-0 ERRORES (ERROR)
+1. DETECTAR   ≠  CORREGIR
+   Una advertencia identifica una discrepancia; no autoriza la alteración arbitraria.
 
-Hashes Patrimoniales Custodiados (M1–M5):
-5/5 COINCIDENTES (MATCH)
+2. EVIDENCIA  ≠  SUPOSICIÓN
+   Solo la documentación verificable constituye prueba; los supuestos quedan excluidos.
 
-Ejecutable Oficial v1.1.1:
-SHA-256: 693D84D9AEAAF15AF9EC0CA6C07CE9A41D43ED823509C6FC954A8343A956E8BF
-Tamaño:  16,176,876 bytes
-Estado:  CERTIFICADO Y PUBLICADO (release/BICU_Consolidador.exe)
+3. DATOS      ≠  INDICADORES
+   Los registros representan hechos; los indicadores son mediciones agregadas.
 
-Artefacto Histórico Preservado v1.1.0:
-SHA-256: 41E80FD377DE31AE5CB9B05F05C607D5D51070910E3A7B16C0C5BEAC7474D4F3
-Tamaño:  16,173,879 bytes
-Estado:  PRESERVADO (release/BICU_Consolidador_v1.1.0_historico.exe)
+4. INDICADORES ≠ REPORTES
+   Las métricas aportan cifras; los reportes proporcionan contexto y análisis directivo.
 
-Registros Históricos M5:
-32/32 INTACTOS (1,696 celdas inmutables)
-
-Invariantes Institucionales (INV-01 a INV-08):
-8/8 APROBADOS (PASS)
-
-Línea Estructural de Datos:
-V004 ACTIVA E INTACTA
-V005 DESCARTADA E INEXISTENTE
-
-Módulos y Servicios Integrados:
-Resolución Autónoma de Recursos y Plantillas — OPERATIVO Y CERTIFICADO
-Consolidación Word -> Matrices M1-M5 — OPERATIVO Y CERTIFICADO
-Planificación POA y Diseño Metodológico — OPERATIVO Y CERTIFICADO
-Motor de Indicadores y Trazabilidad — OPERATIVO Y CERTIFICADO
-Reporting Oficial (REP-01 a REP-05) y Dashboard — OPERATIVO Y CERTIFICADO
-Cola de Revisión Institucional — OPERATIVO Y CERTIFICADO
-Backup Institucional Seguro (.bicu.bak) — OPERATIVO Y CERTIFICADO
-Restauración Controlada y Safety Backup — OPERATIVO Y CERTIFICADO
-Preflight Operacional Multigrupo — OPERATIVO Y CERTIFICADO
+5. REPORTES   ≠  DASHBOARD
+   Los reportes son instrumentos auditables; el tablero es una síntesis ejecutiva.
 ```
 
 ---
 
-## 15. Estado Actual del Proyecto
+## 13. Prohibición de Fabricación de Información Nominal
 
-| Componente / Iniciativa | Estado Institucional | Observaciones Técnicas |
-|---|---|---|
-| **Resolución Autónoma de Recursos** | **Certificado y Operativo** | Detección determinista de rutas y plantillas independiente del CWD (Fase 29.25.1). |
-| **Consolidación Word ➔ Matrices M1–M5** | **Certificado y Operativo** | Procesamiento transaccional de informes y distribución oficial. |
-| **Planificación y Diseño Metodológico** | **Certificado y Operativo** | Gestión de POA, reglas V-MD y renderizado de documentos oficiales. |
-| **Motor de Indicadores y Trazabilidad** | **Certificado y Operativo** | Cálculo determinista sobre esquema V004. |
-| **Reporting Oficial (REP-01 a REP-05)** | **Certificado y Operativo** | Exportación formal en formatos XLSX, DOCX y CSV. |
-| **Dashboard Institucional (5 Niveles)** | **Certificado y Operativo** | Supervisión ejecutiva jerárquica con filtros de período y sede. |
-| **Cola de Revisión Institucional** | **Certificado y Operativo** | Implementación, auditoría pericial y cierre formal en Fase 29.22. |
-| **Backup Institucional Seguro** | **Certificado y Operativo** | SQLite Online Backup API, formato .bicu.bak, validación multicapa (Fase 29.24.1). |
-| **Restauración Controlada** | **Certificado y Operativo** | Safety snapshot, reemplazo atómico, post-verificación (Fase 29.24.1). |
-| **Preflight Operacional** | **Certificado y Operativo** | 5 grupos de verificación, reporte estructurado READY/WARNING/FATAL (Fase 29.24.1). |
-| **Distribución Ejecutable v1.1.1** | **Publicado Oficialmente** | Binario promovido bajo custodia SHA-256 en release/BICU_Consolidador.exe. |
+Queda **terminantemente prohibida** en todo el sistema la fabricación, simulación, interpolación o autocompletado de identidades, nombres, números de cédula o clasificaciones de participantes. 
 
-**Estado Oficial:**
-> **Release Institucional v1.1.1: CERTIFICADO, PROMOVIDO Y PUBLICADO.**
+* Ante la ausencia de un número de cédula, el registro se conserva con valor ausente (nulo) explícito.
+* Queda prohibido generar identificaciones nominales ficticias para "completar" estadísticas de cobertura.
+* Los mecanismos de consulta por aproximación nominal son exclusivamente informativos y jamás asocian un registro sin la confirmación expresa del operador.
 
 ---
 
-**Bluefields Indian & Caribbean University (BICU)**  
-*Dirección de Innovación y Emprendimiento — Sistema Institucional de Gestión y Calidad de la Información.*
+## 14. Trazabilidad
 
+El sistema garantiza una cadena de custodia ininterrumpida que permite auditar cualquier cifra institucional hasta su documento de origen:
+
+```text
+Actividad Planificada (POA)
+         ↓
+Diseño Metodológico Aprobado
+         ↓
+Informe Oficial de Ejecución en Territorio
+         ↓
+Listado de Asistencia y Nóminas
+         ↓
+Registro Transaccional en Base de Datos
+         ↓
+Fila Auditada en Matriz Oficial (M1–M5)
+         ↓
+Indicador de Gestión Institucional
+```
+
+Cada etapa conserva enlaces unívocos que permiten rastrear qué persona asistió a cuál intervención, en qué fecha y sede, bajo qué objetivo del POA y con cuál informe de respaldo.
+
+---
+
+## 15. Separación PLANIFICADO ≠ EJECUTADO
+
+Uno de los principios de gobernanza del sistema es la distinción rigurosa entre la planificación y la ejecución:
+
+* **Meta Planificada**: Representa una aspiración formal programada y presupuestada en el POA. Su existencia en el sistema **no constituye ejecución ni avance físico**.
+* **Ejecución Real**: Requiere la recepción, validación y convalidación de un informe de ejecución con nóminas comprobadas.
+* **Tratamiento de Actividades Emergentes**: Intervenciones imprevistas o extraordinarias desarrolladas para atender contingencias comunitarias son registradas plenamente para documentar el esfuerzo y cobertura institucional, pero **no incrementan artificialmente el porcentaje de cumplimiento de las metas planificadas del POA**.
+
+---
+
+## 16. Validación Humana
+
+El sistema está concebido como una plataforma de apoyo pericial y automatización metódica, reservando la autoridad de decisión al personal humano calificado:
+
+* La aprobación formal de un diseño metodológico requiere revisión y firma técnica humana.
+* La reclasificación o resolución de un caso en la Cola de Revisión exige la intervención consciente de un operador.
+* El software prohíbe la toma de decisiones críticas de identidad mediante algoritmos opacos o automáticos sin supervisión.
+
+---
+
+## 17. Respaldo y Restauración
+
+La custodia del patrimonio informativo institucional cuenta con un subsistema especializado de respaldo y recuperación:
+
+* **Generación de Respaldos Consistentes**: Procedimiento de copia estructurada del repositorio relacional que garantiza una imagen coherente sin interferir con las operaciones activas.
+* **Paquete de Respaldo Institucional**: Archivo empaquetado que integra la base de datos, un manifiesto formal con metadatos descriptivos (fecha, versión del esquema, recuentos de filas por tabla) y una firma criptográfica de control de integridad.
+* **Validación Multicapa Previa a la Restauración**: Protocolo de 9 niveles de comprobación (integridad de compresión, presencia de manifiesto, coincidencia de firma criptográfica, cabecera formal, integridad referencial y compatibilidad de esquema).
+* **Copia Preventiva Obligatoria (*Safety Backup*)**: Antes de sustituir los datos activos durante una restauración, el sistema crea automáticamente un respaldo preventivo de la base de datos en funcionamiento, garantizando recuperación inmediata ante imprevistos.
+
+---
+
+## 18. Control de Versiones
+
+### Esquema Relacional de Persistencia
+La base de datos relacional del sistema sigue una evolución estrictamente versionada y acumulativa:
+
+* **Versión V001**: Estructura fundacional de ejecución, registro de personas, nóminas de asistencia y auditoría inmutable.
+* **Versión V002**: Integridad criptográfica, verificación de firmas de activos y tablas de agregación de métricas.
+* **Versión V003**: Planificación institucional, metas POA, diseños metodológicos, agenda y matriz presupuestaria.
+* **Versión V004**: Enlace relacional y trazabilidad multidimensional entre actividades planificadas e informes ejecutados.
+* **Estado de la Línea Estructural**: La versión **V004 permanece activa, estable y vigente**. La versión preliminar V005 se encuentra descartada por haberse demostrado que V004 provee la capacidad total requerida para la Cola de Revisión sin alterar el modelo.
+
+### Distribución del Sistema
+El sistema se distribuye mediante paquetes de escritorio institucional que aseguran la correspondencia estricta entre el código auditado y el binario en operación:
+
+* **Versión Actual**: `v1.1.1` (Publicación oficial).
+* **Versión Previa**: `v1.1.0` (Preservada íntegramente como activo histórico).
+
+---
+
+## 19. Estado de Certificación
+
+El sistema cuenta con certificación técnica formal emitida mediante auditorías periciales de calidad:
+
+```text
+================================================================================
+                    CERTIFICACIÓN DE CALIDAD INSTITUCIONAL
+================================================================================
+
+ Batería de Pruebas de Calidad:
+   - Casos Aprobados:        1,492 (100% de la batería analítica)
+   - Casos Omitidos:         1 (Configuración de entorno externo)
+   - Fallos Detectados:      0
+   - Errores de Ejecución:   0
+
+ Custodia Criptográfica de Matrices Institucionales (M1–M5):
+   - Matriz 1 (Consolidado de Actividades):    COINCIDENTE (MATCH)
+   - Matriz 2 (Estudiantes):                   COINCIDENTE (MATCH)
+   - Matriz 3 (Académicos y Administrativos):  COINCIDENTE (MATCH)
+   - Matriz 4 (Colaboradores):                 COINCIDENTE (MATCH)
+   - Matriz 5 (Protagonistas Beneficiados):    COINCIDENTE (MATCH)
+   - Estado de Custodia: 5/5 Matrices Intactas
+
+ Registros Históricos de Matriz 5:
+   - Registros Evaluados:    32 / 32
+   - Celdas Inmutables:      1,696 / 1,696 (Preservación Absoluta)
+
+ Invariantes Institucionales (INV-01 a INV-08):
+   - Evaluación Global:      8 / 8 Aprobados (PASS)
+
+ Esquema Relacional de Base de Datos:
+   - Esquema Activo:         V004
+   - Esquema V005:           Inexistente / Descartado
+================================================================================
+```
+
+---
+
+## 20. Estado Actual del Proyecto
+
+| Componente / Iniciativa | Estado Institucional | Observaciones Operativas |
+| :--- | :---: | :--- |
+| **Resolución de Recursos y Plantillas** | **Operativo y Certificado** | Localización determinista de plantillas institucionales independiente de la ruta de invocación. |
+| **Ingesta y Consolidación de Informes** | **Operativo y Certificado** | Procesamiento transaccional de informes y nóminas de asistencia. |
+| **Planificación y Diseño Metodológico** | **Operativo y Certificado** | Gestión de metas POA, formulación metodológica y exportación formal. |
+| **Motor de Indicadores y Trazabilidad** | **Operativo y Certificado** | Cálculo determinista sobre el modelo relacional V004. |
+| **Reporting Oficial (REP-01 a REP-05)** | **Operativo y Certificado** | Emisión institucional de reportes formalizados. |
+| **Dashboard Ejecutivo (5 Niveles)** | **Operativo y Certificado** | Supervisión estratégica jerárquica con filtros de período y sede. |
+| **Cola de Revisión Institucional** | **Operativo y Certificado** | Gestión pericial de discrepancias con auditoría inmutable. |
+| **Respaldo Institucional Seguro** | **Operativo y Certificado** | Copia estructurada, paquete firmado y verificación en 9 niveles. |
+| **Restauración Controlada** | **Operativo y Certificado** | Sustitución segura con copia preventiva de seguridad obligatoria. |
+| **Preflight Operacional Integrado** | **Operativo y Certificado** | Verificación previa automática de rutas, repositorio y datos históricos. |
+| **Distribución Institucional v1.1.1** | **Publicado Oficialmente** | Paquete de distribución promovido y certificado. |
+
+---
+
+## 21. Procedimiento General de Operación
+
+1. **Puesta en Marcha**:
+   * Ejecutar la aplicación institucional desde el paquete de distribución.
+   * El sistema ejecutará automáticamente una comprobación inicial de diagnóstico (*preflight*) verificando la accesibilidad de rutas, el estado del repositorio de datos y la integridad del histórico protegido.
+
+2. **Ingesta de Informes de Ejecución**:
+   * Acceder a la opción de Consolidación en la interfaz principal.
+   * Seleccionar la carpeta que contiene los informes oficiales de ejecución en formato de procesador de texto.
+   * Iniciar el proceso de lectura. El sistema informará el balance de actividades procesadas, asistencias consolidadas y casos que requieren revisión.
+
+3. **Atención de la Cola de Revisión**:
+   * Acceder al módulo de Cola de Revisión.
+   * Inspeccionar individualmente cada registro pendiente.
+   * Seleccionar el estamento correspondiente de acuerdo con la evidencia documental o declarar el registro como no resoluble si no es posible subsanar la ambigüedad.
+   * Confirmar la resolución para registrar el asiento pericial e incorporar los datos a las matrices oficiales.
+
+4. **Planificación y Diseño Metodológico**:
+   * Acceder al módulo de Planificación para consultar las actividades registradas.
+   * Abrir el editor de diseño metodológico para estructurar objetivos, cronograma, responsabilidades y presupuesto.
+   * Validar las reglas metodológicas institucionales y exportar el documento formal para tramitación oficial.
+
+5. **Consulta de Indicadores, Reportes y Tablero**:
+   * Acceder al módulo de Indicadores y Tablero para supervisar el avance de metas y la distribución sociodemográfica.
+   * Generar y exportar los reportes oficiales (REP-01 a REP-05) según los períodos requeridos para la rendición de cuentas.
+
+6. **Custodia y Respaldo Periódico**:
+   * Desde la sección de Respaldo, generar periódicamente el paquete de seguridad institucional para su resguardo en el repositorio de custodia designado por la universidad.
+
+---
+
+## 22. Consideraciones y Observaciones Pendientes
+
+En apego irrestricto a la **regla institucional de veracidad y transparencia documental**:
+
+1. **Capacidad de Carga de Matrices POA (Módulo 3)**:
+   * El núcleo del sistema cuenta con un componente especializado de infraestructura para la lectura programática de matrices del Plan Operativo Anual (POA) a partir de hojas de cálculo, con capacidad para procesar formatos institucionales agregados y detallados, mapear sinónimos de encabezados y convalidar campos numéricos y de fechas.
+   * **Estado Real de Interfaz**: Dicha capacidad existe a nivel de servicios internos del sistema, pero **no se encuentra expuesta actualmente como un asistente o botón de carga en la interfaz gráfica de usuario**. Las actividades que se visualizan en el módulo corresponden a las preexistentes en el repositorio relacional. La integración de un diálogo interactivo para la importación directa de nuevos archivos de POA por parte de los operadores queda identificada como una oportunidad de mejora para una versión posterior.
+
+2. **Notificaciones de Validación de Formatos Externos**:
+   * Durante la lectura de hojas de cálculo complejas con reglas de validación de celdas preexistentes, pueden emitirse advertencias informativas por parte de los lectores de documentos. Dichas advertencias son de carácter meramente informativo y no comprometen la exactitud matemática de los cálculos, la integridad de las matrices ni la fidelidad de los datos consolidados.
+
+---
+
+## 23. Cierre Institucional
+
+El presente documento constituye la especificación formal del estado consolidado y publicado del **Sistema Institucional de Gestión, Planificación, Consolidación y Reporting** de la **Bluefields Indian & Caribbean University (BICU)**, desarrollado bajo la dirección de la **Dirección de Innovación y Emprendimiento** para el fortalecimiento de la calidad, transparencia y pertinencia universitaria en la Costa Caribe de Nicaragua.
+
+---
+
+────────────────────────────────────────
+
+MADE WITH LOVE: BY KEVIN MEJÍA MONTALVÁN
+
+────────────────────────────────────────

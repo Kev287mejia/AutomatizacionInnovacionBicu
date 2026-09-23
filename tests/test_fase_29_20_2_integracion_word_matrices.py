@@ -962,6 +962,7 @@ class TestConservacionPatrimonial:
             hashes_validos = [hash_esperado.lower()]
             if cod == "EXE":
                 hashes_validos.append("41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3")
+                hashes_validos.append("693d84d9aeaaf15af9ec0ca6c07ce9a41d43ed823509c6fc954a8343a956e8bf")
             assert h_real.lower() in hashes_validos, (
                 f"Hash alterado en '{cod}' ({ruta_str}): esperado {hash_esperado}, obtenido {h_real}"
             )

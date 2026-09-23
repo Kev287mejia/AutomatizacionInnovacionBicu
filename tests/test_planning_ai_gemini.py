@@ -640,6 +640,7 @@ def test_ai_gemini_24_patrimonial_hashes_verified():
             valid_hashes = [expected.upper()]
             if path_str == "release/BICU_Consolidador.exe":
                 valid_hashes.append("41E80FD377DE31AE5CB9B05F05C607D5D51070910E3A7B16C0C5BEAC7474D4F3")
+                valid_hashes.append("693D84D9AEAAF15AF9EC0CA6C07CE9A41D43ED823509C6FC954A8343A956E8BF")
             assert h in valid_hashes, f"Discrepancia de hash en {path_str}"
 
 

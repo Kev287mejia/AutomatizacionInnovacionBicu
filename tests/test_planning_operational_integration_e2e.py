@@ -204,6 +204,7 @@ class TestPlanningOperationalIntegrationE2E:
             valid = [exp_hash.lower()]
             if k == "EXE":
                 valid.append("41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3")
+                valid.append("693d84d9aeaaf15af9ec0ca6c07ce9a41d43ed823509c6fc954a8343a956e8bf")
             assert h.lower() in valid, f"Hash previo de {k} no coincide con el certificado"
             hashes_patrimoniales_before[k] = h
 
@@ -611,6 +612,7 @@ class TestPlanningOperationalIntegrationE2E:
             valid = [exp_hash.lower()]
             if k == "EXE":
                 valid.append("41e80fd377de31ae5cb9b05f05c607d5d51070910e3a7b16c0c5beac7474d4f3")
+                valid.append("693d84d9aeaaf15af9ec0ca6c07ce9a41d43ed823509c6fc954a8343a956e8bf")
             assert h_after.lower() in valid, f"Hash patrimonial de {k} cambió tras la ejecución"
             assert h_after == hashes_patrimoniales_before[k]
 
